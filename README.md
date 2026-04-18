@@ -1,4 +1,7 @@
 # Soft Goals Manager
+> 🇷🇺 Русская версия: [README_ru.md](README_ru.md)  
+> 🇬🇧 English version: see below.
+
 
 This repository contains a personal goals management application. It includes:
 
