@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Personal goals management CLI and web application",
     "main": "index_new.js",  "scripts": {
-    "start": "node app.js",
+  "start": "node app_priority.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
