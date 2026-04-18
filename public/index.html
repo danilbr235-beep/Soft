@@ -7,7 +7,7 @@
   <!-- Подключаем Font Awesome для иконок -->
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css"
-        integrity="sha512-1hawoHRQ5yAfzh0P3RIPMsR1dLqUGoYwSGtA/RP+ZL7o3IHkLz2zNHdf3YyzCrzm2o4JX4fsbE9fN7Xl+obKdw=="
+        integrity="sha512-1hawoHRQ5yAfzh0P3RIPMsR1dLqGoVsGtA/RP+ZLo73IhKLz2zNHdf3vyzC7rm2oJX4fSbE9fN7XI+OkWdw=="
         crossorigin="anonymous"
         referrerpolicy="no-referrer" />
   <!-- Новый стиль -->
@@ -28,7 +28,7 @@
     <label>
       Категория:
       <select id="filter-category">
-        <option value="">Все</option>
+        <option value="">&#1042;&#1089;&#1077;</option>
       </select>
     </label>
     <label>
@@ -39,10 +39,14 @@
       До срока (дней):
       <input type="number" id="filter-due-within" min="1" />
     </label>
+    <label>
+      Поиск:
+      <input type="text" id="filter-search" placeholder="Поиск целей..." />
+    </label>
     <button type="button" id="apply-filters">Применить фильтры</button>
   </div>
 
-    <!-- Статистика и сортировка -->
+  <!-- Статистика и сортировка -->
   <div id="summary"></div>
   <label>
     Сортировать по:
@@ -61,6 +65,6 @@
   <div id="notifications"></div>
 
   <!-- Улучшенный скрипт -->
-  <script src="new_script_v4.js"></script>
+  <script src="new_script_v5.js"></script>
 </body>
 </html>
