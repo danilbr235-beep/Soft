@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soft Goals Manager</title>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha512-1hawoHRQ5yAfzh0P3RIPMsR1dLqUGoYwSGtA/RP+ZL7o3IHkLz2zNHdf3YyzCrzm2o4JX4fsbE9fN7Xl+obKdw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Improved styles including priority badge and dark mode -->
+  <link rel="stylesheet" href="styles_v5.css">
+</head>
+<body>
+  <h1>Soft Goals Manager</h1>
+  <!-- Form to add new goals -->
+  <form id="goal-form">
+    <input id="goal-input" placeholder="Введите цель" />
+    <input type="date" id="due-date-input" />
+    <input id="category-input" placeholder="Категория" />
+    <!-- Priority select: low, medium, high -->
+    <select id="priority-input">
+      <option value="low">Низкий</option>
+      <option value="medium" selected>Средний</option>
+      <option value="high">Высокий</option>
+    </select>
+    <button type="submit">Добавить</button>
+  </form>
+
+  <!-- Filters for list -->
+  <div id="filters">
+    <label>
+      Категория:
+      <select id="filter-category">
+        <option value="">Все</option>
+      </select>
+    </label>
+    <label>
+      <input type="checkbox" id="filter-overdue" />
+      Просроченные
+    </label>
+    <label>
+      До срока (дней):
+      <input type="number" id="filter-due-within" min="1" />
+    </label>
+    <label>
+      Приоритет:
+      <select id="filter-priority">
+        <option value="">Все</option>
+        <option value="low">Низкий</option>
+        <option value="medium">Средний</option>
+        <option value="high">Высокий</option>
+      </select>
+    </label>
+    <label>
+      Поиск:
+      <input type="text" id="filter-search" placeholder="Поиск целей..." />
+    </label>
+    <button type="button" id="apply-filters">Применить фильтры</button>
+    <button type="button" id="theme-toggle">Сменить тему</button>
+  </div>
+
+  <!-- Summary statistics and sorting -->
+  <div id="summary"></div>
+  <label>
+    Сортировать по:
+    <select id="sort-by">
+      <option value="none">Без сортировки</option>
+      <option value="due">Сроку</option>
+      <option value="category">Категории</option>
+      <option value="completed">Статусу выполнения</option>
+      <option value="priority">Приоритету</option>
+    </select>
+  </label>
+
+  <!-- List of goals -->
+  <ul id="goals-list"></ul>
+
+  <!-- Notifications container -->
+  <div id="notifications"></div>
+
+  <!-- Include the enhanced script with priority support -->
+  <script src="new_script_v7.js"></script>
+</body>
+</html>
