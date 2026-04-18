@@ -11,7 +11,7 @@
         crossorigin="anonymous"
         referrerpolicy="no-referrer" />
   <!-- Новый стиль -->
-  <link rel="stylesheet" href="styles_v2.css">
+  <link rel="stylesheet" href="styles_v3.css">
 </head>
 <body>
   <h1>Soft Goals Manager</h1>
@@ -42,6 +42,18 @@
     <button type="button" id="apply-filters">Применить фильтры</button>
   </div>
 
+    <!-- Статистика и сортировка -->
+  <div id="summary"></div>
+  <label>
+    Сортировать по:
+    <select id="sort-by">
+      <option value="none">Без сортировки</option>
+      <option value="due">Сроку</option>
+      <option value="category">Категории</option>
+      <option value="completed">Статусу выполнения</option>
+    </select>
+  </label>
+
   <!-- Список целей -->
   <ul id="goals-list"></ul>
 
@@ -49,6 +61,6 @@
   <div id="notifications"></div>
 
   <!-- Улучшенный скрипт -->
-  <script src="new_script_v3.js"></script>
+  <script src="new_script_v4.js"></script>
 </body>
 </html>
