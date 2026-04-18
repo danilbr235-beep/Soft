@@ -1,0 +1,195 @@
+/*
+ * Extended styles including dark mode support.
+ * Based on styles_v3.css with additional rules under the .dark-mode body class.
+ */
+
+/* Общие настройки */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 2rem;
+  max-width: 800px;
+}
+
+/* Форма и фильтры */
+form,
+#filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+form input,
+form button,
+#filters select,
+#filters input,
+#filters button {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Список целей */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 0.5rem 0;
+}
+
+li .meta {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+li .actions {
+  margin-top: 0.25rem;
+}
+
+/* Состояния */
+li.completed {
+  text-decoration: line-through;
+  color: #888;
+}
+
+li.overdue {
+  color: #b71c1c;
+}
+
+/* Кнопки */
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button.delete {
+  background-color: #dc3545;
+}
+
+button.delete:hover {
+  background-color: #b52a37;
+}
+
+button.edit {
+  background-color: #ffc107;
+  color: #000;
+}
+
+button.edit:hover {
+  background-color: #d39e00;
+}
+
+/* Уведомления */
+#notifications {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+}
+
+.notification {
+  background-color: #323232;
+  color: white;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  opacity: 0.9;
+}
+
+.notification.success {
+  background-color: #28a745;
+}
+
+.notification.error {
+  background-color: #dc3545;
+}
+
+/* Статистика и сортировка */
+#summary {
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+#summary span {
+  margin-right: 0.5rem;
+}
+
+label select {
+  margin-left: 0.25rem;
+}
+
+/* Dark mode overrides */
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+body.dark-mode li {
+  border-bottom-color: #444;
+}
+
+body.dark-mode li .meta {
+  color: #bbbbbb;
+}
+
+body.dark-mode li.completed {
+  color: #888888;
+}
+
+body.dark-mode li.overdue {
+  color: #ff6b6b;
+}
+
+body.dark-mode button {
+  background-color: #1f78ff;
+  color: #ffffff;
+}
+
+body.dark-mode button:hover {
+  background-color: #155ab2;
+}
+
+body.dark-mode button.delete {
+  background-color: #b00020;
+}
+
+body.dark-mode button.delete:hover {
+  background-color: #7e0015;
+}
+
+body.dark-mode button.edit {
+  background-color: #d69e00;
+  color: #ffffff;
+}
+
+body.dark-mode button.edit:hover {
+  background-color: #b28300;
+}
+
+body.dark-mode .notification {
+  background-color: #444444;
+  color: #ffffff;
+}
+
+body.dark-mode .notification.success {
+  background-color: #4caf50;
+}
+
+body.dark-mode .notification.error {
+  background-color: #f44336;
+}
