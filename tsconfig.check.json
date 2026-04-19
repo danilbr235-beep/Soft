@@ -13,6 +13,7 @@
     "packages/client/src/**/*.ts",
     "packages/learning/src/**/*.ts",
     "packages/onboarding/src/**/*.ts",
+    "packages/privacy/src/**/*.ts",
     "packages/rules/src/**/*.ts",
     "packages/sync/src/**/*.ts",
     "packages/types/src/**/*.ts",

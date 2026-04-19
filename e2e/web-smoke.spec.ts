@@ -40,4 +40,11 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Open Coach").click();
   await expect(page.getByText("How certain is this?")).toBeVisible();
   await expect(page.getByText(/not a diagnosis/i)).toBeVisible();
+
+  await page.getByLabel("Open Settings").click();
+  await expect(page.getByText(/Vault lock is enabled/i)).toBeVisible();
+  await page.getByLabel("Lock demo vault").click();
+  await expect(page.getByText("Soft is locked")).toBeVisible();
+  await page.getByLabel("Unlock demo vault").click();
+  await expect(page.getByText("Privacy vault")).toBeVisible();
 });

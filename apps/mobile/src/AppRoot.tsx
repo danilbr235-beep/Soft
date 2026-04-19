@@ -8,6 +8,7 @@ import { LearnScreen } from "./screens/LearnScreen";
 import { ProgramsScreen } from "./screens/ProgramsScreen";
 import { CoachScreen } from "./screens/CoachScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
+import { PrivacyLockScreen } from "./screens/PrivacyLockScreen";
 import { useAppState } from "./state/useAppState";
 
 export function AppRoot() {
@@ -18,6 +19,15 @@ export function AppRoot() {
       <SafeAreaView style={styles.safeArea}>
         <StatusBar barStyle="light-content" />
         <OnboardingScreen onComplete={app.completeOnboarding} />
+      </SafeAreaView>
+    );
+  }
+
+  if (app.privacyLock.locked) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="light-content" />
+        <PrivacyLockScreen onUnlock={app.unlock} />
       </SafeAreaView>
     );
   }
@@ -46,7 +56,14 @@ export function AppRoot() {
         ) : null}
         {app.activeTab === "Programs" ? <ProgramsScreen activeProgram={app.today.activeProgram} /> : null}
         {app.activeTab === "Coach" ? <CoachScreen priority={app.today.currentPriority} /> : null}
-        {app.activeTab === "Settings" ? <SettingsScreen resetOnboarding={app.resetOnboarding} /> : null}
+        {app.activeTab === "Settings" ? (
+          <SettingsScreen
+            privacyLock={app.privacyLock}
+            onLockNow={app.lockNow}
+            onToggleVaultLock={app.togglePrivacyVault}
+            resetOnboarding={app.resetOnboarding}
+          />
+        ) : null}
       </View>
       <BottomNav activeTab={app.activeTab} onChange={app.setActiveTab} />
       {app.quickLogSheet}

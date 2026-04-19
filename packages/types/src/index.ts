@@ -84,6 +84,13 @@ export type OnboardingResult = {
   completedAt: string;
 };
 
+export type PrivacyLockState = {
+  vaultLockEnabled: boolean;
+  discreetNotifications: boolean;
+  locked: boolean;
+  updatedAt: string;
+};
+
 export type OnboardingDraft = {
   primaryGoal: GoalType;
   secondaryGoals: GoalType[];
