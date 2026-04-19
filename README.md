@@ -1,76 +1,67 @@
-# Soft Goals Manager
+# Private Men's Health Coach
 
-🇷🇺 Русская версия: [README_ru.md](README_ru.md)  
-🇬🇧 English version: see below.
+Privacy-first mobile MVP for daily men's health tracking, recovery guidance, learning, and conservative coaching explanations.
 
-Soft Goals Manager is a personal goals tracking application that provides a powerful command‑line tool, a RESTful API server, and a feature‑rich web interface.
+This repository replaces the previous goals-manager prototype with a production-minded Expo + TypeScript monorepo scaffold.
 
-## Features
+## What This MVP Does
 
-- **Command‑line interface (CLI):** manage your goals from the terminal. Add goals with a description, optional due date, category and priority. List goals with filters (category, priority, overdue, due within N days) and sorting options, edit existing goals, mark goals as complete/incomplete and delete goals. The CLI stores goals in a JSON file for persistence.
-- **REST API server:** built with Express.js and persisting data to `goals.json`. It exposes endpoints to list, create, update and delete goals. New goals include `text`, `dueDate`, `category`, `priority` (default is `"medium"`) and `completed` status.
-- **Web front‑end:** a modern responsive interface built with HTML/CSS/JavaScript. The UI supports dark mode, a theme toggle, search, category/priority filters, overdue and due‑within filters, sorting, and displays statistics (total, completed, overdue and due soon). You can edit, complete/undo and delete goals directly in the UI. Notifications inform you about actions.
+- Opens into a calm mobile app shell with onboarding and bottom navigation.
+- Renders a Today screen from deterministic mock/rules data.
+- Supports fast quick-log entry points for high-signal daily tracking.
+- Includes a curated Learn hub, starter Programs, Coach explanations, and Settings/Privacy surfaces.
+- Provides a mock API contract for `GET /today`, `POST /logs`, `GET /programs`, `GET /content/featured`, and `POST /coach/explain-priority`.
+- Keeps quick-log writes local-first with a sync queue and a demo sync-clear flow.
+- Turns onboarding answers into a persisted profile, baseline, privacy defaults, and starter program.
+- Includes a Playwright web smoke test for onboarding, Today, quick logging, and sync status.
 
-## Prerequisites
+## What This MVP Does Not Do
 
-- [Node.js](https://nodejs.org/) version 14 or higher
-- npm (comes with Node.js)
+- It is not a diagnostic tool.
+- It does not provide medical certainty or treatment instructions.
+- It does not include real auth, Supabase, HealthKit, Google Fit, labs parsing, AI/RAG, or production sync yet.
 
-## Installation
+## Structure
 
-Clone the repository and install dependencies:
-
-```bash
-git clone https://github.com/danilbr235-beep/Soft.git
-cd Soft
-npm install
+```text
+apps/
+  api/       Mock Fastify API contract
+  mobile/    Expo React Native app
+packages/
+  onboarding/Onboarding result and starter-program routing
+  rules/     Deterministic Today rule engine
+  sync/      Local-first sync queue helpers
+  types/     Shared domain contracts
+  ui/        Shared design tokens
+docs/
+  product/   Product brief
+  contracts/ Today/onboarding contracts
+  architecture/ Build plan
 ```
 
-## Running the Web Application
+## Commands
 
-Start the Express server (serves the API and static files in `/public`):
-
-```bash
-npm start
+```powershell
+npm.cmd install
+npm.cmd test
+npm.cmd run typecheck
+npm.cmd run smoke:web
+npm.cmd run api
+npm.cmd run mobile
 ```
 
-By default the server runs on port 3000. Open your browser and navigate to `http://localhost:3000` to access the goals manager web app.
+Use `npm.cmd` in PowerShell if `npm.ps1` is blocked by Windows execution policy.
 
-## CLI Usage
+## Current Vertical Slice
 
-You can run the CLI via npx or node. Use the following commands:
+The app now supports:
 
-```bash
-# Add a goal with optional due date, category and priority
-npx soft-cli add "Read a book" --due=2026-05-01 --category=education --priority=high
-
-# List all goals (can filter by category, priority, overdue, due within)
-npx soft-cli list --category=education --priority=high --due-within=7 --overdue
-
-# Edit a goal: change text, due date, category or priority
-npx soft-cli edit <id> --text="Read two books" --due=2026-05-10 --category=education --priority=medium
-
-# Mark a goal as complete or undo completion
-npx soft-cli complete <id>
-
-# Delete a goal
-npx soft-cli delete <id>
-
-# See all available commands
-npx soft-cli help
-```
-
-Goals are stored in `goals.json` in the repository root. The CLI is defined in `index_priority.js` and registered as the `soft-cli` binary in `package.json`.
-
-## Project Structure
-
-- **app_priority.js** – Express server with REST API and priority support.
-- **index_priority.js** – CLI script for managing goals.
-- **public/index.html** – Web interface.
-- **public/styles_v5.css** – CSS for light/dark themes, layout, badges and notifications.
-- **public/new_script_v7.js** – Client‑side JavaScript with search, filters, sorting, statistics, dark mode and priority badges.
-- **goals.json** – JSON file for persisting goals.
-
-## License
-
-This project is released under the MIT License.
+1. Welcome and privacy framing.
+2. Goal selection.
+3. Baseline preset.
+4. Simple/Pro mode selection.
+5. Persisted onboarding result.
+6. Today generation from the selected profile and starter program.
+7. Quick log save into local storage.
+8. Pending sync queue state.
+9. Demo sync-clear flow on Track.

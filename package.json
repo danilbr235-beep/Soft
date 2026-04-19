@@ -1,19 +1,24 @@
 {
-  "name": "soft",
-  "version": "1.0.0",
-  "description": "Personal goals management CLI and web application",
-  "main": "index_new.js",
+  "name": "private-mens-health-coach",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Privacy-first mobile men's health coach MVP",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "start": "node app_priority.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.check.json",
+    "smoke:web": "playwright test e2e/web-smoke.spec.ts",
+    "mobile": "npm --workspace @pmhc/mobile run start",
+    "api": "npm --workspace @pmhc/api run dev"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bin": {
-    "soft-cli": "index_priority.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2"
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@types/react": "^19.2.14",
+    "@types/node": "^20.19.25",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   }
 }

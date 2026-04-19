@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.expo/
+.expo-shared/
+web-build/
+coverage/
+playwright-report/
+test-results/
+.env
+.env.local
+.DS_Store
+*.log

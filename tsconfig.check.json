@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "apps/api/src/**/*.ts",
+    "apps/mobile/index.ts",
+    "apps/mobile/App.tsx",
+    "apps/mobile/src/**/*.ts",
+    "apps/mobile/src/**/*.tsx",
+    "packages/onboarding/src/**/*.ts",
+    "packages/rules/src/**/*.ts",
+    "packages/sync/src/**/*.ts",
+    "packages/types/src/**/*.ts",
+    "packages/ui/src/**/*.ts"
+  ]
+}

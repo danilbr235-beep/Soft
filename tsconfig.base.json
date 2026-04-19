@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@pmhc/types": ["packages/types/src/index.ts"],
+      "@pmhc/rules": ["packages/rules/src/index.ts"],
+      "@pmhc/onboarding": ["packages/onboarding/src/index.ts"],
+      "@pmhc/sync": ["packages/sync/src/index.ts"]
+    }
+  }
+}
