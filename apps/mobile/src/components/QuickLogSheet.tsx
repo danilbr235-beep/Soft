@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { createSymptomCheckinValue, symptomCheckinOptions } from "@pmhc/safety";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { QuickLogDefinition } from "@pmhc/types";
 
@@ -9,7 +10,12 @@ type Props = {
 };
 
 export function QuickLogSheet({ definition, onClose, onSave }: Props) {
-  const options = definition.input === "score" ? [1, 3, 5, 7, 10] : definition.input === "boolean" ? ["Yes", "No"] : ["Light", "Moderate", "Strong"];
+  const options =
+    definition.input === "score"
+      ? [1, 3, 5, 7, 10]
+      : definition.input === "boolean"
+        ? ["Yes", "No"]
+        : symptomCheckinOptions.map((option) => option.label);
 
   function valueFor(option: string | number) {
     if (definition.input === "boolean") {
@@ -17,7 +23,8 @@ export function QuickLogSheet({ definition, onClose, onSave }: Props) {
     }
 
     if (definition.input === "symptom") {
-      return { level: option };
+      const symptomOption = symptomCheckinOptions.find((item) => item.label === option);
+      return createSymptomCheckinValue(symptomOption?.key ?? "all_clear");
     }
 
     return option;

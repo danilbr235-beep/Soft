@@ -24,9 +24,15 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Log it quickly")).toBeVisible();
   await page.getByLabel("Save Confidence 7").click();
 
+  await page.getByLabel("Quick log Symptoms").click();
+  await expect(page.getByText("Log it quickly")).toBeVisible();
+  await page.getByLabel("Save Symptoms Pain").click();
+  await expect(page.getByText("Symptom review recommended")).toBeVisible();
+  await expect(page.getByText("Keep today conservative")).toBeVisible();
+
   await page.getByLabel("Open Track").click();
   await expect(page.getByText("confidence: 7")).toBeVisible();
-  await expect(page.getByText("1 pending local write")).toBeVisible();
+  await expect(page.getByText("2 pending local writes")).toBeVisible();
 
   await page.getByLabel("Sync demo writes").click();
   await expect(page.getByText("All local writes are synced.")).toBeVisible();
@@ -44,7 +50,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
 
   await page.getByLabel("Open Coach").click();
   await expect(page.getByText("How certain is this?")).toBeVisible();
-  await expect(page.getByText(/not a diagnosis/i)).toBeVisible();
+  await expect(page.getByText(/educational tracking support/i)).toBeVisible();
 
   await page.getByLabel("Open Settings").click();
   await expect(page.getByText(/Vault lock is enabled/i)).toBeVisible();

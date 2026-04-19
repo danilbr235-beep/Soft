@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildTodayPayload } from "./todayRules";
+import { createSymptomCheckinValue } from "@pmhc/safety";
 import type { RuleEngineInput } from "@pmhc/types";
 
 const baseInput: RuleEngineInput = {
@@ -35,6 +36,7 @@ describe("buildTodayPayload", () => {
       "morning_erection",
       "libido",
       "confidence",
+      "symptom_checkin",
     ]);
   });
 
@@ -61,7 +63,7 @@ describe("buildTodayPayload", () => {
         {
           id: "symptom-1",
           type: "symptom_checkin",
-          value: { pain: true, numbness: true },
+          value: createSymptomCheckinValue("pain"),
           occurredAt: "2026-04-19T08:00:00Z",
           source: "manual",
         },
@@ -71,5 +73,23 @@ describe("buildTodayPayload", () => {
     expect(payload.currentPriority.domain).toBe("safety");
     expect(payload.alerts.map((alert) => alert.severity)).toContain("medical_attention");
     expect(payload.currentPriority.avoidToday).toMatch(/intense|aggressive/i);
+  });
+
+  it("does not create a safety alert for all-clear symptom check-ins", () => {
+    const payload = buildTodayPayload({
+      ...baseInput,
+      latestLogs: [
+        {
+          id: "symptom-1",
+          type: "symptom_checkin",
+          value: createSymptomCheckinValue("all_clear"),
+          occurredAt: "2026-04-19T08:00:00Z",
+          source: "manual",
+        },
+      ],
+    });
+
+    expect(payload.currentPriority.domain).toBe("baseline");
+    expect(payload.alerts.map((alert) => alert.severity)).not.toContain("medical_attention");
   });
 });

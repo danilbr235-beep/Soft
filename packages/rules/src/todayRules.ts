@@ -10,6 +10,7 @@ import type {
   RuleEngineInput,
   TodayPayload,
 } from "@pmhc/types";
+import { hasSymptomRedFlag } from "@pmhc/safety";
 
 export const supportedQuickLogs: QuickLogType[] = [
   "morning_erection",
@@ -192,7 +193,8 @@ function chooseQuickLogs(domain: CurrentPriority["domain"], mode: RuleEngineInpu
   const practice: QuickLogType[] = ["pelvic_floor_done", "pump_done", "sex_happened"];
 
   if (domain === "baseline") {
-    return base.map(toQuickLogDefinition);
+    const baselineLogs: QuickLogType[] = [...base, "symptom_checkin"];
+    return baselineLogs.map(toQuickLogDefinition);
   }
 
   const ordered = domain === "recovery" || domain === "safety" ? [...recovery, ...base] : [...base, ...recovery];
@@ -294,8 +296,7 @@ function hasSafetySignal(input: RuleEngineInput) {
       return false;
     }
 
-    const value = log.value as Record<string, unknown>;
-    return value.pain === true || value.numbness === true || value.blood === true || value.injuryConcern === true;
+    return hasSymptomRedFlag(log.value);
   });
 }
 

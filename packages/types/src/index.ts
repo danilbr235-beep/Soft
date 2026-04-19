@@ -48,6 +48,16 @@ export type QuickLogType =
   | "symptom_checkin"
   | "sex_happened";
 
+export type SymptomCheckinKey = "all_clear" | "pain" | "numbness" | "blood" | "injury_concern";
+
+export type SymptomCheckinValue = {
+  severity: "none" | "light" | "moderate" | "strong";
+  pain: boolean;
+  numbness: boolean;
+  blood: boolean;
+  injuryConcern: boolean;
+};
+
 export type ActionCardKind = "Learn" | "Check-in" | "Practice" | "Reflect";
 
 export type ContentType = "article" | "guide" | "audio" | "video" | "course" | "summary";

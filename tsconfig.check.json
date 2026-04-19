@@ -16,6 +16,7 @@
     "packages/privacy/src/**/*.ts",
     "packages/programs/src/**/*.ts",
     "packages/rules/src/**/*.ts",
+    "packages/safety/src/**/*.ts",
     "packages/sync/src/**/*.ts",
     "packages/types/src/**/*.ts",
     "packages/ui/src/**/*.ts"
