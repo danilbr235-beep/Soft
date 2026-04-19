@@ -77,6 +77,29 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Privacy vault")).toBeVisible();
 });
 
+test("can choose English or Russian from onboarding and settings", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page.getByText("Language")).toBeVisible();
+  await page.getByLabel("Use Russian").click();
+  await expect(page.getByText("Спокойный ежедневный коуч")).toBeVisible();
+  await page.getByLabel("Использовать английский").click();
+  await expect(page.getByText("A calm daily coach")).toBeVisible();
+
+  await page.getByText("Start privately").click();
+  await page.getByLabel("Confidence").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Mixed signals").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Simple mode").click();
+  await page.getByLabel("Generate Today").click();
+
+  await page.getByLabel("Open Settings").click();
+  await page.getByLabel("Use Russian").click();
+  await expect(page.getByText("Настройки").first()).toBeVisible();
+  await expect(page.getByText("Сегодня").first()).toBeVisible();
+});
+
 test("pro mode can record pump use and receives conservative guidance", async ({ page }) => {
   await page.goto("/");
 

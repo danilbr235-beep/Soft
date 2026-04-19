@@ -21,6 +21,7 @@ import type {
   ContentProgress,
   LogEntry,
   OnboardingResult,
+  AppLanguage,
   PrivacyLockState,
   ProgramProgress,
   QuickLogDefinition,
@@ -84,7 +85,7 @@ const fallbackOnboarding = createOnboardingResult({
     vaultLockEnabled: false,
     discreetNotifications: true,
   },
-  language: "ru",
+  language: "en",
 });
 
 const starterInput: RuleEngineInput = {
@@ -100,6 +101,7 @@ const fallbackPrivacyLock = createPrivacyLockState(fallbackOnboarding.privacy, "
 export function useAppState() {
   const [activeTab, setActiveTab] = useState<AppTab>("Today");
   const [onboarding, setOnboarding] = useState<OnboardingResult | null>(null);
+  const [language, setLanguage] = useState<AppLanguage>(fallbackOnboarding.profile.language);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [syncQueue, setSyncQueue] = useState<SyncQueueJob[]>([]);
   const [contentProgress, setContentProgress] = useState<ContentProgress[]>([]);
@@ -130,6 +132,7 @@ export function useAppState() {
       }
 
       setOnboarding(savedOnboarding);
+      setLanguage(savedOnboarding?.profile.language ?? fallbackOnboarding.profile.language);
       setLogs(savedLogs);
       setSyncQueue(savedQueue);
       setContentProgress(savedContentProgress);
@@ -216,6 +219,7 @@ export function useAppState() {
       const nextProgramProgress = createProgramProgress(result.recommendedProgram, result.completedAt);
 
       setOnboarding(result);
+      setLanguage(result.profile.language);
       await Promise.all([
         onboardingRepository.save(result),
         persistPrivacyLock(nextPrivacyLock),
@@ -225,8 +229,36 @@ export function useAppState() {
     [persistPrivacyLock, persistProgramProgress],
   );
 
+  const changeLanguage = useCallback(
+    async (nextLanguage: AppLanguage) => {
+      setLanguage(nextLanguage);
+
+      if (!onboarding) {
+        return;
+      }
+
+      const nextOnboarding: OnboardingResult = {
+        ...onboarding,
+        profile: {
+          ...onboarding.profile,
+          language: nextLanguage,
+        },
+        contentPreferences: {
+          ...onboarding.contentPreferences,
+          language: nextLanguage,
+          autoTranslate: nextLanguage === "ru",
+        },
+      };
+
+      setOnboarding(nextOnboarding);
+      await onboardingRepository.save(nextOnboarding);
+    },
+    [onboarding],
+  );
+
   const resetOnboarding = useCallback(async () => {
     setOnboarding(null);
+    setLanguage(fallbackOnboarding.profile.language);
     setLogs([]);
     setSyncQueue([]);
     setContentProgress([]);
@@ -289,13 +321,15 @@ export function useAppState() {
     hasCompletedOnboarding: onboarding != null,
     logs,
     quickLogSheet: selectedQuickLog ? (
-      <QuickLogSheet definition={selectedQuickLog} onClose={() => setSelectedQuickLog(null)} onSave={saveQuickLog} />
+      <QuickLogSheet definition={selectedQuickLog} language={language} onClose={() => setSelectedQuickLog(null)} onSave={saveQuickLog} />
     ) : null,
+    language,
     today,
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,
     programCompletionPercent: today.activeProgram ? programCompletionPercent(today.activeProgram, programProgress) : 0,
     completeOnboarding,
+    changeLanguage,
     completeProgramToday,
     lockNow,
     openQuickLog: setSelectedQuickLog,

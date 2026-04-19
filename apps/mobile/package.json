@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@pmhc/rules": "0.1.0",
+    "@pmhc/i18n": "0.1.0",
     "@pmhc/onboarding": "0.1.0",
     "@pmhc/sync": "0.1.0",
     "@pmhc/types": "0.1.0",

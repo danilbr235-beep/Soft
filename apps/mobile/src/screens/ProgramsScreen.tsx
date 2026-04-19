@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { Program } from "@pmhc/types";
 import { Screen } from "../components/Screen";
@@ -6,38 +7,42 @@ import { Surface } from "../components/Surface";
 
 type Props = {
   activeProgram: Program | null;
+  copy: LanguageCopy;
   completionPercent: number;
   onCompleteToday: () => void;
 };
 
-export function ProgramsScreen({ activeProgram, completionPercent, onCompleteToday }: Props) {
-  const dayLabel = activeProgram ? `Day ${activeProgram.dayIndex} of ${activeProgram.durationDays}` : "No active day";
+export function ProgramsScreen({ activeProgram, copy, completionPercent, onCompleteToday }: Props) {
+  const dayLabel = activeProgram ? copy.programs.dayOf(activeProgram.dayIndex, activeProgram.durationDays) : copy.programs.noActiveDay;
+  const programTitle = activeProgram
+    ? copy.programs.programTitles[activeProgram.id] ?? activeProgram.title
+    : copy.programs.noActiveProgram;
 
   return (
-    <Screen title="Programs" subtitle="Guided plans stay conservative until there is enough signal.">
+    <Screen title={copy.programs.title} subtitle={copy.programs.subtitle}>
       <Surface>
-        <Text style={styles.eyebrow}>Active</Text>
-        <Text style={styles.title}>{activeProgram?.title ?? "No active program"}</Text>
+        <Text style={styles.eyebrow}>{copy.programs.active}</Text>
+        <Text style={styles.title}>{programTitle}</Text>
         <Text style={styles.body}>{dayLabel}</Text>
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${completionPercent}%` }]} />
         </View>
-        <Text style={styles.body}>{completionPercent}% complete</Text>
+        <Text style={styles.body}>{copy.programs.percentComplete(completionPercent)}</Text>
         <Pressable
-          accessibilityLabel="Complete program day"
+          accessibilityLabel={copy.programs.completeProgramDay}
           accessibilityRole="button"
           disabled={!activeProgram}
           onPress={onCompleteToday}
           style={[styles.button, !activeProgram && styles.disabledButton]}
         >
-          <Text style={styles.buttonText}>Complete today</Text>
+          <Text style={styles.buttonText}>{copy.programs.completeToday}</Text>
         </Pressable>
       </Surface>
       <Surface>
-        <Text style={styles.sectionTitle}>Next candidates</Text>
-        <Text style={styles.body}>Pelvic floor consistency starter</Text>
-        <Text style={styles.body}>Sleep and environment reset</Text>
-        <Text style={styles.body}>Confidence reset</Text>
+        <Text style={styles.sectionTitle}>{copy.programs.nextCandidates}</Text>
+        {copy.programs.candidates.map((candidate) => (
+          <Text key={candidate} style={styles.body}>{candidate}</Text>
+        ))}
       </Surface>
     </Screen>
   );

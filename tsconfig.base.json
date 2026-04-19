@@ -16,6 +16,7 @@
       "@pmhc/onboarding": ["packages/onboarding/src/index.ts"],
       "@pmhc/sync": ["packages/sync/src/index.ts"],
       "@pmhc/client": ["packages/client/src/index.ts"],
+      "@pmhc/i18n": ["packages/i18n/src/index.ts"],
       "@pmhc/learning": ["packages/learning/src/index.ts"],
       "@pmhc/privacy": ["packages/privacy/src/index.ts"],
       "@pmhc/programs": ["packages/programs/src/index.ts"],

@@ -1,51 +1,61 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { ContentItem } from "@pmhc/types";
+import type { AppLanguage, ContentItem } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 
 type Props = {
   content: ContentItem[];
+  copy: LanguageCopy;
+  language: AppLanguage;
   onToggleSaved: (itemId: string) => void;
   onMarkCompleted: (itemId: string) => void;
 };
 
-export function LearnScreen({ content, onMarkCompleted, onToggleSaved }: Props) {
+export function LearnScreen({ content, copy, language, onMarkCompleted, onToggleSaved }: Props) {
   return (
-    <Screen title="Learn" subtitle="Curated material tied to the current state, not a random link library.">
-      {content.map((item) => (
-        <Surface key={item.id}>
-          <View style={{ gap: spacing.xs }}>
-            <Text style={{ color: colors.moss, fontWeight: "800", textTransform: "uppercase" }}>
-              {item.trustLevel}
-            </Text>
-            <Text style={{ color: colors.text, fontWeight: "900", fontSize: 20 }}>{item.title}</Text>
-            <Text style={{ color: colors.muted, lineHeight: 21 }}>{item.translatedSummaryRu ?? item.summary}</Text>
-            <Text style={{ color: colors.steel }}>
-              {item.durationMinutes} min - {item.sourceName}
-            </Text>
-            <View style={styles.actions}>
-              <Pressable
-                accessibilityLabel={`${item.saved ? "Unsave" : "Save"} ${item.title}`}
-                accessibilityRole="button"
-                onPress={() => onToggleSaved(item.id)}
-                style={[styles.button, item.saved && styles.activeButton]}
-              >
-                <Text style={styles.buttonText}>{item.saved ? "Saved" : "Save"}</Text>
-              </Pressable>
-              <Pressable
-                accessibilityLabel={item.completed ? `Completed ${item.title}` : `Mark complete ${item.title}`}
-                accessibilityRole="button"
-                disabled={item.completed}
-                onPress={() => onMarkCompleted(item.id)}
-                style={[styles.button, item.completed && styles.activeButton]}
-              >
-                <Text style={styles.buttonText}>{item.completed ? "Completed" : "Mark complete"}</Text>
-              </Pressable>
+    <Screen title={copy.learn.title} subtitle={copy.learn.subtitle}>
+      {content.map((item) => {
+        const title = language === "ru" ? item.translatedTitleRu ?? item.title : item.title;
+        const summary = language === "ru" ? item.translatedSummaryRu ?? item.summary : item.summary;
+        const saveAction = item.saved ? copy.learn.unsave : copy.learn.save;
+        const completeAction = item.completed ? copy.learn.completed : copy.learn.markComplete;
+
+        return (
+          <Surface key={item.id}>
+            <View style={{ gap: spacing.xs }}>
+              <Text style={{ color: colors.moss, fontWeight: "800", textTransform: "uppercase" }}>
+                {item.trustLevel}
+              </Text>
+              <Text style={{ color: colors.text, fontWeight: "900", fontSize: 20 }}>{title}</Text>
+              <Text style={{ color: colors.muted, lineHeight: 21 }}>{summary}</Text>
+              <Text style={{ color: colors.steel }}>
+                {copy.common.minutes(item.durationMinutes)} - {item.sourceName}
+              </Text>
+              <View style={styles.actions}>
+                <Pressable
+                  accessibilityLabel={`${saveAction} ${title}`}
+                  accessibilityRole="button"
+                  onPress={() => onToggleSaved(item.id)}
+                  style={[styles.button, item.saved && styles.activeButton]}
+                >
+                  <Text style={styles.buttonText}>{item.saved ? copy.learn.saved : copy.learn.save}</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityLabel={`${completeAction} ${title}`}
+                  accessibilityRole="button"
+                  disabled={item.completed}
+                  onPress={() => onMarkCompleted(item.id)}
+                  style={[styles.button, item.completed && styles.activeButton]}
+                >
+                  <Text style={styles.buttonText}>{item.completed ? copy.learn.completed : copy.learn.markComplete}</Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
-        </Surface>
-      ))}
+          </Surface>
+        );
+      })}
     </Screen>
   );
 }

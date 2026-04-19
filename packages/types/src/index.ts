@@ -202,6 +202,7 @@ export type ContentItem = {
   id: string;
   type: ContentType;
   title: string;
+  translatedTitleRu?: string;
   summary: string;
   durationMinutes: number;
   trustLevel: TrustLevel;

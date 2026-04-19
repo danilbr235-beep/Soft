@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { createOnboardingResult } from "@pmhc/onboarding";
+import { getCopy, languageName } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { GoalType, OnboardingResult, UserMode } from "@pmhc/types";
+import type { AppLanguage, GoalType, OnboardingResult, UserMode } from "@pmhc/types";
 
 type Props = {
   onComplete: (result: OnboardingResult) => void;
@@ -10,10 +11,12 @@ type Props = {
 
 export function OnboardingScreen({ onComplete }: Props) {
   const [step, setStep] = useState(0);
+  const [language, setLanguage] = useState<AppLanguage>("en");
   const [primaryGoal, setPrimaryGoal] = useState<GoalType>("sexual_confidence");
   const [mode, setMode] = useState<UserMode>("Simple");
   const [baselinePreset, setBaselinePreset] = useState<"low" | "mixed" | "stable">("mixed");
   const [hasRedFlag, setHasRedFlag] = useState(false);
+  const copy = getCopy(language);
 
   function finish() {
     onComplete(
@@ -27,7 +30,7 @@ export function OnboardingScreen({ onComplete }: Props) {
           vaultLockEnabled: true,
           discreetNotifications: true,
         },
-        language: "ru",
+        language,
       }),
     );
   }
@@ -36,17 +39,17 @@ export function OnboardingScreen({ onComplete }: Props) {
     return (
       <View style={styles.wrap}>
         <View style={styles.copy}>
-          <Text style={styles.eyebrow}>Step 1 of 4</Text>
-          <Text style={styles.title}>Choose the main focus.</Text>
-          <Text style={styles.body}>This sets the first program and the first Today priority.</Text>
+          <Text style={styles.eyebrow}>{copy.onboarding.stepOneEyebrow}</Text>
+          <Text style={styles.title}>{copy.onboarding.stepOneTitle}</Text>
+          <Text style={styles.body}>{copy.onboarding.stepOneBody}</Text>
         </View>
         <View style={styles.optionStack}>
-          <Choice label="Confidence" active={primaryGoal === "sexual_confidence"} onPress={() => setPrimaryGoal("sexual_confidence")} />
-          <Choice label="Pelvic floor" active={primaryGoal === "pelvic_floor"} onPress={() => setPrimaryGoal("pelvic_floor")} />
-          <Choice label="Recovery" active={primaryGoal === "recovery"} onPress={() => setPrimaryGoal("recovery")} />
-          <Choice label="Sleep setup" active={primaryGoal === "sleep_environment"} onPress={() => setPrimaryGoal("sleep_environment")} />
+          <Choice label={copy.onboarding.goals.sexual_confidence} active={primaryGoal === "sexual_confidence"} onPress={() => setPrimaryGoal("sexual_confidence")} />
+          <Choice label={copy.onboarding.goals.pelvic_floor} active={primaryGoal === "pelvic_floor"} onPress={() => setPrimaryGoal("pelvic_floor")} />
+          <Choice label={copy.onboarding.goals.recovery} active={primaryGoal === "recovery"} onPress={() => setPrimaryGoal("recovery")} />
+          <Choice label={copy.onboarding.goals.sleep_environment} active={primaryGoal === "sleep_environment"} onPress={() => setPrimaryGoal("sleep_environment")} />
         </View>
-        <Footer onBack={() => setStep(0)} onNext={() => setStep(2)} />
+        <Footer backLabel={copy.common.back} nextLabel={copy.common.next} onBack={() => setStep(0)} onNext={() => setStep(2)} />
       </View>
     );
   }
@@ -55,16 +58,16 @@ export function OnboardingScreen({ onComplete }: Props) {
     return (
       <View style={styles.wrap}>
         <View style={styles.copy}>
-          <Text style={styles.eyebrow}>Step 2 of 4</Text>
-          <Text style={styles.title}>Set a simple baseline.</Text>
-          <Text style={styles.body}>Use a rough starting point. You can refine it with quick logs later.</Text>
+          <Text style={styles.eyebrow}>{copy.onboarding.stepTwoEyebrow}</Text>
+          <Text style={styles.title}>{copy.onboarding.stepTwoTitle}</Text>
+          <Text style={styles.body}>{copy.onboarding.stepTwoBody}</Text>
         </View>
         <View style={styles.optionStack}>
-          <Choice label="Low energy / high stress" active={baselinePreset === "low"} onPress={() => setBaselinePreset("low")} />
-          <Choice label="Mixed signals" active={baselinePreset === "mixed"} onPress={() => setBaselinePreset("mixed")} />
-          <Choice label="Mostly stable" active={baselinePreset === "stable"} onPress={() => setBaselinePreset("stable")} />
+          <Choice label={copy.onboarding.baselines.low} active={baselinePreset === "low"} onPress={() => setBaselinePreset("low")} />
+          <Choice label={copy.onboarding.baselines.mixed} active={baselinePreset === "mixed"} onPress={() => setBaselinePreset("mixed")} />
+          <Choice label={copy.onboarding.baselines.stable} active={baselinePreset === "stable"} onPress={() => setBaselinePreset("stable")} />
         </View>
-        <Footer onBack={() => setStep(1)} onNext={() => setStep(3)} />
+        <Footer backLabel={copy.common.back} nextLabel={copy.common.next} onBack={() => setStep(1)} onNext={() => setStep(3)} />
       </View>
     );
   }
@@ -73,16 +76,16 @@ export function OnboardingScreen({ onComplete }: Props) {
     return (
       <View style={styles.wrap}>
         <View style={styles.copy}>
-          <Text style={styles.eyebrow}>Step 3 of 4</Text>
-          <Text style={styles.title}>Choose operating style.</Text>
-          <Text style={styles.body}>Simple keeps Today lighter. Pro adds more detail once you want it.</Text>
+          <Text style={styles.eyebrow}>{copy.onboarding.stepThreeEyebrow}</Text>
+          <Text style={styles.title}>{copy.onboarding.stepThreeTitle}</Text>
+          <Text style={styles.body}>{copy.onboarding.stepThreeBody}</Text>
         </View>
         <View style={styles.optionStack}>
-          <Choice label="Simple mode" active={mode === "Simple"} onPress={() => setMode("Simple")} />
-          <Choice label="Pro mode" active={mode === "Pro"} onPress={() => setMode("Pro")} />
-          <Choice label="Use conservative guidance" active={hasRedFlag} onPress={() => setHasRedFlag(!hasRedFlag)} />
+          <Choice label={copy.onboarding.modes.Simple} active={mode === "Simple"} onPress={() => setMode("Simple")} />
+          <Choice label={copy.onboarding.modes.Pro} active={mode === "Pro"} onPress={() => setMode("Pro")} />
+          <Choice label={copy.onboarding.conservative} active={hasRedFlag} onPress={() => setHasRedFlag(!hasRedFlag)} />
         </View>
-        <Footer onBack={() => setStep(2)} onNext={finish} nextLabel="Generate Today" />
+        <Footer backLabel={copy.common.back} onBack={() => setStep(2)} onNext={finish} nextLabel={copy.onboarding.generateToday} />
       </View>
     );
   }
@@ -90,20 +93,50 @@ export function OnboardingScreen({ onComplete }: Props) {
   return (
     <View style={styles.wrap}>
       <View style={styles.copy}>
-        <Text style={styles.eyebrow}>Private by design</Text>
-        <Text style={styles.title}>A calm daily coach for recovery, confidence, and tracking.</Text>
-        <Text style={styles.body}>
-          Start with a light baseline. The app explains patterns, supports routines, and keeps sensitive details discreet.
-        </Text>
+        <LanguageSelector language={language} setLanguage={setLanguage} />
+        <Text style={styles.eyebrow}>{copy.onboarding.heroEyebrow}</Text>
+        <Text style={styles.title}>{copy.onboarding.heroTitle}</Text>
+        <Text style={styles.body}>{copy.onboarding.heroBody}</Text>
       </View>
       <View style={styles.panel}>
-        <Text style={styles.panelTitle}>Before you start</Text>
-        <Text style={styles.panelText}>This is educational tracking support. It does not diagnose, treat, or replace urgent care.</Text>
-        <Text style={styles.panelText}>You control what gets logged. Sensitive sections can stay behind a vault lock later.</Text>
+        <Text style={styles.panelTitle}>{copy.onboarding.beforeTitle}</Text>
+        <Text style={styles.panelText}>{copy.onboarding.beforeLine1}</Text>
+        <Text style={styles.panelText}>{copy.onboarding.beforeLine2}</Text>
       </View>
       <Pressable style={styles.primary} onPress={() => setStep(1)}>
-        <Text style={styles.primaryText}>Start privately</Text>
+        <Text style={styles.primaryText}>{copy.onboarding.start}</Text>
       </Pressable>
+    </View>
+  );
+}
+
+function LanguageSelector({
+  language,
+  setLanguage,
+}: {
+  language: AppLanguage;
+  setLanguage: (language: AppLanguage) => void;
+}) {
+  const copy = getCopy(language);
+
+  return (
+    <View style={styles.languageBlock}>
+      <Text style={styles.languageLabel}>{copy.common.language}</Text>
+      <View style={styles.languageRow}>
+        {(["en", "ru"] as AppLanguage[]).map((option) => (
+          <Pressable
+            key={option}
+            accessibilityLabel={option === "en" ? copy.common.useEnglish : copy.common.useRussian}
+            accessibilityRole="button"
+            onPress={() => setLanguage(option)}
+            style={[styles.languageButton, language === option && styles.activeChoice]}
+          >
+            <Text style={[styles.choiceText, language === option && styles.activeChoiceText]}>
+              {languageName(option)}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
     </View>
   );
 }
@@ -116,11 +149,11 @@ function Choice({ active, label, onPress }: { active: boolean; label: string; on
   );
 }
 
-function Footer({ onBack, onNext, nextLabel = "Next" }: { onBack: () => void; onNext: () => void; nextLabel?: string }) {
+function Footer({ backLabel, onBack, onNext, nextLabel }: { backLabel: string; onBack: () => void; onNext: () => void; nextLabel: string }) {
   return (
     <View style={styles.footer}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Back" style={styles.secondary} onPress={onBack}>
-        <Text style={styles.secondaryText}>Back</Text>
+      <Pressable accessibilityRole="button" accessibilityLabel={backLabel} style={styles.secondary} onPress={onBack}>
+        <Text style={styles.secondaryText}>{backLabel}</Text>
       </Pressable>
       <Pressable accessibilityRole="button" accessibilityLabel={nextLabel} style={styles.footerPrimary} onPress={onNext}>
         <Text style={styles.primaryText}>{nextLabel}</Text>
@@ -201,6 +234,29 @@ const styles = StyleSheet.create({
   },
   optionStack: {
     gap: spacing.sm,
+  },
+  languageBlock: {
+    gap: spacing.sm,
+  },
+  languageLabel: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  languageRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  languageButton: {
+    minHeight: 42,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.panel,
+    paddingHorizontal: spacing.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
   choice: {
     minHeight: 54,

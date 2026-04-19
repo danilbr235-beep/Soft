@@ -1,4 +1,5 @@
 import { SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
+import { getCopy } from "@pmhc/i18n";
 import { colors } from "@pmhc/ui";
 import { BottomNav } from "./components/BottomNav";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
@@ -13,6 +14,7 @@ import { useAppState } from "./state/useAppState";
 
 export function AppRoot() {
   const app = useAppState();
+  const copy = getCopy(app.language);
 
   if (!app.hasCompletedOnboarding) {
     return (
@@ -27,7 +29,7 @@ export function AppRoot() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <StatusBar barStyle="light-content" />
-        <PrivacyLockScreen onUnlock={app.unlock} />
+        <PrivacyLockScreen copy={copy} onUnlock={app.unlock} />
       </SafeAreaView>
     );
   }
@@ -37,11 +39,13 @@ export function AppRoot() {
       <StatusBar barStyle="light-content" />
       <View style={styles.shell}>
         {app.activeTab === "Today" ? (
-          <TodayScreen today={app.today} onAskCoach={() => app.setActiveTab("Coach")} onLog={app.openQuickLog} />
+          <TodayScreen copy={copy} today={app.today} onAskCoach={() => app.setActiveTab("Coach")} onLog={app.openQuickLog} />
         ) : null}
         {app.activeTab === "Track" ? (
           <TrackScreen
             logs={app.logs}
+            copy={copy}
+            language={app.language}
             pendingSyncCount={app.pendingSyncCount}
             onLog={app.openQuickLog}
             onSync={app.syncQueuedWrites}
@@ -50,6 +54,8 @@ export function AppRoot() {
         {app.activeTab === "Learn" ? (
           <LearnScreen
             content={app.content}
+            copy={copy}
+            language={app.language}
             onMarkCompleted={app.completeContent}
             onToggleSaved={app.toggleSavedContent}
           />
@@ -57,21 +63,25 @@ export function AppRoot() {
         {app.activeTab === "Programs" ? (
           <ProgramsScreen
             activeProgram={app.today.activeProgram}
+            copy={copy}
             completionPercent={app.programCompletionPercent}
             onCompleteToday={app.completeProgramToday}
           />
         ) : null}
-        {app.activeTab === "Coach" ? <CoachScreen priority={app.today.currentPriority} /> : null}
+        {app.activeTab === "Coach" ? <CoachScreen copy={copy} language={app.language} priority={app.today.currentPriority} /> : null}
         {app.activeTab === "Settings" ? (
           <SettingsScreen
+            copy={copy}
+            language={app.language}
             privacyLock={app.privacyLock}
+            onChangeLanguage={app.changeLanguage}
             onLockNow={app.lockNow}
             onToggleVaultLock={app.togglePrivacyVault}
             resetOnboarding={app.resetOnboarding}
           />
         ) : null}
       </View>
-      <BottomNav activeTab={app.activeTab} onChange={app.setActiveTab} />
+      <BottomNav activeTab={app.activeTab} copy={copy} onChange={app.setActiveTab} />
       {app.quickLogSheet}
     </SafeAreaView>
   );

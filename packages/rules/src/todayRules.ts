@@ -7,6 +7,7 @@ import type {
   LogEntry,
   QuickLogDefinition,
   QuickLogType,
+  AppLanguage,
   RuleEngineInput,
   TodayPayload,
 } from "@pmhc/types";
@@ -24,16 +25,29 @@ export const supportedQuickLogs: QuickLogType[] = [
   "sex_happened",
 ];
 
-const quickLogLabels: Record<QuickLogType, string> = {
-  morning_erection: "Morning",
-  libido: "Libido",
-  confidence: "Confidence",
-  energy: "Energy",
-  sleep_quality: "Sleep",
-  pelvic_floor_done: "Pelvic floor",
-  pump_done: "Pump",
-  symptom_checkin: "Symptoms",
-  sex_happened: "Intimacy",
+const quickLogLabels: Record<AppLanguage, Record<QuickLogType, string>> = {
+  en: {
+    morning_erection: "Morning",
+    libido: "Libido",
+    confidence: "Confidence",
+    energy: "Energy",
+    sleep_quality: "Sleep",
+    pelvic_floor_done: "Pelvic floor",
+    pump_done: "Pump",
+    symptom_checkin: "Symptoms",
+    sex_happened: "Intimacy",
+  },
+  ru: {
+    morning_erection: "Утро",
+    libido: "Либидо",
+    confidence: "Уверенность",
+    energy: "Энергия",
+    sleep_quality: "Сон",
+    pelvic_floor_done: "Тазовое дно",
+    pump_done: "Помпа",
+    symptom_checkin: "Симптомы",
+    sex_happened: "Близость",
+  },
 };
 
 export function buildTodayPayload(input: RuleEngineInput): TodayPayload {
@@ -44,8 +58,9 @@ export function buildTodayPayload(input: RuleEngineInput): TodayPayload {
 
   const currentPriority = choosePriority({ input, safetySignal, lowSleepStreak, pumpCaution, lowData });
   const alerts = chooseAlerts(input, safetySignal, lowSleepStreak, pumpCaution);
-  const actionCards = chooseActionCards(currentPriority.domain);
-  const quickLogs = chooseQuickLogs(currentPriority.domain, input.profile.mode);
+  const language = input.profile.language;
+  const actionCards = chooseActionCards(currentPriority.domain, language);
+  const quickLogs = chooseQuickLogs(currentPriority.domain, input.profile.mode, language);
 
   return {
     date: new Date().toISOString().slice(0, 10),
@@ -53,27 +68,35 @@ export function buildTodayPayload(input: RuleEngineInput): TodayPayload {
     syncStatus: "synced",
     activeProgram: input.activeProgram,
     currentPriority,
-    dailyState: buildDailyState(input.latestLogs, lowData),
+    dailyState: buildDailyState(input.latestLogs, lowData, language),
     alerts,
     actionCards,
     quickLogs,
-    liveUpdates: buildLiveUpdates(input.contentItems),
-    insights: buildInsights(input.latestLogs, lowData),
+    liveUpdates: buildLiveUpdates(input.contentItems, language),
+    insights: buildInsights(input.latestLogs, lowData, language),
   };
 }
 
-export function explainPriority(priority: CurrentPriority): CoachExplanation {
+export function explainPriority(priority: CurrentPriority, language: AppLanguage = "en"): CoachExplanation {
+  const ru = language === "ru";
+
   return {
     title: priority.title,
     explanation: priority.whyItMatters,
     dataNote:
       priority.confidence === "low"
-        ? "There is not enough trend data yet, so this answer stays cautious and focused on baseline building."
-        : "This explanation uses recent logs and the current rule priority, not a diagnosis.",
-    confidenceNote: confidenceNote(priority.confidence),
+        ? ru
+          ? "Пока недостаточно трендовых данных, поэтому ответ остается осторожным и помогает собрать базовую линию."
+          : "There is not enough trend data yet, so this answer stays cautious and focused on baseline building."
+        : ru
+          ? "Это объяснение использует последние логи и текущий rule-priority, а не диагноз."
+          : "This explanation uses recent logs and the current rule priority, not a diagnosis.",
+    confidenceNote: confidenceNote(priority.confidence, language),
     nextStep: priority.recommendedAction,
     avoidToday: priority.avoidToday,
-    safetyNote: "This is educational tracking support, not a diagnosis or urgent care advice.",
+    safetyNote: ru
+      ? "Это образовательная поддержка для трекинга, не диагноз и не совет для срочной помощи."
+      : "This is educational tracking support, not a diagnosis or urgent care advice.",
     confidence: priority.confidence,
   };
 }
@@ -85,13 +108,21 @@ function choosePriority(args: {
   pumpCaution: boolean;
   lowData: boolean;
 }): CurrentPriority {
+  const ru = args.input.profile.language === "ru";
+
   if (args.safetySignal) {
     return {
       domain: "safety",
-      title: "Keep today conservative",
-      whyItMatters: "Recent symptom signals mean the safest useful move is to reduce intensity and track clearly.",
-      recommendedAction: "Log symptoms and choose only gentle recovery actions today.",
-      avoidToday: "Avoid intense or aggressive protocols until the signal is clearer.",
+      title: ru ? "Сегодня держим всё осторожно" : "Keep today conservative",
+      whyItMatters: ru
+        ? "Последние симптомы говорят, что самый полезный безопасный шаг - снизить интенсивность и логировать ясно."
+        : "Recent symptom signals mean the safest useful move is to reduce intensity and track clearly.",
+      recommendedAction: ru
+        ? "Залогируйте симптомы и выбирайте только мягкое восстановление сегодня."
+        : "Log symptoms and choose only gentle recovery actions today.",
+      avoidToday: ru
+        ? "Избегайте интенсивных или агрессивных протоколов, пока сигнал не станет яснее."
+        : "Avoid intense or aggressive protocols until the signal is clearer.",
       confidence: "medium",
     };
   }
@@ -99,10 +130,16 @@ function choosePriority(args: {
   if (args.lowSleepStreak) {
     return {
       domain: "recovery",
-      title: "Recovery comes first today",
-      whyItMatters: "Sleep has been low several times recently, so readiness guidance should become lighter.",
-      recommendedAction: "Use a short recovery practice and keep tracking simple.",
-      avoidToday: "Avoid stacking extra experiments on a low-recovery day.",
+      title: ru ? "Сначала восстановление" : "Recovery comes first today",
+      whyItMatters: ru
+        ? "Сон несколько раз был низким, поэтому рекомендации по готовности должны стать легче."
+        : "Sleep has been low several times recently, so readiness guidance should become lighter.",
+      recommendedAction: ru
+        ? "Сделайте короткую практику восстановления и держите трекинг простым."
+        : "Use a short recovery practice and keep tracking simple.",
+      avoidToday: ru
+        ? "Не добавляйте новые эксперименты в день низкого восстановления."
+        : "Avoid stacking extra experiments on a low-recovery day.",
       confidence: "medium",
     };
   }
@@ -110,10 +147,16 @@ function choosePriority(args: {
   if (args.pumpCaution) {
     return {
       domain: "recovery",
-      title: "Keep pump work light today",
-      whyItMatters: "A recent pump log is a signal to avoid chasing intensity and watch comfort closely.",
-      recommendedAction: "Use a recovery check-in and keep any practice gentle today.",
-      avoidToday: "Avoid repeat pump work or stacking intense protocols today.",
+      title: ru ? "Сегодня помпа только мягко" : "Keep pump work light today",
+      whyItMatters: ru
+        ? "Недавний лог помпы - сигнал не гнаться за интенсивностью и внимательно следить за комфортом."
+        : "A recent pump log is a signal to avoid chasing intensity and watch comfort closely.",
+      recommendedAction: ru
+        ? "Сделайте recovery check-in и держите любую практику мягкой сегодня."
+        : "Use a recovery check-in and keep any practice gentle today.",
+      avoidToday: ru
+        ? "Избегайте повторной помпы или сочетания интенсивных протоколов сегодня."
+        : "Avoid repeat pump work or stacking intense protocols today.",
       confidence: "medium",
     };
   }
@@ -121,31 +164,42 @@ function choosePriority(args: {
   if (args.lowData) {
     return {
       domain: "baseline",
-      title: "Build your baseline",
-      whyItMatters: "There is not enough stable data yet for strong recommendations.",
-      recommendedAction: "Log three quick signals today: morning, libido, and confidence.",
+      title: ru ? "Соберите базовую линию" : "Build your baseline",
+      whyItMatters: ru
+        ? "Пока недостаточно стабильных данных для сильных рекомендаций."
+        : "There is not enough stable data yet for strong recommendations.",
+      recommendedAction: ru
+        ? "Сегодня залогируйте три быстрых сигнала: утро, либидо и уверенность."
+        : "Log three quick signals today: morning, libido, and confidence.",
       confidence: "low",
     };
   }
 
   return {
     domain: args.input.profile.primaryGoal === "pelvic_floor" ? "pelvic_floor" : "confidence",
-    title: "Keep the plan steady",
-    whyItMatters: "Your data is stable enough for a small focused action without adding noise.",
-    recommendedAction: "Complete one planned practice and one short reflection.",
+    title: ru ? "Держите план ровным" : "Keep the plan steady",
+    whyItMatters: ru
+      ? "Данных достаточно для небольшого фокусного действия без лишнего шума."
+      : "Your data is stable enough for a small focused action without adding noise.",
+    recommendedAction: ru
+      ? "Завершите одну запланированную практику и короткую рефлексию."
+      : "Complete one planned practice and one short reflection.",
     confidence: "medium",
   };
 }
 
 function chooseAlerts(input: RuleEngineInput, safetySignal: boolean, lowSleepStreak: boolean, pumpCaution: boolean): Alert[] {
   const alerts: Alert[] = [...input.recentAlerts];
+  const ru = input.profile.language === "ru";
 
   if (safetySignal) {
     alerts.push({
       id: "safety-symptoms",
       severity: "medical_attention",
-      title: "Symptom review recommended",
-      message: "Keep tracking conservative and consider professional guidance if symptoms persist or feel acute.",
+      title: ru ? "Рекомендуется пересмотр симптомов" : "Symptom review recommended",
+      message: ru
+        ? "Держите трекинг осторожным и рассмотрите профессиональную консультацию, если симптомы сохраняются или ощущаются остро."
+        : "Keep tracking conservative and consider professional guidance if symptoms persist or feel acute.",
       module: "safety",
     });
   }
@@ -154,8 +208,8 @@ function chooseAlerts(input: RuleEngineInput, safetySignal: boolean, lowSleepStr
     alerts.push({
       id: "sleep-recovery-caution",
       severity: "caution",
-      title: "Recovery signal is low",
-      message: "A lighter day is more useful than pushing intensity.",
+      title: ru ? "Сигнал восстановления низкий" : "Recovery signal is low",
+      message: ru ? "Более легкий день полезнее, чем давление на интенсивность." : "A lighter day is more useful than pushing intensity.",
       module: "today",
     });
   }
@@ -164,8 +218,10 @@ function chooseAlerts(input: RuleEngineInput, safetySignal: boolean, lowSleepStr
     alerts.push({
       id: "pump-intensity-caution",
       severity: "caution",
-      title: "Keep intensity conservative",
-      message: "A pump log should not lead to repeated or aggressive protocols today.",
+      title: ru ? "Держите интенсивность осторожной" : "Keep intensity conservative",
+      message: ru
+        ? "Лог помпы не должен вести к повторным или агрессивным протоколам сегодня."
+        : "A pump log should not lead to repeated or aggressive protocols today.",
       module: "today",
     });
   }
@@ -173,125 +229,130 @@ function chooseAlerts(input: RuleEngineInput, safetySignal: boolean, lowSleepStr
   return alerts.sort((a, b) => severityRank(b.severity) - severityRank(a.severity));
 }
 
-function chooseActionCards(domain: CurrentPriority["domain"]): ActionCard[] {
-  const practiceTitle = domain === "recovery" ? "Downshift practice" : "Short practice";
+function chooseActionCards(domain: CurrentPriority["domain"], language: AppLanguage): ActionCard[] {
+  const ru = language === "ru";
+  const practiceTitle = domain === "recovery" ? (ru ? "Практика снижения темпа" : "Downshift practice") : ru ? "Короткая практика" : "Short practice";
 
   const cards: ActionCard[] = [
     {
       id: "practice",
       kind: "Practice",
       title: practiceTitle,
-      description: "A contained action that supports the current priority.",
-      cta: "Start",
+      description: ru ? "Небольшое действие, которое поддерживает текущий приоритет." : "A contained action that supports the current priority.",
+      cta: ru ? "Начать" : "Start",
     },
     {
       id: "check-in",
       kind: "Check-in",
-      title: "One-minute check-in",
-      description: "Capture the signal without turning the day into a dashboard.",
-      cta: "Log",
+      title: ru ? "Чек-ин на минуту" : "One-minute check-in",
+      description: ru ? "Поймайте сигнал, не превращая день в дашборд." : "Capture the signal without turning the day into a dashboard.",
+      cta: ru ? "Лог" : "Log",
     },
     {
       id: "learn",
       kind: "Learn",
-      title: "Relevant explainer",
-      description: "Read the short context behind today's recommendation.",
-      cta: "Read",
+      title: ru ? "Релевантное объяснение" : "Relevant explainer",
+      description: ru ? "Прочитайте короткий контекст к сегодняшней рекомендации." : "Read the short context behind today's recommendation.",
+      cta: ru ? "Читать" : "Read",
     },
     {
       id: "reflect",
       kind: "Reflect",
-      title: "Evening note",
-      description: "Record what changed, what helped, and what to keep light.",
-      cta: "Reflect",
+      title: ru ? "Вечерняя заметка" : "Evening note",
+      description: ru ? "Запишите, что изменилось, что помогло и что стоит держать легче." : "Record what changed, what helped, and what to keep light.",
+      cta: ru ? "Отразить" : "Reflect",
     },
   ];
 
   return domain === "baseline" ? [cards[1], cards[2], cards[0], cards[3]] : cards;
 }
 
-function chooseQuickLogs(domain: CurrentPriority["domain"], mode: RuleEngineInput["profile"]["mode"]): QuickLogDefinition[] {
+function chooseQuickLogs(domain: CurrentPriority["domain"], mode: RuleEngineInput["profile"]["mode"], language: AppLanguage): QuickLogDefinition[] {
   const base: QuickLogType[] = ["morning_erection", "libido", "confidence"];
   const recovery: QuickLogType[] = ["sleep_quality", "energy", "symptom_checkin"];
   const practice: QuickLogType[] = ["pelvic_floor_done", "pump_done", "sex_happened"];
 
   if (domain === "baseline") {
     const baselineLogs: QuickLogType[] = [...base, "symptom_checkin"];
-    return baselineLogs.map(toQuickLogDefinition);
+    return baselineLogs.map((logType) => toQuickLogDefinition(logType, language));
   }
 
   const ordered = domain === "recovery" || domain === "safety" ? [...recovery, ...base] : [...base, ...recovery];
   const withPractice = mode === "Pro" ? [...ordered, ...practice] : ordered;
 
-  return withPractice.slice(0, mode === "Pro" ? 8 : 5).map(toQuickLogDefinition);
+  return withPractice.slice(0, mode === "Pro" ? 8 : 5).map((logType) => toQuickLogDefinition(logType, language));
 }
 
-function toQuickLogDefinition(type: QuickLogType): QuickLogDefinition {
+function toQuickLogDefinition(type: QuickLogType, language: AppLanguage): QuickLogDefinition {
   return {
     type,
-    label: quickLogLabels[type],
+    label: quickLogLabels[language][type],
     input: type === "symptom_checkin" ? "symptom" : type.endsWith("_done") || type === "morning_erection" || type === "sex_happened" ? "boolean" : "score",
   };
 }
 
-function buildDailyState(logs: LogEntry[], lowData: boolean) {
+function buildDailyState(logs: LogEntry[], lowData: boolean, language: AppLanguage) {
   const sleep = latestNumeric(logs, "sleep_quality");
   const energy = latestNumeric(logs, "energy");
   const confidence = latestNumeric(logs, "confidence");
   const libido = latestNumeric(logs, "libido");
+  const ru = language === "ru";
 
   return [
     {
       id: "readiness",
-      label: "Readiness",
-      value: lowData ? "Baseline" : scoreLabel(avg([sleep, energy, confidence])),
+      label: ru ? "Готовность" : "Readiness",
+      value: lowData ? (ru ? "База" : "Baseline") : scoreLabel(avg([sleep, energy, confidence])),
       direction: "unknown" as const,
-      status: lowData ? "collecting first signals" : "based on recent manual logs",
+      status: lowData ? (ru ? "собираем первые сигналы" : "collecting first signals") : ru ? "по последним ручным логам" : "based on recent manual logs",
     },
     {
       id: "sleep",
-      label: "Sleep",
+      label: ru ? "Сон" : "Sleep",
       value: scoreLabel(sleep),
       direction: sleep != null && sleep < 5 ? ("down" as const) : ("flat" as const),
-      status: sleep == null ? "not logged yet" : sleep < 5 ? "needs support" : "usable",
+      status: sleep == null ? (ru ? "пока не логировали" : "not logged yet") : sleep < 5 ? (ru ? "нужна поддержка" : "needs support") : ru ? "подходит" : "usable",
     },
     {
       id: "confidence",
-      label: "Confidence",
+      label: ru ? "Уверенность" : "Confidence",
       value: scoreLabel(confidence),
       direction: "flat" as const,
-      status: confidence == null ? "not logged yet" : "logged",
+      status: confidence == null ? (ru ? "пока не логировали" : "not logged yet") : ru ? "залогировано" : "logged",
     },
     {
       id: "Libido",
-      label: "Libido",
+      label: ru ? "Либидо" : "Libido",
       value: scoreLabel(libido),
       direction: "flat" as const,
-      status: libido == null ? "optional signal" : "logged",
+      status: libido == null ? (ru ? "дополнительный сигнал" : "optional signal") : ru ? "залогировано" : "logged",
     },
   ];
 }
 
-function buildLiveUpdates(contentItems: ContentItem[]) {
+function buildLiveUpdates(contentItems: ContentItem[], language: AppLanguage) {
   const item = contentItems[0];
+  const ru = language === "ru";
 
   return [
     {
       id: item?.id ?? "starter-learning",
-      title: item?.title ?? "New: baseline tracking without overchecking",
-      sourceLabel: item?.sourceName ?? "Reviewed starter note",
+      title: (ru ? item?.translatedTitleRu : item?.title) ?? item?.title ?? (ru ? "Новое: базовый трекинг без перепроверок" : "New: baseline tracking without overchecking"),
+      sourceLabel: item?.sourceName ?? (ru ? "Проверенная стартовая заметка" : "Reviewed starter note"),
       category: "learning" as const,
     },
   ];
 }
 
-function buildInsights(logs: LogEntry[], lowData: boolean) {
+function buildInsights(logs: LogEntry[], lowData: boolean, language: AppLanguage) {
+  const ru = language === "ru";
+
   if (lowData) {
     return [
       {
         id: "low-data",
-        title: "No pattern yet",
-        summary: "A few calm logs are more useful than guessing from one day.",
+        title: ru ? "Паттерна пока нет" : "No pattern yet",
+        summary: ru ? "Несколько спокойных логов полезнее, чем догадки по одному дню." : "A few calm logs are more useful than guessing from one day.",
         confidence: "low" as const,
       },
     ];
@@ -302,8 +363,20 @@ function buildInsights(logs: LogEntry[], lowData: boolean) {
   return [
     {
       id: "sleep-confidence",
-      title: lowSleepCount > 0 ? "Sleep may be affecting readiness" : "Signals look stable",
-      summary: lowSleepCount > 0 ? "Recent low sleep entries should lower today's intensity." : "Keep the next action small and consistent.",
+      title: lowSleepCount > 0
+        ? ru
+          ? "Сон может влиять на готовность"
+          : "Sleep may be affecting readiness"
+        : ru
+          ? "Сигналы выглядят стабильными"
+          : "Signals look stable",
+      summary: lowSleepCount > 0
+        ? ru
+          ? "Недавние низкие оценки сна должны снизить сегодняшнюю интенсивность."
+          : "Recent low sleep entries should lower today's intensity."
+        : ru
+          ? "Держите следующее действие маленьким и регулярным."
+          : "Keep the next action small and consistent.",
       confidence: lowSleepCount > 0 ? ("medium" as const) : ("low" as const),
     },
   ];
@@ -348,7 +421,15 @@ function scoreLabel(value: number | null) {
   return value == null ? "--" : `${value}/10`;
 }
 
-function confidenceNote(confidence: CurrentPriority["confidence"]) {
+function confidenceNote(confidence: CurrentPriority["confidence"], language: AppLanguage) {
+  if (language === "ru") {
+    return {
+      low: "Низкая уверенность: нужно еще несколько стабильных логов, прежде чем более сильные рекомендации будут полезны.",
+      medium: "Средняя уверенность: рекомендация осторожная и основана на последних сигналах.",
+      high: "Высокая уверенность: рекомендация все равно образовательная и должна оставаться в пределах комфорта и безопасности.",
+    }[confidence];
+  }
+
   return {
     low: "Low confidence: a few more consistent logs are needed before stronger guidance is useful.",
     medium: "Medium confidence: the guidance is conservative and based on recent signals.",

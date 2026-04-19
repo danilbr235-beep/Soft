@@ -31,4 +31,12 @@ describe("explainPriority", () => {
     expect(explanation.avoidToday).toMatch(/avoid intense/i);
     expect(explanation.nextStep).toBe(baselinePriority.recommendedAction);
   });
+
+  it("can explain a priority in Russian", () => {
+    const explanation = explainPriority(baselinePriority, "ru");
+
+    expect(explanation.dataNote).toMatch(/данных/i);
+    expect(explanation.confidenceNote).toMatch(/низкая/i);
+    expect(explanation.safetyNote).toMatch(/не диагноз/i);
+  });
 });

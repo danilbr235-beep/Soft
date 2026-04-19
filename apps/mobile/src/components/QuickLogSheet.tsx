@@ -1,56 +1,65 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { createSymptomCheckinValue, symptomCheckinOptions } from "@pmhc/safety";
+import { getCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { QuickLogDefinition } from "@pmhc/types";
+import type { AppLanguage, QuickLogDefinition, SymptomCheckinKey } from "@pmhc/types";
 
 type Props = {
   definition: QuickLogDefinition;
+  language: AppLanguage;
   onClose: () => void;
   onSave: (definition: QuickLogDefinition, value: unknown) => void;
 };
 
-export function QuickLogSheet({ definition, onClose, onSave }: Props) {
-  const options =
+const symptomLabelsRu: Record<SymptomCheckinKey, string> = {
+  all_clear: "Все спокойно",
+  pain: "Боль",
+  numbness: "Онемение",
+  blood: "Кровь",
+  injury_concern: "Травма / вопрос",
+};
+
+type QuickLogOption = {
+  label: string | number;
+  value: unknown;
+};
+
+export function QuickLogSheet({ definition, language, onClose, onSave }: Props) {
+  const copy = getCopy(language);
+  const options: QuickLogOption[] =
     definition.input === "score"
-      ? [1, 3, 5, 7, 10]
+      ? [1, 3, 5, 7, 10].map((value) => ({ label: value, value }))
       : definition.input === "boolean"
-        ? ["Yes", "No"]
-        : symptomCheckinOptions.map((option) => option.label);
-
-  function valueFor(option: string | number) {
-    if (definition.input === "boolean") {
-      return option === "Yes";
-    }
-
-    if (definition.input === "symptom") {
-      const symptomOption = symptomCheckinOptions.find((item) => item.label === option);
-      return createSymptomCheckinValue(symptomOption?.key ?? "all_clear");
-    }
-
-    return option;
-  }
+        ? [
+            { label: copy.common.yes, value: true },
+            { label: copy.common.no, value: false },
+          ]
+        : symptomCheckinOptions.map((option) => ({
+            label: language === "ru" ? symptomLabelsRu[option.key] : option.label,
+            value: createSymptomCheckinValue(option.key),
+          }));
 
   return (
     <View style={styles.backdrop}>
       <View style={styles.sheet}>
         <View style={styles.handle} />
         <Text style={styles.title}>{definition.label}</Text>
-        <Text style={styles.subtitle}>Log it quickly. You can add detail later if it matters.</Text>
+        <Text style={styles.subtitle}>{copy.quickLog.subtitle}</Text>
         <View style={styles.options}>
           {options.map((option) => (
             <Pressable
-              key={String(option)}
-              accessibilityLabel={`Save ${definition.label} ${option}`}
+              key={String(option.label)}
+              accessibilityLabel={copy.quickLog.saveLabel(definition.label, option.label)}
               accessibilityRole="button"
               style={styles.option}
-              onPress={() => onSave(definition, valueFor(option))}
+              onPress={() => onSave(definition, option.value)}
             >
-              <Text style={styles.optionText}>{option}</Text>
+              <Text style={styles.optionText}>{option.label}</Text>
             </Pressable>
           ))}
         </View>
         <Pressable style={styles.close} onPress={onClose}>
-          <Text style={styles.closeText}>Not now</Text>
+          <Text style={styles.closeText}>{copy.common.notNow}</Text>
         </Pressable>
       </View>
     </View>

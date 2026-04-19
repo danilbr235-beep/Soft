@@ -6,7 +6,7 @@ import type { RuleEngineInput } from "@pmhc/types";
 const baseInput: RuleEngineInput = {
   profile: {
     id: "local-user",
-    language: "ru",
+    language: "en",
     mode: "Simple",
     primaryGoal: "sexual_confidence",
     secondaryGoals: ["recovery"],
@@ -107,5 +107,17 @@ describe("buildTodayPayload", () => {
 
     expect(payload.currentPriority.domain).toBe("baseline");
     expect(payload.alerts.map((alert) => alert.severity)).not.toContain("medical_attention");
+  });
+
+  it("localizes priorities and quick log labels for Russian users", () => {
+    const payload = buildTodayPayload({
+      ...baseInput,
+      profile: { ...baseInput.profile, language: "ru" },
+    });
+
+    expect(payload.currentPriority.title).toBe("Соберите базовую линию");
+    expect(payload.quickLogs.map((log) => log.label)).toEqual(["Утро", "Либидо", "Уверенность", "Симптомы"]);
+    expect(payload.dailyState[0]?.label).toBe("Готовность");
+    expect(payload.insights[0]?.title).toBe("Паттерна пока нет");
   });
 });

@@ -1,25 +1,27 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 
 type Props = {
+  copy: LanguageCopy;
   onUnlock: () => void;
 };
 
-export function PrivacyLockScreen({ onUnlock }: Props) {
+export function PrivacyLockScreen({ copy, onUnlock }: Props) {
   return (
     <View style={styles.wrap}>
       <View style={styles.copy}>
-        <Text style={styles.eyebrow}>Private session</Text>
-        <Text style={styles.title}>Soft is locked</Text>
-        <Text style={styles.body}>Sensitive details are hidden until you unlock the demo vault.</Text>
+        <Text style={styles.eyebrow}>{copy.privacyLock.eyebrow}</Text>
+        <Text style={styles.title}>{copy.privacyLock.title}</Text>
+        <Text style={styles.body}>{copy.privacyLock.body}</Text>
       </View>
       <Pressable
-        accessibilityLabel="Unlock demo vault"
+        accessibilityLabel={copy.privacyLock.unlock}
         accessibilityRole="button"
         onPress={onUnlock}
         style={styles.primary}
       >
-        <Text style={styles.primaryText}>Unlock demo vault</Text>
+        <Text style={styles.primaryText}>{copy.privacyLock.unlock}</Text>
       </Pressable>
     </View>
   );

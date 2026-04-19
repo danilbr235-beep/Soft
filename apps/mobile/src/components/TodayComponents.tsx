@@ -1,26 +1,28 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { Alert, CurrentPriority, DailyStateTile, QuickLogDefinition } from "@pmhc/types";
 import { Surface } from "./Surface";
 
 type PriorityProps = {
+  copy: LanguageCopy;
   priority: CurrentPriority;
   onAskCoach: () => void;
 };
 
-export function PriorityCard({ onAskCoach, priority }: PriorityProps) {
+export function PriorityCard({ copy, onAskCoach, priority }: PriorityProps) {
   return (
     <Surface>
       <View style={styles.rowBetween}>
-        <Text style={styles.kicker}>Current priority</Text>
-        <Text style={styles.badge}>{priority.confidence} confidence</Text>
+        <Text style={styles.kicker}>{copy.today.currentPriority}</Text>
+        <Text style={styles.badge}>{copy.today.confidence(priority.confidence)}</Text>
       </View>
       <Text style={styles.priorityTitle}>{priority.title}</Text>
       <Text style={styles.body}>{priority.whyItMatters}</Text>
       <Text style={styles.action}>{priority.recommendedAction}</Text>
       {priority.avoidToday ? <Text style={styles.avoid}>{priority.avoidToday}</Text> : null}
       <Pressable accessibilityRole="button" onPress={onAskCoach} style={styles.secondaryButton}>
-        <Text style={styles.secondaryButtonText}>Ask Coach why</Text>
+        <Text style={styles.secondaryButtonText}>{copy.today.askCoachWhy}</Text>
       </Pressable>
     </Surface>
   );
@@ -57,9 +59,11 @@ export function AlertStrip({ alerts }: { alerts: Alert[] }) {
 }
 
 export function QuickLogRow({
+  accessibilityPrefix = "Quick log",
   logs,
   onLog,
 }: {
+  accessibilityPrefix?: string;
   logs: QuickLogDefinition[];
   onLog: (definition: QuickLogDefinition) => void;
 }) {
@@ -68,7 +72,7 @@ export function QuickLogRow({
       {logs.map((log) => (
         <Pressable
           key={log.type}
-          accessibilityLabel={`Quick log ${log.label}`}
+          accessibilityLabel={`${accessibilityPrefix} ${log.label}`}
           accessibilityRole="button"
           style={styles.quickChip}
           onPress={() => onLog(log)}

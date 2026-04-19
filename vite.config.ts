@@ -15,6 +15,7 @@ export default defineConfig({
       "@pmhc/rules": fileURLToPath(new URL("packages/rules/src/index.ts", import.meta.url)),
       "@pmhc/sync": fileURLToPath(new URL("packages/sync/src/index.ts", import.meta.url)),
       "@pmhc/client": fileURLToPath(new URL("packages/client/src/index.ts", import.meta.url)),
+      "@pmhc/i18n": fileURLToPath(new URL("packages/i18n/src/index.ts", import.meta.url)),
       "@pmhc/learning": fileURLToPath(new URL("packages/learning/src/index.ts", import.meta.url)),
       "@pmhc/privacy": fileURLToPath(new URL("packages/privacy/src/index.ts", import.meta.url)),
       "@pmhc/programs": fileURLToPath(new URL("packages/programs/src/index.ts", import.meta.url)),
