@@ -39,10 +39,11 @@ const quickLogLabels: Record<QuickLogType, string> = {
 export function buildTodayPayload(input: RuleEngineInput): TodayPayload {
   const safetySignal = hasSafetySignal(input);
   const lowSleepStreak = countRecentLowScores(input.latestLogs, "sleep_quality", 4) >= 3;
+  const pumpCaution = hasRecentPumpUse(input.latestLogs);
   const lowData = input.latestLogs.length < 3;
 
-  const currentPriority = choosePriority({ input, safetySignal, lowSleepStreak, lowData });
-  const alerts = chooseAlerts(input, safetySignal, lowSleepStreak);
+  const currentPriority = choosePriority({ input, safetySignal, lowSleepStreak, pumpCaution, lowData });
+  const alerts = chooseAlerts(input, safetySignal, lowSleepStreak, pumpCaution);
   const actionCards = chooseActionCards(currentPriority.domain);
   const quickLogs = chooseQuickLogs(currentPriority.domain, input.profile.mode);
 
@@ -81,6 +82,7 @@ function choosePriority(args: {
   input: RuleEngineInput;
   safetySignal: boolean;
   lowSleepStreak: boolean;
+  pumpCaution: boolean;
   lowData: boolean;
 }): CurrentPriority {
   if (args.safetySignal) {
@@ -105,6 +107,17 @@ function choosePriority(args: {
     };
   }
 
+  if (args.pumpCaution) {
+    return {
+      domain: "recovery",
+      title: "Keep pump work light today",
+      whyItMatters: "A recent pump log is a signal to avoid chasing intensity and watch comfort closely.",
+      recommendedAction: "Use a recovery check-in and keep any practice gentle today.",
+      avoidToday: "Avoid repeat pump work or stacking intense protocols today.",
+      confidence: "medium",
+    };
+  }
+
   if (args.lowData) {
     return {
       domain: "baseline",
@@ -124,7 +137,7 @@ function choosePriority(args: {
   };
 }
 
-function chooseAlerts(input: RuleEngineInput, safetySignal: boolean, lowSleepStreak: boolean): Alert[] {
+function chooseAlerts(input: RuleEngineInput, safetySignal: boolean, lowSleepStreak: boolean, pumpCaution: boolean): Alert[] {
   const alerts: Alert[] = [...input.recentAlerts];
 
   if (safetySignal) {
@@ -143,6 +156,16 @@ function chooseAlerts(input: RuleEngineInput, safetySignal: boolean, lowSleepStr
       severity: "caution",
       title: "Recovery signal is low",
       message: "A lighter day is more useful than pushing intensity.",
+      module: "today",
+    });
+  }
+
+  if (pumpCaution) {
+    alerts.push({
+      id: "pump-intensity-caution",
+      severity: "caution",
+      title: "Keep intensity conservative",
+      message: "A pump log should not lead to repeated or aggressive protocols today.",
       module: "today",
     });
   }
@@ -298,6 +321,10 @@ function hasSafetySignal(input: RuleEngineInput) {
 
     return hasSymptomRedFlag(log.value);
   });
+}
+
+function hasRecentPumpUse(logs: LogEntry[]) {
+  return logs.some((log) => log.type === "pump_done" && log.value === true);
 }
 
 function countRecentLowScores(logs: LogEntry[], type: QuickLogType, threshold: number) {

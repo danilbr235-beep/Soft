@@ -59,3 +59,28 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Unlock demo vault").click();
   await expect(page.getByText("Privacy vault")).toBeVisible();
 });
+
+test("pro mode can record pump use and receives conservative guidance", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByText("Start privately").click();
+  await page.getByLabel("Confidence").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Mixed signals").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Pro mode").click();
+  await page.getByLabel("Generate Today").click();
+
+  await page.getByLabel("Quick log Morning").click();
+  await page.getByLabel("Save Morning Yes").click();
+  await page.getByLabel("Quick log Libido").click();
+  await page.getByLabel("Save Libido 7").click();
+  await page.getByLabel("Quick log Confidence").click();
+  await page.getByLabel("Save Confidence 7").click();
+
+  await page.getByLabel("Quick log Pump").click();
+  await page.getByLabel("Save Pump Yes").click();
+
+  await expect(page.getByText("Keep pump work light today")).toBeVisible();
+  await expect(page.getByText("Keep intensity conservative")).toBeVisible();
+});

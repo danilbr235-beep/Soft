@@ -75,6 +75,22 @@ describe("buildTodayPayload", () => {
     expect(payload.currentPriority.avoidToday).toMatch(/intense|aggressive/i);
   });
 
+  it("suppresses aggressive practice after a pump log", () => {
+    const payload = buildTodayPayload({
+      ...baseInput,
+      latestLogs: [
+        { id: "confidence-1", type: "confidence", value: 6, occurredAt: "2026-04-19T07:00:00Z", source: "manual" },
+        { id: "libido-1", type: "libido", value: 6, occurredAt: "2026-04-19T07:01:00Z", source: "manual" },
+        { id: "pump-1", type: "pump_done", value: true, occurredAt: "2026-04-19T07:02:00Z", source: "manual" },
+      ],
+    });
+
+    expect(payload.currentPriority.domain).toBe("recovery");
+    expect(payload.currentPriority.title).toMatch(/pump/i);
+    expect(payload.currentPriority.avoidToday).toMatch(/repeat|stacking|intense/i);
+    expect(payload.alerts.map((alert) => alert.id)).toContain("pump-intensity-caution");
+  });
+
   it("does not create a safety alert for all-clear symptom check-ins", () => {
     const payload = buildTodayPayload({
       ...baseInput,
