@@ -14,11 +14,28 @@ export function createJsonRepository<T>(
   storage: KeyValueStorage,
   key: string,
   fallback: T,
+  validate?: (value: unknown) => value is T,
 ): JsonRepository<T> {
   return {
     async load() {
       const raw = await storage.getItem(key);
-      return raw == null ? fallback : (JSON.parse(raw) as T);
+      if (raw == null) {
+        return fallback;
+      }
+
+      try {
+        const parsed = JSON.parse(raw) as unknown;
+
+        if (validate && !validate(parsed)) {
+          await storage.removeItem(key);
+          return fallback;
+        }
+
+        return parsed as T;
+      } catch {
+        await storage.removeItem(key);
+        return fallback;
+      }
     },
     async save(value) {
       await storage.setItem(key, JSON.stringify(value));

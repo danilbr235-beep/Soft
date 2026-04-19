@@ -1,5 +1,19 @@
 import { expect, test } from "@playwright/test";
 
+test("recovers from legacy local storage state instead of showing a blank screen", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("pmhc:onboarding-complete", "true");
+    localStorage.setItem("pmhc:quick-logs", "not-json");
+    localStorage.setItem("pmhc:program-progress", "{\"programId\":false}");
+  });
+
+  await page.goto("/");
+  await page.waitForTimeout(1000);
+
+  await expect(page.getByText("A calm daily coach")).toBeVisible();
+  await expect(page.getByText("Start privately")).toBeVisible();
+});
+
 test("mobile web MVP opens, completes onboarding, and records a quick log", async ({ page }) => {
   await page.goto("/");
 

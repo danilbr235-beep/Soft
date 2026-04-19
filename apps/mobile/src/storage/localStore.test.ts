@@ -32,4 +32,31 @@ describe("createJsonRepository", () => {
 
     await expect(repository.load()).resolves.toEqual({ count: 0, label: "empty" });
   });
+
+  it("returns fallback and clears the key when JSON is corrupted", async () => {
+    const storage = createMemoryStorage({ demo: "{not-json" });
+    const repository = createJsonRepository<DemoState>(storage, "demo", { count: 0, label: "empty" });
+
+    await expect(repository.load()).resolves.toEqual({ count: 0, label: "empty" });
+    await expect(storage.getItem("demo")).resolves.toBeNull();
+  });
+
+  it("returns fallback and clears the key when saved JSON has the wrong shape", async () => {
+    const storage = createMemoryStorage({ demo: "true" });
+    const repository = createJsonRepository<DemoState>(
+      storage,
+      "demo",
+      { count: 0, label: "empty" },
+      (value): value is DemoState =>
+        typeof value === "object" &&
+        value != null &&
+        "count" in value &&
+        "label" in value &&
+        typeof value.count === "number" &&
+        typeof value.label === "string",
+    );
+
+    await expect(repository.load()).resolves.toEqual({ count: 0, label: "empty" });
+    await expect(storage.getItem("demo")).resolves.toBeNull();
+  });
 });

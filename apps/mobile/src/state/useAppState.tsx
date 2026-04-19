@@ -41,12 +41,32 @@ const contentProgressKey = "pmhc:content-progress";
 const privacyLockKey = "pmhc:privacy-lock";
 const programProgressKey = "pmhc:program-progress";
 
-const onboardingRepository = createJsonRepository<OnboardingResult | null>(AsyncStorage, onboardingKey, null);
-const logsRepository = createJsonRepository<LogEntry[]>(AsyncStorage, logsKey, []);
-const syncQueueRepository = createJsonRepository<SyncQueueJob[]>(AsyncStorage, syncQueueKey, []);
-const contentProgressRepository = createJsonRepository<ContentProgress[]>(AsyncStorage, contentProgressKey, []);
-const privacyLockRepository = createJsonRepository<PrivacyLockState | null>(AsyncStorage, privacyLockKey, null);
-const programProgressRepository = createJsonRepository<ProgramProgress | null>(AsyncStorage, programProgressKey, null);
+const onboardingRepository = createJsonRepository<OnboardingResult | null>(
+  AsyncStorage,
+  onboardingKey,
+  null,
+  isNullableOnboardingResult,
+);
+const logsRepository = createJsonRepository<LogEntry[]>(AsyncStorage, logsKey, [], isLogEntryArray);
+const syncQueueRepository = createJsonRepository<SyncQueueJob[]>(AsyncStorage, syncQueueKey, [], isSyncQueueJobArray);
+const contentProgressRepository = createJsonRepository<ContentProgress[]>(
+  AsyncStorage,
+  contentProgressKey,
+  [],
+  isContentProgressArray,
+);
+const privacyLockRepository = createJsonRepository<PrivacyLockState | null>(
+  AsyncStorage,
+  privacyLockKey,
+  null,
+  isNullablePrivacyLockState,
+);
+const programProgressRepository = createJsonRepository<ProgramProgress | null>(
+  AsyncStorage,
+  programProgressKey,
+  null,
+  isNullableProgramProgress,
+);
 
 const fallbackOnboarding = createOnboardingResult({
   primaryGoal: "sexual_confidence",
@@ -287,4 +307,97 @@ export function useAppState() {
     completeContent,
     unlock,
   };
+}
+
+function isNullableOnboardingResult(value: unknown): value is OnboardingResult | null {
+  if (value === null) {
+    return true;
+  }
+
+  if (!isRecord(value) || !isRecord(value.profile) || !isRecord(value.privacy) || !isRecord(value.recommendedProgram)) {
+    return false;
+  }
+
+  return (
+    typeof value.profile.id === "string" &&
+    typeof value.profile.mode === "string" &&
+    typeof value.profile.primaryGoal === "string" &&
+    typeof value.profile.conservativeGuidance === "boolean" &&
+    typeof value.privacy.vaultLockEnabled === "boolean" &&
+    typeof value.privacy.discreetNotifications === "boolean" &&
+    typeof value.recommendedProgram.id === "string" &&
+    typeof value.recommendedProgram.title === "string" &&
+    typeof value.recommendedProgram.durationDays === "number" &&
+    typeof value.recommendedProgram.dayIndex === "number" &&
+    typeof value.completedAt === "string"
+  );
+}
+
+function isLogEntryArray(value: unknown): value is LogEntry[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (entry) =>
+        isRecord(entry) &&
+        typeof entry.id === "string" &&
+        typeof entry.type === "string" &&
+        typeof entry.occurredAt === "string" &&
+        typeof entry.source === "string",
+    )
+  );
+}
+
+function isSyncQueueJobArray(value: unknown): value is SyncQueueJob[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (job) =>
+        isRecord(job) &&
+        typeof job.id === "string" &&
+        job.jobType === "quick_log" &&
+        isRecord(job.payload) &&
+        typeof job.status === "string",
+    )
+  );
+}
+
+function isContentProgressArray(value: unknown): value is ContentProgress[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        isRecord(item) &&
+        typeof item.itemId === "string" &&
+        typeof item.saved === "boolean" &&
+        typeof item.completed === "boolean" &&
+        typeof item.updatedAt === "string",
+    )
+  );
+}
+
+function isNullablePrivacyLockState(value: unknown): value is PrivacyLockState | null {
+  return (
+    value === null ||
+    (isRecord(value) &&
+      typeof value.vaultLockEnabled === "boolean" &&
+      typeof value.discreetNotifications === "boolean" &&
+      typeof value.locked === "boolean" &&
+      typeof value.updatedAt === "string")
+  );
+}
+
+function isNullableProgramProgress(value: unknown): value is ProgramProgress | null {
+  return (
+    value === null ||
+    (isRecord(value) &&
+      typeof value.programId === "string" &&
+      Array.isArray(value.completedDayIndexes) &&
+      value.completedDayIndexes.every((day) => typeof day === "number") &&
+      (typeof value.lastCompletedAt === "string" || value.lastCompletedAt === null) &&
+      typeof value.updatedAt === "string")
+  );
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
