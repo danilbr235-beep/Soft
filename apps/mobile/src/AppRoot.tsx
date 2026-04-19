@@ -37,7 +37,7 @@ export function AppRoot() {
       <StatusBar barStyle="light-content" />
       <View style={styles.shell}>
         {app.activeTab === "Today" ? (
-          <TodayScreen today={app.today} onLog={app.openQuickLog} />
+          <TodayScreen today={app.today} onAskCoach={() => app.setActiveTab("Coach")} onLog={app.openQuickLog} />
         ) : null}
         {app.activeTab === "Track" ? (
           <TrackScreen

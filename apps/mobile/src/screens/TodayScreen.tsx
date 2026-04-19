@@ -7,13 +7,14 @@ import { Surface } from "../components/Surface";
 
 type Props = {
   today: TodayPayload;
+  onAskCoach: () => void;
   onLog: (definition: QuickLogDefinition) => void;
 };
 
-export function TodayScreen({ onLog, today }: Props) {
+export function TodayScreen({ onAskCoach, onLog, today }: Props) {
   return (
     <Screen eyebrow={today.todayMode} title="Today" subtitle={`${today.activeProgram?.title ?? "No active program"} · ${today.syncStatus}`}>
-      <PriorityCard priority={today.currentPriority} />
+      <PriorityCard priority={today.currentPriority} onAskCoach={onAskCoach} />
       <StateGrid tiles={today.dailyState} />
       <AlertStrip alerts={today.alerts} />
       <View style={styles.actions}>

@@ -5,9 +5,10 @@ import { Surface } from "./Surface";
 
 type PriorityProps = {
   priority: CurrentPriority;
+  onAskCoach: () => void;
 };
 
-export function PriorityCard({ priority }: PriorityProps) {
+export function PriorityCard({ onAskCoach, priority }: PriorityProps) {
   return (
     <Surface>
       <View style={styles.rowBetween}>
@@ -18,7 +19,7 @@ export function PriorityCard({ priority }: PriorityProps) {
       <Text style={styles.body}>{priority.whyItMatters}</Text>
       <Text style={styles.action}>{priority.recommendedAction}</Text>
       {priority.avoidToday ? <Text style={styles.avoid}>{priority.avoidToday}</Text> : null}
-      <Pressable style={styles.secondaryButton}>
+      <Pressable accessibilityRole="button" onPress={onAskCoach} style={styles.secondaryButton}>
         <Text style={styles.secondaryButtonText}>Ask Coach why</Text>
       </Pressable>
     </Surface>

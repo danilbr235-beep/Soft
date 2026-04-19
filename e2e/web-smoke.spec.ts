@@ -33,6 +33,9 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
 
   await expect(page.getByText("Current priority", { exact: true })).toBeVisible();
   await expect(page.getByText("Build your baseline")).toBeVisible();
+  await page.getByText("Ask Coach why").click();
+  await expect(page.getByText("How certain is this?")).toBeVisible();
+  await page.getByLabel("Open Today").click();
 
   await page.getByLabel("Quick log Confidence").click();
   await expect(page.getByText("Log it quickly")).toBeVisible();
