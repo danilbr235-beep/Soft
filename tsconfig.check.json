@@ -14,6 +14,7 @@
     "packages/learning/src/**/*.ts",
     "packages/onboarding/src/**/*.ts",
     "packages/privacy/src/**/*.ts",
+    "packages/programs/src/**/*.ts",
     "packages/rules/src/**/*.ts",
     "packages/sync/src/**/*.ts",
     "packages/types/src/**/*.ts",

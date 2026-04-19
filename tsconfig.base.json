@@ -17,7 +17,8 @@
       "@pmhc/sync": ["packages/sync/src/index.ts"],
       "@pmhc/client": ["packages/client/src/index.ts"],
       "@pmhc/learning": ["packages/learning/src/index.ts"],
-      "@pmhc/privacy": ["packages/privacy/src/index.ts"]
+      "@pmhc/privacy": ["packages/privacy/src/index.ts"],
+      "@pmhc/programs": ["packages/programs/src/index.ts"]
     }
   }
 }

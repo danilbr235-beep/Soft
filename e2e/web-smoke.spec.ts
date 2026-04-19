@@ -37,6 +37,11 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Mark complete Build a baseline without overchecking").click();
   await expect(page.getByLabel("Completed Build a baseline without overchecking")).toBeVisible();
 
+  await page.getByLabel("Open Programs").click();
+  await expect(page.getByText("Day 1 of 14")).toBeVisible();
+  await page.getByLabel("Complete program day").click();
+  await expect(page.getByText("Day 2 of 14")).toBeVisible();
+
   await page.getByLabel("Open Coach").click();
   await expect(page.getByText("How certain is this?")).toBeVisible();
   await expect(page.getByText(/not a diagnosis/i)).toBeVisible();

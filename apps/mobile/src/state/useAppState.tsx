@@ -8,6 +8,12 @@ import {
   toggleVaultLock,
   unlockPrivacyVault,
 } from "@pmhc/privacy";
+import {
+  applyProgramProgress,
+  completeCurrentProgramDay,
+  createProgramProgress,
+  programCompletionPercent,
+} from "@pmhc/programs";
 import { buildTodayPayload } from "@pmhc/rules";
 import { createQueuedQuickLogJob, markSyncSucceeded, nextPendingJobs } from "@pmhc/sync";
 import type {
@@ -16,6 +22,7 @@ import type {
   LogEntry,
   OnboardingResult,
   PrivacyLockState,
+  ProgramProgress,
   QuickLogDefinition,
   RuleEngineInput,
   SyncQueueJob,
@@ -32,12 +39,14 @@ const logsKey = "pmhc:quick-logs";
 const syncQueueKey = "pmhc:sync-queue";
 const contentProgressKey = "pmhc:content-progress";
 const privacyLockKey = "pmhc:privacy-lock";
+const programProgressKey = "pmhc:program-progress";
 
 const onboardingRepository = createJsonRepository<OnboardingResult | null>(AsyncStorage, onboardingKey, null);
 const logsRepository = createJsonRepository<LogEntry[]>(AsyncStorage, logsKey, []);
 const syncQueueRepository = createJsonRepository<SyncQueueJob[]>(AsyncStorage, syncQueueKey, []);
 const contentProgressRepository = createJsonRepository<ContentProgress[]>(AsyncStorage, contentProgressKey, []);
 const privacyLockRepository = createJsonRepository<PrivacyLockState | null>(AsyncStorage, privacyLockKey, null);
+const programProgressRepository = createJsonRepository<ProgramProgress | null>(AsyncStorage, programProgressKey, null);
 
 const fallbackOnboarding = createOnboardingResult({
   primaryGoal: "sexual_confidence",
@@ -75,6 +84,7 @@ export function useAppState() {
   const [syncQueue, setSyncQueue] = useState<SyncQueueJob[]>([]);
   const [contentProgress, setContentProgress] = useState<ContentProgress[]>([]);
   const [privacyLock, setPrivacyLock] = useState<PrivacyLockState>(fallbackPrivacyLock);
+  const [programProgress, setProgramProgress] = useState<ProgramProgress | null>(null);
   const [selectedQuickLog, setSelectedQuickLog] = useState<QuickLogDefinition | null>(null);
   const content: ContentItem[] = useMemo(
     () => mergeContentProgress(starterContent, contentProgress),
@@ -85,13 +95,15 @@ export function useAppState() {
     let mounted = true;
 
     async function load() {
-      const [savedOnboarding, savedLogs, savedQueue, savedContentProgress, savedPrivacyLock] = await Promise.all([
-        onboardingRepository.load(),
-        logsRepository.load(),
-        syncQueueRepository.load(),
-        contentProgressRepository.load(),
-        privacyLockRepository.load(),
-      ]);
+      const [savedOnboarding, savedLogs, savedQueue, savedContentProgress, savedPrivacyLock, savedProgramProgress] =
+        await Promise.all([
+          onboardingRepository.load(),
+          logsRepository.load(),
+          syncQueueRepository.load(),
+          contentProgressRepository.load(),
+          privacyLockRepository.load(),
+          programProgressRepository.load(),
+        ]);
 
       if (!mounted) {
         return;
@@ -105,6 +117,7 @@ export function useAppState() {
         savedPrivacyLock ??
           (savedOnboarding ? createPrivacyLockState(savedOnboarding.privacy, savedOnboarding.completedAt) : fallbackPrivacyLock),
       );
+      setProgramProgress(savedProgramProgress);
     }
 
     void load();
@@ -115,10 +128,12 @@ export function useAppState() {
   }, []);
 
   const today = useMemo<TodayPayload>(() => {
+    const currentOnboarding = onboarding ?? fallbackOnboarding;
+    const activeProgram = applyProgramProgress(currentOnboarding.recommendedProgram, programProgress);
     const payload = buildTodayPayload({
         ...starterInput,
-        profile: (onboarding ?? fallbackOnboarding).profile,
-        activeProgram: (onboarding ?? fallbackOnboarding).recommendedProgram,
+        profile: currentOnboarding.profile,
+        activeProgram,
         latestLogs: logs,
         contentItems: content,
       });
@@ -127,7 +142,7 @@ export function useAppState() {
       ...payload,
       syncStatus: nextPendingJobs(syncQueue).length > 0 ? "pending" : "synced",
     };
-  }, [content, logs, onboarding, syncQueue]);
+  }, [content, logs, onboarding, programProgress, syncQueue]);
 
   const persistLogs = useCallback(async (nextLogs: LogEntry[]) => {
     setLogs(nextLogs);
@@ -147,6 +162,11 @@ export function useAppState() {
   const persistPrivacyLock = useCallback(async (nextPrivacyLock: PrivacyLockState) => {
     setPrivacyLock(nextPrivacyLock);
     await privacyLockRepository.save(nextPrivacyLock);
+  }, []);
+
+  const persistProgramProgress = useCallback(async (nextProgress: ProgramProgress) => {
+    setProgramProgress(nextProgress);
+    await programProgressRepository.save(nextProgress);
   }, []);
 
   const saveQuickLog = useCallback(
@@ -173,11 +193,16 @@ export function useAppState() {
   const completeOnboarding = useCallback(
     async (result: OnboardingResult) => {
       const nextPrivacyLock = createPrivacyLockState(result.privacy, result.completedAt);
+      const nextProgramProgress = createProgramProgress(result.recommendedProgram, result.completedAt);
 
       setOnboarding(result);
-      await Promise.all([onboardingRepository.save(result), persistPrivacyLock(nextPrivacyLock)]);
+      await Promise.all([
+        onboardingRepository.save(result),
+        persistPrivacyLock(nextPrivacyLock),
+        persistProgramProgress(nextProgramProgress),
+      ]);
     },
-    [persistPrivacyLock],
+    [persistPrivacyLock, persistProgramProgress],
   );
 
   const resetOnboarding = useCallback(async () => {
@@ -186,12 +211,14 @@ export function useAppState() {
     setSyncQueue([]);
     setContentProgress([]);
     setPrivacyLock(fallbackPrivacyLock);
+    setProgramProgress(null);
     await Promise.all([
       onboardingRepository.clear(),
       logsRepository.clear(),
       syncQueueRepository.clear(),
       contentProgressRepository.clear(),
       privacyLockRepository.clear(),
+      programProgressRepository.clear(),
     ]);
   }, []);
 
@@ -226,6 +253,16 @@ export function useAppState() {
     await persistPrivacyLock(unlockPrivacyVault(privacyLock, new Date().toISOString()));
   }, [persistPrivacyLock, privacyLock]);
 
+  const completeProgramToday = useCallback(async () => {
+    const activeProgram = today.activeProgram;
+
+    if (!activeProgram) {
+      return;
+    }
+
+    await persistProgramProgress(completeCurrentProgramDay(activeProgram, programProgress, new Date().toISOString()));
+  }, [persistProgramProgress, programProgress, today.activeProgram]);
+
   return {
     activeTab,
     content,
@@ -237,7 +274,9 @@ export function useAppState() {
     today,
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,
+    programCompletionPercent: today.activeProgram ? programCompletionPercent(today.activeProgram, programProgress) : 0,
     completeOnboarding,
+    completeProgramToday,
     lockNow,
     openQuickLog: setSelectedQuickLog,
     resetOnboarding,

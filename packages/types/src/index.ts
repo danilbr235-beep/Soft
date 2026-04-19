@@ -109,6 +109,13 @@ export type Program = {
   dayIndex: number;
 };
 
+export type ProgramProgress = {
+  programId: string;
+  completedDayIndexes: number[];
+  lastCompletedAt: string | null;
+  updatedAt: string;
+};
+
 export type LogEntry = {
   id: string;
   type: QuickLogType;

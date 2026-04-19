@@ -54,7 +54,13 @@ export function AppRoot() {
             onToggleSaved={app.toggleSavedContent}
           />
         ) : null}
-        {app.activeTab === "Programs" ? <ProgramsScreen activeProgram={app.today.activeProgram} /> : null}
+        {app.activeTab === "Programs" ? (
+          <ProgramsScreen
+            activeProgram={app.today.activeProgram}
+            completionPercent={app.programCompletionPercent}
+            onCompleteToday={app.completeProgramToday}
+          />
+        ) : null}
         {app.activeTab === "Coach" ? <CoachScreen priority={app.today.currentPriority} /> : null}
         {app.activeTab === "Settings" ? (
           <SettingsScreen
