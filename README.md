@@ -13,6 +13,8 @@ This repository replaces the previous goals-manager prototype with a production-
 - Provides a mock API contract for `GET /today`, `POST /logs`, `GET /programs`, `GET /content/featured`, and `POST /coach/explain-priority`.
 - Keeps quick-log writes local-first with a sync queue and a demo sync-clear flow.
 - Turns onboarding answers into a persisted profile, baseline, privacy defaults, and starter program.
+- Supports English/Russian localization for the app shell, Today rules, Coach explanations, quick logs, and core content.
+- Summarizes local Track history into a baseline snapshot with recent counts, score averages, latest values, and conservative symptom cautions.
 - Includes a Playwright web smoke test for onboarding, Today, quick logging, and sync status.
 
 ## What This MVP Does Not Do
@@ -65,3 +67,5 @@ The app now supports:
 7. Quick log save into local storage.
 8. Pending sync queue state.
 9. Demo sync-clear flow on Track.
+10. English/Russian language switch in onboarding and Settings.
+11. Track baseline snapshot from local quick logs.

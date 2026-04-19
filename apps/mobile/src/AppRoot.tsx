@@ -45,7 +45,6 @@ export function AppRoot() {
           <TrackScreen
             logs={app.logs}
             copy={copy}
-            language={app.language}
             pendingSyncCount={app.pendingSyncCount}
             onLog={app.openQuickLog}
             onSync={app.syncQueuedWrites}

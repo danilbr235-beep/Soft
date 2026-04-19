@@ -1,4 +1,4 @@
-import type { AppLanguage } from "@pmhc/types";
+import type { AppLanguage, QuickLogType } from "@pmhc/types";
 
 export type LocalizedTab = "Today" | "Track" | "Learn" | "Programs" | "Coach" | "Settings";
 
@@ -55,6 +55,13 @@ export type LanguageCopy = {
   track: {
     title: string;
     subtitle: string;
+    snapshotTitle: string;
+    snapshotCounts: (logsToday: number, logsThisWeek: number) => string;
+    noTrendYet: string;
+    scoreDetail: (average: number, latest: number) => string;
+    noScoreData: string;
+    safetyNoteTitle: string;
+    safetyNoteBody: string;
     syncQueue: string;
     pendingWrites: (count: number) => string;
     synced: string;
@@ -116,6 +123,7 @@ export type LanguageCopy = {
     unlock: string;
   };
   quickLog: {
+    labels: Record<QuickLogType, string>;
     subtitle: string;
     saveLabel: (label: string, option: string | number) => string;
   };
@@ -206,6 +214,13 @@ const copies: Record<AppLanguage, LanguageCopy> = {
     track: {
       title: "Track",
       subtitle: "Fast manual logging, built for low friction.",
+      snapshotTitle: "Baseline snapshot",
+      snapshotCounts: (logsToday, logsThisWeek) => `${logsToday} today - ${logsThisWeek} last 7 days`,
+      noTrendYet: "No trend yet. A few calm logs will make this useful.",
+      scoreDetail: (average, latest) => `Average ${average}/10 - latest ${latest}/10`,
+      noScoreData: "No data yet",
+      safetyNoteTitle: "Safety note",
+      safetyNoteBody: "A recent symptom log has a caution signal. Keep tracking conservative and avoid intense protocols today.",
       syncQueue: "Sync queue",
       pendingWrites: (count) => `${count} pending local write${count === 1 ? "" : "s"}`,
       synced: "All local writes are synced.",
@@ -274,6 +289,17 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       unlock: "Unlock demo vault",
     },
     quickLog: {
+      labels: {
+        morning_erection: "Morning",
+        libido: "Libido",
+        confidence: "Confidence",
+        energy: "Energy",
+        sleep_quality: "Sleep",
+        pelvic_floor_done: "Pelvic floor",
+        pump_done: "Pump",
+        symptom_checkin: "Symptoms",
+        sex_happened: "Intimacy",
+      },
       subtitle: "Log it quickly. You can add detail later if it matters.",
       saveLabel: (label, option) => `Save ${label} ${option}`,
     },
@@ -362,6 +388,13 @@ const copies: Record<AppLanguage, LanguageCopy> = {
     track: {
       title: "Трек",
       subtitle: "Быстрое ручное логирование без лишнего трения.",
+      snapshotTitle: "Снимок базовой линии",
+      snapshotCounts: (logsToday, logsThisWeek) => `${logsToday} сегодня - ${logsThisWeek} за 7 дней`,
+      noTrendYet: "Тренда пока нет. Несколько спокойных логов сделают это полезным.",
+      scoreDetail: (average, latest) => `Среднее ${average}/10 - последнее ${latest}/10`,
+      noScoreData: "Данных пока нет",
+      safetyNoteTitle: "Заметка по безопасности",
+      safetyNoteBody: "В недавнем симптом-логе есть осторожный сигнал. Держите трекинг консервативным и избегайте интенсивных протоколов сегодня.",
       syncQueue: "Очередь синхронизации",
       pendingWrites: (count) => `${count} локальных записей ждут синхронизации`,
       synced: "Все локальные записи синхронизированы.",
@@ -430,6 +463,17 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       unlock: "Открыть демо-замок",
     },
     quickLog: {
+      labels: {
+        morning_erection: "Утро",
+        libido: "Либидо",
+        confidence: "Уверенность",
+        energy: "Энергия",
+        sleep_quality: "Сон",
+        pelvic_floor_done: "Тазовое дно",
+        pump_done: "Помпа",
+        symptom_checkin: "Симптомы",
+        sex_happened: "Близость",
+      },
       subtitle: "Залогируйте быстро. Детали можно добавить позже, если они важны.",
       saveLabel: (label, option) => `Сохранить ${label} ${option}`,
     },

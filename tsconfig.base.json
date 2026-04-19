@@ -20,7 +20,8 @@
       "@pmhc/learning": ["packages/learning/src/index.ts"],
       "@pmhc/privacy": ["packages/privacy/src/index.ts"],
       "@pmhc/programs": ["packages/programs/src/index.ts"],
-      "@pmhc/safety": ["packages/safety/src/index.ts"]
+      "@pmhc/safety": ["packages/safety/src/index.ts"],
+      "@pmhc/tracking": ["packages/tracking/src/index.ts"]
     }
   }
 }

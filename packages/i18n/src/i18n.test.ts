@@ -11,4 +11,11 @@ describe("i18n copy", () => {
     expect(languageName("en")).toBe("English");
     expect(languageName("ru")).toBe("Русский");
   });
+
+  it("includes Track snapshot copy in both languages", () => {
+    expect(getCopy("en").track.snapshotTitle).toBe("Baseline snapshot");
+    expect(getCopy("en").quickLog.labels.confidence).toBe("Confidence");
+    expect(getCopy("ru").track.snapshotTitle).toBe("Снимок базовой линии");
+    expect(getCopy("ru").quickLog.labels.confidence).toBe("Уверенность");
+  });
 });

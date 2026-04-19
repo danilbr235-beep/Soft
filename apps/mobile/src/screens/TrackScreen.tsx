@@ -1,7 +1,8 @@
-import { Pressable, Text } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
+import { buildTrackingSnapshot } from "@pmhc/tracking";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { AppLanguage, LogEntry, QuickLogDefinition, QuickLogType } from "@pmhc/types";
+import type { LogEntry, QuickLogDefinition } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 import { QuickLogRow } from "../components/TodayComponents";
@@ -14,57 +15,55 @@ const manualLogTypes: Array<Pick<QuickLogDefinition, "type" | "input">> = [
   { type: "pump_done", input: "boolean" },
 ];
 
-const manualLogLabels: Record<AppLanguage, Record<QuickLogType, string>> = {
-  en: {
-    morning_erection: "Morning",
-    libido: "Libido",
-    confidence: "Confidence",
-    energy: "Energy",
-    sleep_quality: "Sleep",
-    pelvic_floor_done: "Pelvic floor",
-    pump_done: "Pump",
-    symptom_checkin: "Symptoms",
-    sex_happened: "Intimacy",
-  },
-  ru: {
-    morning_erection: "Утро",
-    libido: "Либидо",
-    confidence: "Уверенность",
-    energy: "Энергия",
-    sleep_quality: "Сон",
-    pelvic_floor_done: "Тазовое дно",
-    pump_done: "Помпа",
-    symptom_checkin: "Симптомы",
-    sex_happened: "Близость",
-  },
-};
-
 export function TrackScreen({
   logs,
   copy,
-  language,
   onLog,
   onSync,
   pendingSyncCount,
 }: {
   logs: LogEntry[];
   copy: LanguageCopy;
-  language: AppLanguage;
   onLog: (definition: QuickLogDefinition) => void;
   onSync: () => void;
   pendingSyncCount: number;
 }) {
   const manualLogs = manualLogTypes.map((log) => ({
     ...log,
-    label: manualLogLabels[language][log.type],
+    label: copy.quickLog.labels[log.type],
   }));
+  const snapshot = buildTrackingSnapshot(logs);
 
   return (
     <Screen title={copy.track.title} subtitle={copy.track.subtitle}>
       <QuickLogRow accessibilityPrefix={copy.today.quickLog} logs={manualLogs} onLog={onLog} />
       <Surface>
-        <Text style={{ color: colors.text, fontWeight: "800", fontSize: 18 }}>{copy.track.syncQueue}</Text>
-        <Text style={{ color: colors.muted }}>
+        <Text style={styles.title}>{copy.track.snapshotTitle}</Text>
+        <Text style={styles.body}>{copy.track.snapshotCounts(snapshot.logsToday, snapshot.logsThisWeek)}</Text>
+        {snapshot.latestLogAt ? null : <Text style={styles.body}>{copy.track.noTrendYet}</Text>}
+        <View style={styles.signalGrid}>
+          {snapshot.scoreSignals.map((signal) => (
+            <View key={signal.type} style={styles.signalTile}>
+              <Text style={styles.signalLabel}>{copy.quickLog.labels[signal.type]}</Text>
+              <Text style={styles.signalValue}>{signal.latest == null ? "--" : `${signal.latest}/10`}</Text>
+              <Text style={styles.signalDetail}>
+                {signal.average == null || signal.latest == null
+                  ? copy.track.noScoreData
+                  : copy.track.scoreDetail(signal.average, signal.latest)}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </Surface>
+      {snapshot.hasSafetySignal ? (
+        <Surface>
+          <Text style={styles.title}>{copy.track.safetyNoteTitle}</Text>
+          <Text style={styles.body}>{copy.track.safetyNoteBody}</Text>
+        </Surface>
+      ) : null}
+      <Surface>
+        <Text style={styles.title}>{copy.track.syncQueue}</Text>
+        <Text style={styles.body}>
           {pendingSyncCount > 0 ? copy.track.pendingWrites(pendingSyncCount) : copy.track.synced}
         </Text>
         {pendingSyncCount > 0 ? (
@@ -81,18 +80,18 @@ export function TrackScreen({
               marginTop: spacing.sm,
             }}
           >
-            <Text style={{ color: colors.ink, fontWeight: "900" }}>{copy.track.syncAction}</Text>
+            <Text style={styles.primaryButtonText}>{copy.track.syncAction}</Text>
           </Pressable>
         ) : null}
       </Surface>
       <Surface>
-        <Text style={{ color: colors.text, fontWeight: "800", fontSize: 18 }}>{copy.track.recentLogs}</Text>
+        <Text style={styles.title}>{copy.track.recentLogs}</Text>
         {logs.length === 0 ? (
-          <Text style={{ color: colors.muted }}>{copy.track.noLogs}</Text>
+          <Text style={styles.body}>{copy.track.noLogs}</Text>
         ) : (
           logs.slice(0, 8).map((log) => (
-            <Text key={log.id} style={{ color: colors.muted }}>
-              {log.type}: {JSON.stringify(log.value)}
+            <Text key={log.id} style={styles.body}>
+              {copy.quickLog.labels[log.type]}: {formatLogValue(log.value, copy)}
             </Text>
           ))
         )}
@@ -100,3 +99,65 @@ export function TrackScreen({
     </Screen>
   );
 }
+
+function formatLogValue(value: unknown, copy: LanguageCopy) {
+  if (typeof value === "boolean") {
+    return value ? copy.common.yes : copy.common.no;
+  }
+
+  if (typeof value === "number") {
+    return `${value}/10`;
+  }
+
+  if (value && typeof value === "object") {
+    return copy.quickLog.labels.symptom_checkin;
+  }
+
+  return JSON.stringify(value);
+}
+
+const styles = StyleSheet.create({
+  title: {
+    color: colors.text,
+    fontWeight: "800",
+    fontSize: 18,
+  },
+  body: {
+    color: colors.muted,
+    lineHeight: 21,
+  },
+  signalGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  signalTile: {
+    width: "48%",
+    minHeight: 92,
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    backgroundColor: colors.panelSoft,
+    padding: spacing.md,
+    gap: spacing.xs,
+  },
+  signalLabel: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  signalValue: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: "900",
+  },
+  signalDetail: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  primaryButtonText: {
+    color: colors.ink,
+    fontWeight: "900",
+  },
+});

@@ -20,6 +20,7 @@ export default defineConfig({
       "@pmhc/privacy": fileURLToPath(new URL("packages/privacy/src/index.ts", import.meta.url)),
       "@pmhc/programs": fileURLToPath(new URL("packages/programs/src/index.ts", import.meta.url)),
       "@pmhc/safety": fileURLToPath(new URL("packages/safety/src/index.ts", import.meta.url)),
+      "@pmhc/tracking": fileURLToPath(new URL("packages/tracking/src/index.ts", import.meta.url)),
       "@pmhc/ui": fileURLToPath(new URL("packages/ui/src/index.ts", import.meta.url)),
     },
   },
