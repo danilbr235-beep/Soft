@@ -51,7 +51,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Baseline snapshot")).toBeVisible();
   await expect(page.getByText("2 today - 2 last 7 days")).toBeVisible();
   await expect(page.getByText("Average 7/10 - latest 7/10")).toBeVisible();
-  await expect(page.getByText("confidence: 7")).toBeVisible();
+  await expect(page.getByText("Confidence: 7/10")).toBeVisible();
   await expect(page.getByText("2 pending local writes")).toBeVisible();
 
   await page.getByLabel("Sync demo writes").click();
@@ -65,6 +65,10 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
 
   await page.getByLabel("Open Programs").click();
   await expect(page.getByText("Day 1 of 14")).toBeVisible();
+  await expect(page.getByText("Today's plan")).toBeVisible();
+  await expect(page.getByText("Baseline check")).toBeVisible();
+  await page.getByLabel("Mark Baseline check done").click();
+  await expect(page.getByText("1 of 3 done")).toBeVisible();
   await page.getByLabel("Complete program day").click();
   await expect(page.getByText("Day 2 of 14")).toBeVisible();
 

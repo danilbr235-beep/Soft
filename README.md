@@ -15,7 +15,8 @@ This repository replaces the previous goals-manager prototype with a production-
 - Turns onboarding answers into a persisted profile, baseline, privacy defaults, and starter program.
 - Supports English/Russian localization for the app shell, Today rules, Coach explanations, quick logs, and core content.
 - Summarizes local Track history into a baseline snapshot with recent counts, score averages, latest values, and conservative symptom cautions.
-- Includes a Playwright web smoke test for onboarding, Today, quick logging, and sync status.
+- Adds a Programs day plan with task-level local checklist progress.
+- Includes Playwright web smoke tests for onboarding, Today, quick logging, Learn progress, Programs checklist, language switching, and sync status.
 
 ## What This MVP Does Not Do
 
@@ -69,3 +70,4 @@ The app now supports:
 9. Demo sync-clear flow on Track.
 10. English/Russian language switch in onboarding and Settings.
 11. Track baseline snapshot from local quick logs.
+12. Programs day plan with three conservative tasks and saved checklist state.

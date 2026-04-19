@@ -119,9 +119,30 @@ export type Program = {
   dayIndex: number;
 };
 
+export type ProgramTaskKind = "check_in" | "practice" | "reflect" | "learn" | "recovery";
+
+export type ProgramDayTask = {
+  id: string;
+  kind: ProgramTaskKind;
+  title: string;
+  description: string;
+  durationMinutes: number;
+};
+
+export type ProgramDayPlan = {
+  programId: string;
+  dayIndex: number;
+  title: string;
+  summary: string;
+  tasks: ProgramDayTask[];
+  completedTaskIds: string[];
+  completed: boolean;
+};
+
 export type ProgramProgress = {
   programId: string;
   completedDayIndexes: number[];
+  completedTaskIdsByDay?: Record<string, string[]>;
   lastCompletedAt: string | null;
   updatedAt: string;
 };

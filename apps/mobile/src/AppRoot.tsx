@@ -64,7 +64,9 @@ export function AppRoot() {
             activeProgram={app.today.activeProgram}
             copy={copy}
             completionPercent={app.programCompletionPercent}
+            dayPlan={app.programDayPlan}
             onCompleteToday={app.completeProgramToday}
+            onToggleTask={app.toggleProgramTask}
           />
         ) : null}
         {app.activeTab === "Coach" ? <CoachScreen copy={copy} language={app.language} priority={app.today.currentPriority} /> : null}
