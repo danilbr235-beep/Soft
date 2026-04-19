@@ -37,7 +37,13 @@ export function AppRoot() {
             onSync={app.syncQueuedWrites}
           />
         ) : null}
-        {app.activeTab === "Learn" ? <LearnScreen content={app.content} /> : null}
+        {app.activeTab === "Learn" ? (
+          <LearnScreen
+            content={app.content}
+            onMarkCompleted={app.completeContent}
+            onToggleSaved={app.toggleSavedContent}
+          />
+        ) : null}
         {app.activeTab === "Programs" ? <ProgramsScreen activeProgram={app.today.activeProgram} /> : null}
         {app.activeTab === "Coach" ? <CoachScreen priority={app.today.currentPriority} /> : null}
         {app.activeTab === "Settings" ? <SettingsScreen resetOnboarding={app.resetOnboarding} /> : null}

@@ -15,7 +15,8 @@
       "@pmhc/rules": ["packages/rules/src/index.ts"],
       "@pmhc/onboarding": ["packages/onboarding/src/index.ts"],
       "@pmhc/sync": ["packages/sync/src/index.ts"],
-      "@pmhc/client": ["packages/client/src/index.ts"]
+      "@pmhc/client": ["packages/client/src/index.ts"],
+      "@pmhc/learning": ["packages/learning/src/index.ts"]
     }
   }
 }

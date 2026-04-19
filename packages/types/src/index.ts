@@ -190,6 +190,13 @@ export type ContentItem = {
   completed: boolean;
 };
 
+export type ContentProgress = {
+  itemId: string;
+  saved: boolean;
+  completed: boolean;
+  updatedAt: string;
+};
+
 export type TodayPayload = {
   date: string;
   todayMode: TodayMode;

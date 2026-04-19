@@ -1,10 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { markContentCompleted, mergeContentProgress, toggleContentSaved } from "@pmhc/learning";
 import { createOnboardingResult } from "@pmhc/onboarding";
 import { buildTodayPayload } from "@pmhc/rules";
 import { createQueuedQuickLogJob, markSyncSucceeded, nextPendingJobs } from "@pmhc/sync";
 import type {
   ContentItem,
+  ContentProgress,
   LogEntry,
   OnboardingResult,
   QuickLogDefinition,
@@ -21,10 +23,12 @@ export type AppTab = "Today" | "Track" | "Learn" | "Programs" | "Coach" | "Setti
 const onboardingKey = "pmhc:onboarding-complete";
 const logsKey = "pmhc:quick-logs";
 const syncQueueKey = "pmhc:sync-queue";
+const contentProgressKey = "pmhc:content-progress";
 
 const onboardingRepository = createJsonRepository<OnboardingResult | null>(AsyncStorage, onboardingKey, null);
 const logsRepository = createJsonRepository<LogEntry[]>(AsyncStorage, logsKey, []);
 const syncQueueRepository = createJsonRepository<SyncQueueJob[]>(AsyncStorage, syncQueueKey, []);
+const contentProgressRepository = createJsonRepository<ContentProgress[]>(AsyncStorage, contentProgressKey, []);
 
 const fallbackOnboarding = createOnboardingResult({
   primaryGoal: "sexual_confidence",
@@ -58,17 +62,22 @@ export function useAppState() {
   const [onboarding, setOnboarding] = useState<OnboardingResult | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [syncQueue, setSyncQueue] = useState<SyncQueueJob[]>([]);
+  const [contentProgress, setContentProgress] = useState<ContentProgress[]>([]);
   const [selectedQuickLog, setSelectedQuickLog] = useState<QuickLogDefinition | null>(null);
-  const content: ContentItem[] = starterContent;
+  const content: ContentItem[] = useMemo(
+    () => mergeContentProgress(starterContent, contentProgress),
+    [contentProgress],
+  );
 
   useEffect(() => {
     let mounted = true;
 
     async function load() {
-      const [savedOnboarding, savedLogs, savedQueue] = await Promise.all([
+      const [savedOnboarding, savedLogs, savedQueue, savedContentProgress] = await Promise.all([
         onboardingRepository.load(),
         logsRepository.load(),
         syncQueueRepository.load(),
+        contentProgressRepository.load(),
       ]);
 
       if (!mounted) {
@@ -78,6 +87,7 @@ export function useAppState() {
       setOnboarding(savedOnboarding);
       setLogs(savedLogs);
       setSyncQueue(savedQueue);
+      setContentProgress(savedContentProgress);
     }
 
     void load();
@@ -112,6 +122,11 @@ export function useAppState() {
     await syncQueueRepository.save(nextQueue);
   }, []);
 
+  const persistContentProgress = useCallback(async (nextProgress: ContentProgress[]) => {
+    setContentProgress(nextProgress);
+    await contentProgressRepository.save(nextProgress);
+  }, []);
+
   const saveQuickLog = useCallback(
     async (definition: QuickLogDefinition, value: unknown) => {
       const nextLog: LogEntry = {
@@ -142,13 +157,33 @@ export function useAppState() {
     setOnboarding(null);
     setLogs([]);
     setSyncQueue([]);
-    await Promise.all([onboardingRepository.clear(), logsRepository.clear(), syncQueueRepository.clear()]);
+    setContentProgress([]);
+    await Promise.all([
+      onboardingRepository.clear(),
+      logsRepository.clear(),
+      syncQueueRepository.clear(),
+      contentProgressRepository.clear(),
+    ]);
   }, []);
 
   const syncQueuedWrites = useCallback(async () => {
     const syncedQueue = syncQueue.map((job) => (job.status === "pending" ? markSyncSucceeded(job) : job));
     await persistSyncQueue(syncedQueue);
   }, [persistSyncQueue, syncQueue]);
+
+  const toggleSavedContent = useCallback(
+    async (itemId: string) => {
+      await persistContentProgress(toggleContentSaved(contentProgress, itemId, new Date().toISOString()));
+    },
+    [contentProgress, persistContentProgress],
+  );
+
+  const completeContent = useCallback(
+    async (itemId: string) => {
+      await persistContentProgress(markContentCompleted(contentProgress, itemId, new Date().toISOString()));
+    },
+    [contentProgress, persistContentProgress],
+  );
 
   return {
     activeTab,
@@ -165,5 +200,7 @@ export function useAppState() {
     resetOnboarding,
     setActiveTab,
     syncQueuedWrites,
+    toggleSavedContent,
+    completeContent,
   };
 }
