@@ -127,6 +127,17 @@ export type CurrentPriority = {
   confidence: RecommendationConfidence;
 };
 
+export type CoachExplanation = {
+  title: string;
+  explanation: string;
+  dataNote: string;
+  confidenceNote: string;
+  nextStep: string;
+  avoidToday?: string;
+  safetyNote: string;
+  confidence: RecommendationConfidence;
+};
+
 export type DailyStateTile = {
   id: string;
   label: string;

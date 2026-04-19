@@ -1,4 +1,11 @@
-import type { ContentItem, LogEntry, Program, QuickLogMutation, TodayPayload } from "@pmhc/types";
+import type {
+  CoachExplanation,
+  ContentItem,
+  LogEntry,
+  Program,
+  QuickLogMutation,
+  TodayPayload,
+} from "@pmhc/types";
 
 export type ApiResponse<T> = {
   accepted: true;
@@ -6,12 +13,7 @@ export type ApiResponse<T> = {
   today: T;
 };
 
-export type CoachPriorityExplanation = {
-  title: string;
-  explanation: string;
-  nextStep: string;
-  safetyNote: string;
-};
+export type CoachPriorityExplanation = CoachExplanation;
 
 export type SyncHealth = {
   status: "available";

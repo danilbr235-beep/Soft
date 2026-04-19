@@ -1,1 +1,1 @@
-export { buildTodayPayload, supportedQuickLogs } from "./todayRules";
+export { buildTodayPayload, explainPriority, supportedQuickLogs } from "./todayRules";

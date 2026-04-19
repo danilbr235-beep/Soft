@@ -1,6 +1,7 @@
 import type {
   ActionCard,
   Alert,
+  CoachExplanation,
   ContentItem,
   CurrentPriority,
   LogEntry,
@@ -56,6 +57,22 @@ export function buildTodayPayload(input: RuleEngineInput): TodayPayload {
     quickLogs,
     liveUpdates: buildLiveUpdates(input.contentItems),
     insights: buildInsights(input.latestLogs, lowData),
+  };
+}
+
+export function explainPriority(priority: CurrentPriority): CoachExplanation {
+  return {
+    title: priority.title,
+    explanation: priority.whyItMatters,
+    dataNote:
+      priority.confidence === "low"
+        ? "There is not enough trend data yet, so this answer stays cautious and focused on baseline building."
+        : "This explanation uses recent logs and the current rule priority, not a diagnosis.",
+    confidenceNote: confidenceNote(priority.confidence),
+    nextStep: priority.recommendedAction,
+    avoidToday: priority.avoidToday,
+    safetyNote: "This is educational tracking support, not a diagnosis or urgent care advice.",
+    confidence: priority.confidence,
   };
 }
 
@@ -301,6 +318,14 @@ function avg(values: Array<number | null>) {
 
 function scoreLabel(value: number | null) {
   return value == null ? "--" : `${value}/10`;
+}
+
+function confidenceNote(confidence: CurrentPriority["confidence"]) {
+  return {
+    low: "Low confidence: a few more consistent logs are needed before stronger guidance is useful.",
+    medium: "Medium confidence: the guidance is conservative and based on recent signals.",
+    high: "High confidence: the guidance is still educational and should stay within your comfort and safety limits.",
+  }[confidence];
 }
 
 function severityRank(severity: Alert["severity"]) {

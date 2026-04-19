@@ -1,5 +1,5 @@
 import Fastify from "fastify";
-import { buildTodayPayload, supportedQuickLogs } from "@pmhc/rules";
+import { buildTodayPayload, explainPriority, supportedQuickLogs } from "@pmhc/rules";
 import type { LogEntry, QuickLogMutation } from "@pmhc/types";
 import { featuredContent, starterRuleInput } from "./seed";
 
@@ -78,12 +78,7 @@ export function createApiServer() {
       latestLogs: logs,
     });
 
-    return {
-      title: today.currentPriority.title,
-      explanation: today.currentPriority.whyItMatters,
-      nextStep: today.currentPriority.recommendedAction,
-      safetyNote: "This is educational tracking support, not a diagnosis or urgent care advice.",
-    };
+    return explainPriority(today.currentPriority);
   });
 
   return app;
