@@ -52,10 +52,10 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 ## P1 Coach
 
 - Keep Coach as a rules explanation layer, not a medical AI.
-- Add quick questions for priority, alert, data confidence, and next step.
-- Say clearly when there is not enough data.
-- Prefer conservative next steps over intensity.
-- Add tests that block diagnostic or shame-oriented language.
+- Add quick questions for priority, alert, data confidence, and next step. (Initial rules-first slice complete.)
+- Say clearly when there is not enough data. (Initial slice complete.)
+- Prefer conservative next steps over intensity. (Initial slice complete.)
+- Add tests that block diagnostic or shame-oriented language. (Initial slice complete.)
 - Prepare the interface for future AI/RAG without depending on it.
 
 ## P1 Privacy

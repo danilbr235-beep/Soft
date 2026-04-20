@@ -104,7 +104,7 @@ function AppRootContent() {
             onToggleTask={app.toggleProgramTask}
           />
         ) : null}
-        {app.activeTab === "Coach" ? <CoachScreen copy={copy} language={app.language} priority={app.today.currentPriority} /> : null}
+        {app.activeTab === "Coach" ? <CoachScreen copy={copy} language={app.language} today={app.today} /> : null}
         {app.activeTab === "Settings" ? (
           <SettingsScreen
             copy={copy}

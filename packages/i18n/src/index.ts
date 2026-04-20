@@ -145,6 +145,9 @@ export type LanguageCopy = {
     certainty: string;
     keepLight: string;
     boundary: string;
+    quickQuestions: string;
+    openQuestion: (title: string) => string;
+    nextStep: string;
   };
   settings: {
     title: string;
@@ -512,6 +515,9 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       certainty: "How certain is this?",
       keepLight: "Keep light today",
       boundary: "Boundary",
+      quickQuestions: "Quick questions",
+      openQuestion: (title) => `Open coach question: ${title}`,
+      nextStep: "Next step",
     },
     settings: {
       title: "Settings",
@@ -746,6 +752,9 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       certainty: "Насколько этому можно доверять?",
       keepLight: "Сегодня мягче",
       boundary: "Граница",
+      quickQuestions: "Быстрые вопросы",
+      openQuestion: (title) => `Открыть вопрос коуча: ${title}`,
+      nextStep: "Мягкий следующий шаг",
     },
     settings: {
       title: "Настройки",
