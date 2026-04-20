@@ -30,3 +30,16 @@ describe("i18n copy", () => {
     expect(JSON.stringify(ru)).not.toContain("Рќ");
   });
 });
+
+describe("Track pattern hint copy", () => {
+  it("stays conservative in English", () => {
+    const track = getCopy("en").track;
+    const text = [
+      track.patternHintsBody,
+      track.patternHintObservedBody(track.patternDirectionLabels.together),
+      track.patternHintLowDataBody,
+    ].join(" ");
+
+    expect(text).not.toMatch(/\b(cause|caused|diagnose|treat|guarantee|proves?)\b/i);
+  });
+});

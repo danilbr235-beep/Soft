@@ -17,6 +17,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Supports English/Russian localization for the app shell, Today rules, Coach explanations, quick logs, and core content.
 - Summarizes local Track history into a baseline snapshot with recent counts, score averages, latest values, filters, edit/delete actions, and JSON export preview.
 - Adds weekly Track snapshot cards for sleep, energy, confidence, libido, and symptoms.
+- Adds conservative Track pattern hints from paired recent logs without causal claims.
 - Adds varied Programs day plans with task-level local checklist progress, rest days, and progress summaries.
 - Adds a local demo PIN flow for the privacy vault while keeping production secure storage out of MVP scope.
 - Auto-locks the privacy vault after a short inactivity window in the local demo.
@@ -85,3 +86,4 @@ The app now supports:
 18. Coach quick questions for priority, alerts, confidence, and the next conservative step.
 19. Today status row for mode, sync, privacy vault state, and active program.
 20. Track weekly snapshot cards with conservative low-data and caution states.
+21. Track pattern hints for paired signals, with low-data fallback and no causal claims.

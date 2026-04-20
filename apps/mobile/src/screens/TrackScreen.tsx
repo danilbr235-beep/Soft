@@ -4,11 +4,12 @@ import type { LanguageCopy } from "@pmhc/i18n";
 import { createSymptomCheckinValue } from "@pmhc/safety";
 import {
   buildTrackingExport,
+  buildTrackingPatternHints,
   buildTrackingSnapshot,
   buildWeeklySnapshotCards,
   filterTrackingLogs,
 } from "@pmhc/tracking";
-import type { TrackingLogFilter, TrackingWeeklySnapshotCard } from "@pmhc/tracking";
+import type { TrackingLogFilter, TrackingPatternHint, TrackingWeeklySnapshotCard } from "@pmhc/tracking";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { LogEntry, QuickLogDefinition } from "@pmhc/types";
 import { Screen } from "../components/Screen";
@@ -48,6 +49,7 @@ export function TrackScreen({
   }));
   const snapshot = buildTrackingSnapshot(logs);
   const weeklyCards = buildWeeklySnapshotCards(logs);
+  const patternHints = buildTrackingPatternHints(logs);
   const filteredLogs = useMemo(() => filterTrackingLogs(logs, selectedFilter), [logs, selectedFilter]);
   const filterOptions: TrackingLogFilter[] = ["all", "scores", "symptoms", "routines"];
 
@@ -103,6 +105,22 @@ export function TrackScreen({
             </View>
           ))}
         </View>
+      </Surface>
+      <Surface>
+        <Text style={styles.title}>{copy.track.patternHintsTitle}</Text>
+        <Text style={styles.body}>{copy.track.patternHintsBody}</Text>
+        {patternHints.map((hint) => (
+          <View key={hint.id} style={styles.hintCard}>
+            <Text style={styles.hintTitle}>{copy.track.patternHintLabels[hint.id]}</Text>
+            <Text style={styles.body}>{formatPatternHintBody(hint, copy)}</Text>
+            <Text style={styles.hintMeta}>
+              {copy.track.patternHintMeta(
+                hint.overlappingDays,
+                copy.track.patternConfidenceLabels[hint.confidence],
+              )}
+            </Text>
+          </View>
+        ))}
       </Surface>
       <Surface>
         <Text style={styles.title}>{copy.track.syncQueue}</Text>
@@ -244,6 +262,14 @@ function formatWeeklyCardMeta(card: TrackingWeeklySnapshotCard, copy: LanguageCo
   return copy.track.weeklyScoreMeta(card.count, status);
 }
 
+function formatPatternHintBody(hint: TrackingPatternHint, copy: LanguageCopy) {
+  if (hint.status === "low_data") {
+    return copy.track.patternHintLowDataBody;
+  }
+
+  return copy.track.patternHintObservedBody(copy.track.patternDirectionLabels[hint.direction]);
+}
+
 function nextDemoValue(log: LogEntry) {
   if (typeof log.value === "number") {
     const options = [1, 3, 5, 7, 10];
@@ -349,6 +375,24 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 12,
     lineHeight: 17,
+  },
+  hintCard: {
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    backgroundColor: colors.panelSoft,
+    gap: spacing.xs,
+    padding: spacing.md,
+  },
+  hintTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "900",
+  },
+  hintMeta: {
+    color: colors.steel,
+    fontSize: 12,
+    fontWeight: "800",
   },
   logRow: {
     minHeight: 92,

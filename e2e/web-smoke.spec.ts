@@ -73,6 +73,9 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("7/10 avg")).toBeVisible();
   await expect(page.getByText("1 check-in")).toBeVisible();
   await expect(page.getByText("Caution signal", { exact: true })).toBeVisible();
+  await expect(page.getByText("Pattern hints")).toBeVisible();
+  await expect(page.getByText("More paired logs needed")).toBeVisible();
+  await expect(page.getByText("Need more paired logs before this section can say anything useful.")).toBeVisible();
   await expect(page.getByText("Confidence: 7/10")).toBeVisible();
   await expect(page.getByText("Safety note")).toBeVisible();
   await page.getByLabel("Filter Track logs: Scores").click();

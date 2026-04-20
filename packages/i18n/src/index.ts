@@ -17,6 +17,9 @@ type TodayStatusCopy = {
   privacy: Record<"vaultOn" | "discreet" | "standard", string>;
 };
 type WeeklySnapshotStatusCopy = Record<"no_data" | "low_data" | "steady" | "changed" | "caution", string>;
+type PatternHintLabelCopy = Record<"sleep_energy" | "sleep_confidence" | "confidence_libido" | "low_data", string>;
+type PatternDirectionCopy = Record<"together" | "opposite" | "unknown", string>;
+type PatternConfidenceCopy = Record<"low" | "medium", string>;
 
 export type LanguageCopy = {
   common: {
@@ -84,6 +87,14 @@ export type LanguageCopy = {
     weeklySymptomValue: (count: number) => string;
     weeklySymptomMeta: (status: string) => string;
     weeklyStatusLabels: WeeklySnapshotStatusCopy;
+    patternHintsTitle: string;
+    patternHintsBody: string;
+    patternHintLabels: PatternHintLabelCopy;
+    patternDirectionLabels: PatternDirectionCopy;
+    patternConfidenceLabels: PatternConfidenceCopy;
+    patternHintObservedBody: (direction: string) => string;
+    patternHintLowDataBody: string;
+    patternHintMeta: (pairedDays: number, confidence: string) => string;
     safetyNoteTitle: string;
     safetyNoteBody: string;
     syncQueue: string;
@@ -465,6 +476,27 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         changed: "Changed",
         caution: "Caution signal",
       },
+      patternHintsTitle: "Pattern hints",
+      patternHintsBody: "Gentle notes from paired logs. Use them as prompts to watch, not proof.",
+      patternHintLabels: {
+        sleep_energy: "Sleep and energy",
+        sleep_confidence: "Sleep and confidence",
+        confidence_libido: "Confidence and libido",
+        low_data: "More paired logs needed",
+      },
+      patternDirectionLabels: {
+        together: "in the same direction",
+        opposite: "in different directions",
+        unknown: "without a clear direction",
+      },
+      patternConfidenceLabels: {
+        low: "low confidence",
+        medium: "medium confidence",
+      },
+      patternHintObservedBody: (direction) =>
+        `These signals moved ${direction} on paired days. Use this as a note to watch.`,
+      patternHintLowDataBody: "Need more paired logs before this section can say anything useful.",
+      patternHintMeta: (pairedDays, confidence) => `${pairedDays} paired days - ${confidence}`,
       safetyNoteTitle: "Safety note",
       safetyNoteBody: "A recent symptom log has a caution signal. Keep tracking conservative and avoid intense protocols today.",
       syncQueue: "Sync queue",
@@ -738,6 +770,27 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         changed: "Есть изменение",
         caution: "Осторожный сигнал",
       },
+      patternHintsTitle: "Подсказки по паттернам",
+      patternHintsBody: "Мягкие заметки по парным логам. Это повод наблюдать, а не доказательство.",
+      patternHintLabels: {
+        sleep_energy: "Сон и энергия",
+        sleep_confidence: "Сон и уверенность",
+        confidence_libido: "Уверенность и либидо",
+        low_data: "Нужно больше парных логов",
+      },
+      patternDirectionLabels: {
+        together: "в одну сторону",
+        opposite: "в разные стороны",
+        unknown: "без ясного направления",
+      },
+      patternConfidenceLabels: {
+        low: "низкая уверенность",
+        medium: "средняя уверенность",
+      },
+      patternHintObservedBody: (direction) =>
+        `Эти два сигнала двигались ${direction} в дни, где были оба лога. Считайте это спокойной заметкой для наблюдения.`,
+      patternHintLowDataBody: "Нужно больше парных логов, прежде чем здесь появится полезная подсказка.",
+      patternHintMeta: (pairedDays, confidence) => `${pairedDays} ${russianPairedDayWord(pairedDays)} - ${confidence}`,
       safetyNoteTitle: "Осторожный сигнал",
       safetyNoteBody: "В недавнем логе есть симптом, с которым лучше не повышать интенсивность. Сегодня держим план мягким.",
       syncQueue: "Локальная очередь",
@@ -982,4 +1035,23 @@ function russianCheckinWord(count: number) {
   }
 
   return "чек-инов";
+}
+
+function russianPairedDayWord(count: number) {
+  const lastTwo = count % 100;
+  const last = count % 10;
+
+  if (lastTwo >= 11 && lastTwo <= 14) {
+    return "парных дней";
+  }
+
+  if (last === 1) {
+    return "парный день";
+  }
+
+  if (last >= 2 && last <= 4) {
+    return "парных дня";
+  }
+
+  return "парных дней";
 }
