@@ -34,16 +34,19 @@ import type {
 } from "@pmhc/types";
 import { QuickLogSheet } from "../components/QuickLogSheet";
 import { starterContent } from "../data/starterContent";
+import { appStorageKeys } from "../storage/appStorageKeys";
 import { createJsonRepository } from "../storage/localStore";
 
 export type AppTab = "Today" | "Track" | "Learn" | "Programs" | "Coach" | "Settings";
 
-const onboardingKey = "pmhc:onboarding-complete";
-const logsKey = "pmhc:quick-logs";
-const syncQueueKey = "pmhc:sync-queue";
-const contentProgressKey = "pmhc:content-progress";
-const privacyLockKey = "pmhc:privacy-lock";
-const programProgressKey = "pmhc:program-progress";
+const [
+  onboardingKey,
+  logsKey,
+  syncQueueKey,
+  contentProgressKey,
+  privacyLockKey,
+  programProgressKey,
+] = appStorageKeys;
 
 const onboardingRepository = createJsonRepository<OnboardingResult | null>(
   AsyncStorage,
@@ -111,6 +114,7 @@ export function useAppState() {
   const [privacyLock, setPrivacyLock] = useState<PrivacyLockState>(fallbackPrivacyLock);
   const [programProgress, setProgramProgress] = useState<ProgramProgress | null>(null);
   const [selectedQuickLog, setSelectedQuickLog] = useState<QuickLogDefinition | null>(null);
+  const [isReady, setIsReady] = useState(false);
   const content: ContentItem[] = useMemo(
     () => mergeContentProgress(starterContent, contentProgress),
     [contentProgress],
@@ -120,30 +124,48 @@ export function useAppState() {
     let mounted = true;
 
     async function load() {
-      const [savedOnboarding, savedLogs, savedQueue, savedContentProgress, savedPrivacyLock, savedProgramProgress] =
-        await Promise.all([
-          onboardingRepository.load(),
-          logsRepository.load(),
-          syncQueueRepository.load(),
-          contentProgressRepository.load(),
-          privacyLockRepository.load(),
-          programProgressRepository.load(),
-        ]);
+      try {
+        const [savedOnboarding, savedLogs, savedQueue, savedContentProgress, savedPrivacyLock, savedProgramProgress] =
+          await Promise.all([
+            onboardingRepository.load(),
+            logsRepository.load(),
+            syncQueueRepository.load(),
+            contentProgressRepository.load(),
+            privacyLockRepository.load(),
+            programProgressRepository.load(),
+          ]);
 
-      if (!mounted) {
-        return;
+        if (!mounted) {
+          return;
+        }
+
+        setOnboarding(savedOnboarding);
+        setLanguage(savedOnboarding?.profile.language ?? fallbackOnboarding.profile.language);
+        setLogs(savedLogs);
+        setSyncQueue(savedQueue);
+        setContentProgress(savedContentProgress);
+        setPrivacyLock(
+          savedPrivacyLock ??
+            (savedOnboarding ? createPrivacyLockState(savedOnboarding.privacy, savedOnboarding.completedAt) : fallbackPrivacyLock),
+        );
+        setProgramProgress(savedProgramProgress);
+      } catch {
+        if (!mounted) {
+          return;
+        }
+
+        setOnboarding(null);
+        setLanguage(fallbackOnboarding.profile.language);
+        setLogs([]);
+        setSyncQueue([]);
+        setContentProgress([]);
+        setPrivacyLock(fallbackPrivacyLock);
+        setProgramProgress(null);
+      } finally {
+        if (mounted) {
+          setIsReady(true);
+        }
       }
-
-      setOnboarding(savedOnboarding);
-      setLanguage(savedOnboarding?.profile.language ?? fallbackOnboarding.profile.language);
-      setLogs(savedLogs);
-      setSyncQueue(savedQueue);
-      setContentProgress(savedContentProgress);
-      setPrivacyLock(
-        savedPrivacyLock ??
-          (savedOnboarding ? createPrivacyLockState(savedOnboarding.privacy, savedOnboarding.completedAt) : fallbackPrivacyLock),
-      );
-      setProgramProgress(savedProgramProgress);
     }
 
     void load();
@@ -339,6 +361,7 @@ export function useAppState() {
     activeTab,
     content,
     hasCompletedOnboarding: onboarding != null,
+    isReady,
     logs,
     quickLogSheet: selectedQuickLog ? (
       <QuickLogSheet definition={selectedQuickLog} language={language} onClose={() => setSelectedQuickLog(null)} onSave={saveQuickLog} />

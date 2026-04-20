@@ -14,6 +14,20 @@ test("recovers from legacy local storage state instead of showing a blank screen
   await expect(page.getByText("Start privately")).toBeVisible();
 });
 
+test("shows a recovery screen instead of a blank page when startup rendering fails", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(() => {
+    localStorage.setItem("pmhc:debug-force-error", "1");
+    localStorage.setItem("pmhc:quick-logs", "not-json");
+  });
+  await page.reload();
+
+  await expect(page.getByText("Soft hit a startup snag")).toBeVisible();
+  await page.getByLabel("Clear local app state and restart").click();
+  await expect(page.getByText("A calm daily coach")).toBeVisible();
+  await expect(page.evaluate(() => localStorage.getItem("pmhc:debug-force-error"))).resolves.toBeNull();
+});
+
 test("mobile web MVP opens, completes onboarding, and records a quick log", async ({ page }) => {
   await page.goto("/");
 

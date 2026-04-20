@@ -16,6 +16,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Supports English/Russian localization for the app shell, Today rules, Coach explanations, quick logs, and core content.
 - Summarizes local Track history into a baseline snapshot with recent counts, score averages, latest values, and conservative symptom cautions.
 - Adds a Programs day plan with task-level local checklist progress.
+- Shows a startup loading state and recovery screen instead of leaving users on a blank page.
 - Includes Playwright web smoke tests for onboarding, Today, quick logging, Learn progress, Programs checklist, language switching, and sync status.
 
 ## What This MVP Does Not Do
@@ -38,6 +39,7 @@ packages/
   ui/        Shared design tokens
 docs/
   product/   Product brief
+  operations/Blank-screen recovery and local run troubleshooting
   contracts/ Today/onboarding contracts
   architecture/ Build plan
 ```
@@ -71,3 +73,4 @@ The app now supports:
 10. English/Russian language switch in onboarding and Settings.
 11. Track baseline snapshot from local quick logs.
 12. Programs day plan with three conservative tasks and saved checklist state.
+13. Startup recovery path for corrupted local demo state or render failures.

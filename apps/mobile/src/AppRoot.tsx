@@ -1,8 +1,10 @@
 import { SafeAreaView, StatusBar, StyleSheet, View } from "react-native";
 import { getCopy } from "@pmhc/i18n";
 import { colors } from "@pmhc/ui";
+import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { BottomNav } from "./components/BottomNav";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
+import { LoadingScreen } from "./screens/LoadingScreen";
 import { TodayScreen } from "./screens/TodayScreen";
 import { TrackScreen } from "./screens/TrackScreen";
 import { LearnScreen } from "./screens/LearnScreen";
@@ -11,10 +13,32 @@ import { CoachScreen } from "./screens/CoachScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { PrivacyLockScreen } from "./screens/PrivacyLockScreen";
 import { useAppState } from "./state/useAppState";
+import { debugStorageKeys } from "./storage/appStorageKeys";
 
 export function AppRoot() {
+  return (
+    <AppErrorBoundary>
+      <AppRootContent />
+    </AppErrorBoundary>
+  );
+}
+
+function AppRootContent() {
   const app = useAppState();
   const copy = getCopy(app.language);
+
+  if (shouldForceStartupError()) {
+    throw new Error("Forced startup recovery check");
+  }
+
+  if (!app.isReady) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="light-content" />
+        <LoadingScreen />
+      </SafeAreaView>
+    );
+  }
 
   if (!app.hasCompletedOnboarding) {
     return (
@@ -97,3 +121,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+function shouldForceStartupError() {
+  if (process.env.NODE_ENV === "production" || typeof window === "undefined") {
+    return false;
+  }
+
+  return window.localStorage.getItem(debugStorageKeys[0]) === "1";
+}
