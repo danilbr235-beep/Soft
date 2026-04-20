@@ -66,6 +66,16 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("2 today - 2 last 7 days")).toBeVisible();
   await expect(page.getByText("Average 7/10 - latest 7/10")).toBeVisible();
   await expect(page.getByText("Confidence: 7/10")).toBeVisible();
+  await expect(page.getByText("Safety note")).toBeVisible();
+  await page.getByLabel("Filter Track logs: Scores").click();
+  await page.getByLabel("Edit Confidence log").click();
+  await expect(page.getByText("Confidence: 10/10")).toBeVisible();
+  await page.getByLabel("Prepare JSON export").click();
+  await expect(page.getByText("Export ready: 1 log")).toBeVisible();
+  await page.getByLabel("Filter Track logs: Symptoms").click();
+  await page.getByLabel("Delete Symptoms log").click();
+  await expect(page.getByText("No logs for this filter yet.")).toBeVisible();
+  await expect(page.getByText("Safety note")).toBeHidden();
   await expect(page.getByText("2 pending local writes")).toBeVisible();
 
   await page.getByLabel("Sync demo writes").click();

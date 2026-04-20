@@ -70,6 +70,8 @@ function AppRootContent() {
             logs={app.logs}
             copy={copy}
             pendingSyncCount={app.pendingSyncCount}
+            onDeleteLog={app.deleteLog}
+            onUpdateLog={app.updateLogValue}
             onLog={app.openQuickLog}
             onSync={app.syncQueuedWrites}
           />

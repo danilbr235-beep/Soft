@@ -3,6 +3,7 @@ import type { AppLanguage, QuickLogType } from "@pmhc/types";
 export type LocalizedTab = "Today" | "Track" | "Learn" | "Programs" | "Coach" | "Settings";
 
 type ActionKindCopy = Record<"Learn" | "Check-in" | "Practice" | "Reflect", string>;
+type TrackFilterCopy = Record<"all" | "scores" | "symptoms" | "routines", string>;
 
 export type LanguageCopy = {
   common: {
@@ -69,7 +70,19 @@ export type LanguageCopy = {
     synced: string;
     syncAction: string;
     recentLogs: string;
+    filterTitle: string;
+    filterLabels: TrackFilterCopy;
     noLogs: string;
+    noFilteredLogs: string;
+    editAction: string;
+    deleteAction: string;
+    editLog: (label: string) => string;
+    deleteLog: (label: string) => string;
+    exportTitle: string;
+    exportBody: string;
+    exportAction: string;
+    exportReady: (count: number) => string;
+    allClear: string;
   };
   learn: {
     title: string;
@@ -349,7 +362,24 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       synced: "All local writes are synced.",
       syncAction: "Sync demo writes",
       recentLogs: "Recent logs",
+      filterTitle: "Filter history",
+      filterLabels: {
+        all: "All",
+        scores: "Scores",
+        symptoms: "Symptoms",
+        routines: "Routines",
+      },
       noLogs: "No logs yet. Add one signal and Today will update.",
+      noFilteredLogs: "No logs for this filter yet.",
+      editAction: "Edit",
+      deleteAction: "Delete",
+      editLog: (label) => `Edit ${label} log`,
+      deleteLog: (label) => `Delete ${label} log`,
+      exportTitle: "Data export",
+      exportBody: "Prepare a local JSON preview for the currently filtered history.",
+      exportAction: "Prepare JSON export",
+      exportReady: (count) => `Export ready: ${count} log${count === 1 ? "" : "s"}`,
+      allClear: "All clear",
     },
     learn: {
       title: "Learn",
@@ -516,7 +546,24 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       synced: "Все локальные записи синхронизированы.",
       syncAction: "Синхронизировать демо-записи",
       recentLogs: "Последние записи",
+      filterTitle: "Фильтр истории",
+      filterLabels: {
+        all: "Все",
+        scores: "Оценки",
+        symptoms: "Симптомы",
+        routines: "Рутины",
+      },
       noLogs: "Записей пока нет. Добавьте один сигнал, и Today обновится.",
+      noFilteredLogs: "В этом фильтре пока пусто.",
+      editAction: "Изменить",
+      deleteAction: "Удалить",
+      editLog: (label) => `Изменить запись: ${label}`,
+      deleteLog: (label) => `Удалить запись: ${label}`,
+      exportTitle: "Экспорт данных",
+      exportBody: "Подготовьте локальный JSON для выбранной части истории.",
+      exportAction: "Подготовить JSON",
+      exportReady: (count) => `Готово к экспорту: ${count} ${russianLogWord(count)}`,
+      allClear: "Все спокойно",
     },
     learn: {
       title: "База",
@@ -607,4 +654,23 @@ function confidenceLabel(level: string, language: AppLanguage) {
   }
 
   return level;
+}
+
+function russianLogWord(count: number) {
+  const lastTwo = count % 100;
+  const last = count % 10;
+
+  if (lastTwo >= 11 && lastTwo <= 14) {
+    return "записей";
+  }
+
+  if (last === 1) {
+    return "запись";
+  }
+
+  if (last >= 2 && last <= 4) {
+    return "записи";
+  }
+
+  return "записей";
 }

@@ -18,6 +18,7 @@ import {
 } from "@pmhc/programs";
 import { buildTodayPayload } from "@pmhc/rules";
 import { createQueuedQuickLogJob, markSyncSucceeded, nextPendingJobs } from "@pmhc/sync";
+import { deleteTrackingLog, updateTrackingLogValue } from "@pmhc/tracking";
 import type {
   ContentItem,
   ContentProgress,
@@ -308,6 +309,20 @@ export function useAppState() {
     await persistSyncQueue(syncedQueue);
   }, [persistSyncQueue, syncQueue]);
 
+  const updateLogValue = useCallback(
+    async (logId: string, value: unknown) => {
+      await persistLogs(updateTrackingLogValue(logs, logId, value));
+    },
+    [logs, persistLogs],
+  );
+
+  const deleteLog = useCallback(
+    async (logId: string) => {
+      await persistLogs(deleteTrackingLog(logs, logId));
+    },
+    [logs, persistLogs],
+  );
+
   const toggleSavedContent = useCallback(
     async (itemId: string) => {
       await persistContentProgress(toggleContentSaved(contentProgress, itemId, new Date().toISOString()));
@@ -375,6 +390,7 @@ export function useAppState() {
     completeOnboarding,
     changeLanguage,
     completeProgramToday,
+    deleteLog,
     lockNow,
     openQuickLog: setSelectedQuickLog,
     resetOnboarding,
@@ -384,6 +400,7 @@ export function useAppState() {
     toggleProgramTask,
     toggleSavedContent,
     completeContent,
+    updateLogValue,
     unlock,
   };
 }

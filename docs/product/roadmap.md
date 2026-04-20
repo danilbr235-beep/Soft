@@ -24,11 +24,11 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 
 ## P1 Track
 
-- Add a log history view with filters by signal type.
-- Support edit and delete for local logs.
+- Add a log history view with filters by signal type. (Initial slice complete.)
+- Support edit and delete for local logs. (Initial slice complete.)
 - Add weekly snapshots for sleep, energy, confidence, libido, and symptoms.
 - Show conservative correlation hints without pretending causality.
-- Add CSV/JSON export for local data.
+- Add CSV/JSON export for local data. (JSON preview complete.)
 - Keep quick logs low-friction and one-handed on mobile.
 
 ## P1 Programs
