@@ -115,6 +115,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
 
   await page.getByLabel("Open Settings").click();
   await expect(page.getByText(/Vault lock is enabled/i)).toBeVisible();
+  await expect(page.getByText("Auto-lock after 5 minutes of inactivity.")).toBeVisible();
   await page.getByLabel("Enter 4-8 digits").fill("1234");
   await page.getByLabel("Save PIN").click();
   await expect(page.getByText("PIN is set for this local demo.")).toBeVisible();

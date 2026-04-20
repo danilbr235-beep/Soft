@@ -2,6 +2,8 @@ import type { OnboardingResult, PrivacyLockState } from "@pmhc/types";
 
 type PrivacyChoices = OnboardingResult["privacy"];
 
+export const DEFAULT_PRIVACY_AUTO_LOCK_MS = 5 * 60 * 1000;
+
 export function createPrivacyLockState(privacy: PrivacyChoices, updatedAt: string): PrivacyLockState {
   return {
     vaultLockEnabled: privacy.vaultLockEnabled,
@@ -10,6 +12,8 @@ export function createPrivacyLockState(privacy: PrivacyChoices, updatedAt: strin
     pinHash: null,
     pinSalt: null,
     failedUnlockAttempts: 0,
+    autoLockAfterMs: DEFAULT_PRIVACY_AUTO_LOCK_MS,
+    lastActivityAt: privacy.vaultLockEnabled ? updatedAt : null,
     updatedAt,
   };
 }
@@ -21,11 +25,17 @@ export function lockPrivacyVault(state: PrivacyLockState, updatedAt: string): Pr
     return { ...normalized, locked: false, updatedAt };
   }
 
-  return { ...normalized, locked: true, updatedAt };
+  return { ...normalized, locked: true, lastActivityAt: null, updatedAt };
 }
 
 export function unlockPrivacyVault(state: PrivacyLockState, updatedAt: string): PrivacyLockState {
-  return { ...normalizePrivacyLockState(state), locked: false, failedUnlockAttempts: 0, updatedAt };
+  return {
+    ...normalizePrivacyLockState(state),
+    locked: false,
+    failedUnlockAttempts: 0,
+    lastActivityAt: updatedAt,
+    updatedAt,
+  };
 }
 
 export function unlockPrivacyVaultWithPin(
@@ -69,8 +79,48 @@ export function toggleVaultLock(state: PrivacyLockState, updatedAt: string): Pri
     vaultLockEnabled,
     locked: vaultLockEnabled ? state.locked : false,
     failedUnlockAttempts: vaultLockEnabled ? normalized.failedUnlockAttempts : 0,
+    lastActivityAt: vaultLockEnabled ? normalized.lastActivityAt ?? updatedAt : null,
     updatedAt,
   };
+}
+
+export function recordPrivacyActivity(state: PrivacyLockState, updatedAt: string): PrivacyLockState {
+  const normalized = normalizePrivacyLockState(state);
+
+  if (!normalized.vaultLockEnabled || normalized.locked) {
+    return normalized;
+  }
+
+  return {
+    ...normalized,
+    lastActivityAt: updatedAt,
+    updatedAt,
+  };
+}
+
+export function shouldAutoLockPrivacyVault(state: PrivacyLockState, now: string): boolean {
+  const normalized = normalizePrivacyLockState(state);
+
+  if (!normalized.vaultLockEnabled || normalized.locked || normalized.autoLockAfterMs == null || !normalized.lastActivityAt) {
+    return false;
+  }
+
+  const lastActivityMs = Date.parse(normalized.lastActivityAt);
+  const nowMs = Date.parse(now);
+
+  if (Number.isNaN(lastActivityMs) || Number.isNaN(nowMs)) {
+    return false;
+  }
+
+  return nowMs - lastActivityMs >= normalized.autoLockAfterMs;
+}
+
+export function lockPrivacyVaultIfInactive(state: PrivacyLockState, now: string): PrivacyLockState {
+  if (!shouldAutoLockPrivacyVault(state, now)) {
+    return normalizePrivacyLockState(state);
+  }
+
+  return lockPrivacyVault(state, now);
 }
 
 export function setPrivacyPin(
@@ -96,6 +146,7 @@ export function clearPrivacyPin(state: PrivacyLockState, updatedAt: string): Pri
     pinHash: null,
     pinSalt: null,
     failedUnlockAttempts: 0,
+    lastActivityAt: null,
     updatedAt,
   };
 }
@@ -113,6 +164,8 @@ export function normalizePrivacyLockState(state: Partial<PrivacyLockState>): Pri
     pinHash: state.pinHash ?? null,
     pinSalt: state.pinSalt ?? null,
     failedUnlockAttempts: state.failedUnlockAttempts ?? 0,
+    autoLockAfterMs: state.autoLockAfterMs === undefined ? DEFAULT_PRIVACY_AUTO_LOCK_MS : state.autoLockAfterMs,
+    lastActivityAt: state.lastActivityAt ?? null,
     updatedAt: state.updatedAt ?? "",
   };
 }

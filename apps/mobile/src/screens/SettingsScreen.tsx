@@ -67,6 +67,12 @@ export function SettingsScreen({
         <Text style={styles.title}>{copy.settings.privacyVault}</Text>
         <Text style={styles.body}>{copy.settings.vaultStatus(privacyLock.vaultLockEnabled, privacyLock.discreetNotifications)}</Text>
         <Text style={styles.statusText}>{hasPrivacyPin ? copy.settings.pinIsSet : copy.settings.pinNotSet}</Text>
+        {privacyLock.autoLockAfterMs ? (
+          <View style={styles.infoBlock}>
+            <Text style={styles.infoTitle}>{copy.settings.autoLockTitle}</Text>
+            <Text style={styles.body}>{copy.settings.autoLockStatus(Math.max(1, Math.round(privacyLock.autoLockAfterMs / 60000)))}</Text>
+          </View>
+        ) : null}
         <View style={styles.actions}>
           <Pressable
             accessibilityLabel={privacyLock.vaultLockEnabled ? copy.settings.turnVaultOff : copy.settings.turnVaultOn}
@@ -148,6 +154,17 @@ const styles = StyleSheet.create({
     color: colors.amber,
     fontWeight: "800",
     lineHeight: 20,
+  },
+  infoBlock: {
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    gap: spacing.xs,
+    padding: spacing.md,
+  },
+  infoTitle: {
+    color: colors.text,
+    fontWeight: "900",
   },
   actions: {
     flexDirection: "row",

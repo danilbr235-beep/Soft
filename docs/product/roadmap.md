@@ -62,7 +62,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 
 - Add a real PIN lock for sensitive app sections. (Local demo PIN slice complete; production secure storage still later.)
 - Add biometric unlock later for iOS and Android.
-- Support automatic lock after inactivity.
+- Support automatic lock after inactivity. (Initial local inactivity timer complete.)
 - Add discreet notification copy and hidden-label mode.
 - Add a clear-data flow with export-before-delete.
 - Move sensitive lock state into secure storage when native builds are ready.
@@ -128,6 +128,6 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 2. Build Track 2.0: history, edit/delete, weekly snapshot, export.
 3. Build Programs 2.0: detail screen, varied day plans, skip/rest, summaries.
 4. Build deeper Learn detail pages, more content, and Russian content polish.
-5. Harden privacy lock with secure storage, inactivity timeout, and native unlock.
+5. Harden privacy lock with secure storage and native unlock.
 6. Add backend and production sync.
 7. Add AI/RAG and device integrations only after safety and content foundations are strong.

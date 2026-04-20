@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_PRIVACY_AUTO_LOCK_MS,
   clearPrivacyPin,
   createPrivacyLockState,
   hasPrivacyPin,
+  lockPrivacyVaultIfInactive,
   lockPrivacyVault,
   normalizePrivacyLockState,
+  recordPrivacyActivity,
   setPrivacyPin,
+  shouldAutoLockPrivacyVault,
   toggleVaultLock,
   unlockPrivacyVault,
   unlockPrivacyVaultWithPin,
@@ -25,6 +29,8 @@ describe("privacy lock helpers", () => {
       pinHash: null,
       pinSalt: null,
       failedUnlockAttempts: 0,
+      autoLockAfterMs: DEFAULT_PRIVACY_AUTO_LOCK_MS,
+      lastActivityAt: "2026-04-19T11:00:00.000Z",
       updatedAt: "2026-04-19T11:00:00.000Z",
     });
   });
@@ -52,6 +58,8 @@ describe("privacy lock helpers", () => {
       pinHash: null,
       pinSalt: null,
       failedUnlockAttempts: 0,
+      autoLockAfterMs: DEFAULT_PRIVACY_AUTO_LOCK_MS,
+      lastActivityAt: "2026-04-19T11:00:00.000Z",
       updatedAt: "2026-04-19T11:00:00.000Z",
     };
 
@@ -62,6 +70,8 @@ describe("privacy lock helpers", () => {
       pinHash: null,
       pinSalt: null,
       failedUnlockAttempts: 0,
+      autoLockAfterMs: DEFAULT_PRIVACY_AUTO_LOCK_MS,
+      lastActivityAt: null,
       updatedAt: "2026-04-19T11:10:00.000Z",
     });
   });
@@ -81,6 +91,8 @@ describe("privacy lock helpers", () => {
       pinHash: null,
       pinSalt: null,
       failedUnlockAttempts: 0,
+      autoLockAfterMs: DEFAULT_PRIVACY_AUTO_LOCK_MS,
+      lastActivityAt: null,
       updatedAt: "2026-04-19T11:00:00.000Z",
     });
   });
@@ -147,5 +159,49 @@ describe("privacy lock helpers", () => {
         failedUnlockAttempts: 0,
       },
     });
+  });
+
+  it("records activity and does not auto-lock while activity is fresh", () => {
+    const active = recordPrivacyActivity(
+      createPrivacyLockState(
+        { vaultLockEnabled: true, discreetNotifications: true },
+        "2026-04-19T11:00:00.000Z",
+      ),
+      "2026-04-19T11:02:00.000Z",
+    );
+
+    expect(active.lastActivityAt).toBe("2026-04-19T11:02:00.000Z");
+    expect(shouldAutoLockPrivacyVault(active, "2026-04-19T11:04:59.000Z")).toBe(false);
+  });
+
+  it("auto-locks an enabled unlocked vault after the inactivity window", () => {
+    const active = recordPrivacyActivity(
+      createPrivacyLockState(
+        { vaultLockEnabled: true, discreetNotifications: true },
+        "2026-04-19T11:00:00.000Z",
+      ),
+      "2026-04-19T11:00:00.000Z",
+    );
+
+    expect(shouldAutoLockPrivacyVault(active, "2026-04-19T11:05:01.000Z")).toBe(true);
+    expect(lockPrivacyVaultIfInactive(active, "2026-04-19T11:05:01.000Z")).toMatchObject({
+      locked: true,
+      updatedAt: "2026-04-19T11:05:01.000Z",
+    });
+  });
+
+  it("does not auto-lock when the vault is disabled, already locked, or timeout is off", () => {
+    const disabled = createPrivacyLockState(
+      { vaultLockEnabled: false, discreetNotifications: true },
+      "2026-04-19T11:00:00.000Z",
+    );
+    const enabled = createPrivacyLockState(
+      { vaultLockEnabled: true, discreetNotifications: true },
+      "2026-04-19T11:00:00.000Z",
+    );
+
+    expect(shouldAutoLockPrivacyVault(disabled, "2026-04-19T12:00:00.000Z")).toBe(false);
+    expect(shouldAutoLockPrivacyVault({ ...enabled, locked: true }, "2026-04-19T12:00:00.000Z")).toBe(false);
+    expect(shouldAutoLockPrivacyVault({ ...enabled, autoLockAfterMs: null }, "2026-04-19T12:00:00.000Z")).toBe(false);
   });
 });

@@ -101,6 +101,8 @@ export type PrivacyLockState = {
   pinHash: string | null;
   pinSalt: string | null;
   failedUnlockAttempts: number;
+  autoLockAfterMs: number | null;
+  lastActivityAt: string | null;
   updatedAt: string;
 };
 

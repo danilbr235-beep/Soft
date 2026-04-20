@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AppState } from "react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { markContentCompleted, mergeContentProgress, toggleContentSaved } from "@pmhc/learning";
 import { createOnboardingResult } from "@pmhc/onboarding";
@@ -6,8 +7,10 @@ import {
   clearPrivacyPin,
   createPrivacyLockState,
   hasPrivacyPin,
+  lockPrivacyVaultIfInactive,
   lockPrivacyVault,
   normalizePrivacyLockState,
+  recordPrivacyActivity,
   setPrivacyPin,
   toggleVaultLock,
   unlockPrivacyVaultWithPin,
@@ -111,6 +114,8 @@ const starterInput: RuleEngineInput = {
 };
 
 const fallbackPrivacyLock = createPrivacyLockState(fallbackOnboarding.privacy, "");
+const privacyActivityThrottleMs = 15 * 1000;
+const webActivityEvents = ["keydown", "mousedown", "mousemove", "scroll", "touchstart"] as const;
 
 export function useAppState() {
   const [activeTab, setActiveTab] = useState<AppTab>("Today");
@@ -229,6 +234,71 @@ export function useAppState() {
     setPrivacyLock(nextPrivacyLock);
     await privacyLockRepository.save(nextPrivacyLock);
   }, []);
+
+  useEffect(() => {
+    if (!isReady || !privacyLock.vaultLockEnabled || privacyLock.locked) {
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const lockedState = lockPrivacyVaultIfInactive(privacyLock, now);
+
+    if (lockedState.locked !== privacyLock.locked) {
+      void persistPrivacyLock(lockedState);
+      return;
+    }
+
+    const remainingMs = remainingAutoLockMs(privacyLock);
+
+    if (remainingMs == null) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      void persistPrivacyLock(lockPrivacyVaultIfInactive(privacyLock, new Date().toISOString()));
+    }, remainingMs + 50);
+
+    return () => clearTimeout(timeout);
+  }, [isReady, persistPrivacyLock, privacyLock]);
+
+  useEffect(() => {
+    if (!isReady || !privacyLock.vaultLockEnabled || privacyLock.locked) {
+      return;
+    }
+
+    function handleActivity() {
+      if (shouldThrottlePrivacyActivity(privacyLock)) {
+        return;
+      }
+
+      void persistPrivacyLock(recordPrivacyActivity(privacyLock, new Date().toISOString()));
+    }
+
+    for (const eventName of webActivityEvents) {
+      if (typeof window !== "undefined") {
+        window.addEventListener(eventName, handleActivity, { passive: true });
+      }
+    }
+
+    const appStateSubscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "background" || nextState === "inactive") {
+        void persistPrivacyLock(lockPrivacyVault(privacyLock, new Date().toISOString()));
+        return;
+      }
+
+      handleActivity();
+    });
+
+    return () => {
+      for (const eventName of webActivityEvents) {
+        if (typeof window !== "undefined") {
+          window.removeEventListener(eventName, handleActivity);
+        }
+      }
+
+      appStateSubscription.remove();
+    };
+  }, [isReady, persistPrivacyLock, privacyLock]);
 
   const persistProgramProgress = useCallback(async (nextProgress: ProgramProgress) => {
     setProgramProgress(nextProgress);
@@ -522,6 +592,8 @@ function isNullablePrivacyLockState(value: unknown): value is PrivacyLockState |
       (typeof value.pinHash === "string" || value.pinHash === null || value.pinHash === undefined) &&
       (typeof value.pinSalt === "string" || value.pinSalt === null || value.pinSalt === undefined) &&
       (typeof value.failedUnlockAttempts === "number" || value.failedUnlockAttempts === undefined) &&
+      (typeof value.autoLockAfterMs === "number" || value.autoLockAfterMs === null || value.autoLockAfterMs === undefined) &&
+      (typeof value.lastActivityAt === "string" || value.lastActivityAt === null || value.lastActivityAt === undefined) &&
       typeof value.updatedAt === "string")
   );
 }
@@ -552,4 +624,32 @@ function isCompletedTaskMap(value: unknown): value is Record<string, string[]> {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function remainingAutoLockMs(privacyLock: PrivacyLockState) {
+  if (!privacyLock.autoLockAfterMs || !privacyLock.lastActivityAt) {
+    return null;
+  }
+
+  const lastActivityMs = Date.parse(privacyLock.lastActivityAt);
+
+  if (Number.isNaN(lastActivityMs)) {
+    return null;
+  }
+
+  return Math.max(privacyLock.autoLockAfterMs - (Date.now() - lastActivityMs), 0);
+}
+
+function shouldThrottlePrivacyActivity(privacyLock: PrivacyLockState) {
+  if (!privacyLock.lastActivityAt) {
+    return false;
+  }
+
+  const lastActivityMs = Date.parse(privacyLock.lastActivityAt);
+
+  if (Number.isNaN(lastActivityMs)) {
+    return false;
+  }
+
+  return Date.now() - lastActivityMs < privacyActivityThrottleMs;
 }

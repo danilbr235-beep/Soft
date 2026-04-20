@@ -166,6 +166,8 @@ export type LanguageCopy = {
     clearPin: string;
     pinIsSet: string;
     pinNotSet: string;
+    autoLockTitle: string;
+    autoLockStatus: (minutes: number) => string;
     medicalBoundary: string;
     medicalBoundaryBody: string;
     reset: string;
@@ -532,6 +534,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       clearPin: "Remove PIN",
       pinIsSet: "PIN is set for this local demo.",
       pinNotSet: "No PIN is set yet.",
+      autoLockTitle: "Auto-lock",
+      autoLockStatus: (minutes) => `Auto-lock after ${minutes} minutes of inactivity.`,
       medicalBoundary: "Medical boundary",
       medicalBoundaryBody: "This app supports education and tracking. It does not diagnose or replace professional care.",
       reset: "Reset local demo state",
@@ -764,6 +768,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       clearPin: "Убрать PIN",
       pinIsSet: "PIN задан для этого локального демо.",
       pinNotSet: "PIN пока не задан.",
+      autoLockTitle: "Автозамок",
+      autoLockStatus: (minutes) => `Автозамок сработает через ${minutes} ${russianMinuteWord(minutes)} бездействия.`,
       medicalBoundary: "Медицинская граница",
       medicalBoundaryBody: "Приложение помогает учиться и наблюдать за собой. Оно не ставит диагнозы и не заменяет врача.",
       reset: "Сбросить локальное демо",
@@ -842,4 +848,23 @@ function russianDayWord(count: number) {
   }
 
   return "дней";
+}
+
+function russianMinuteWord(count: number) {
+  const lastTwo = count % 100;
+  const last = count % 10;
+
+  if (lastTwo >= 11 && lastTwo <= 14) {
+    return "минут";
+  }
+
+  if (last === 1) {
+    return "минуту";
+  }
+
+  if (last >= 2 && last <= 4) {
+    return "минуты";
+  }
+
+  return "минут";
 }
