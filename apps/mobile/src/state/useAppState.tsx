@@ -11,8 +11,10 @@ import {
 import {
   applyProgramProgress,
   buildProgramDayPlan,
+  buildProgramProgressSummary,
   completeCurrentProgramDay,
   createProgramProgress,
+  markCurrentProgramRestDay,
   programCompletionPercent,
   toggleCurrentProgramTask,
 } from "@pmhc/programs";
@@ -28,6 +30,7 @@ import type {
   PrivacyLockState,
   ProgramDayPlan,
   ProgramProgress,
+  ProgramProgressSummary,
   QuickLogDefinition,
   RuleEngineInput,
   SyncQueueJob,
@@ -196,6 +199,9 @@ export function useAppState() {
   const programDayPlan = useMemo<ProgramDayPlan | null>(() => {
     return today.activeProgram ? buildProgramDayPlan(today.activeProgram, programProgress) : null;
   }, [programProgress, today.activeProgram]);
+  const programSummary = useMemo<ProgramProgressSummary | null>(() => {
+    return today.activeProgram ? buildProgramProgressSummary(today.activeProgram, programProgress) : null;
+  }, [programProgress, today.activeProgram]);
 
   const persistLogs = useCallback(async (nextLogs: LogEntry[]) => {
     setLogs(nextLogs);
@@ -359,6 +365,16 @@ export function useAppState() {
     await persistProgramProgress(completeCurrentProgramDay(activeProgram, programProgress, new Date().toISOString()));
   }, [persistProgramProgress, programProgress, today.activeProgram]);
 
+  const restProgramToday = useCallback(async () => {
+    const activeProgram = today.activeProgram;
+
+    if (!activeProgram) {
+      return;
+    }
+
+    await persistProgramProgress(markCurrentProgramRestDay(activeProgram, programProgress, new Date().toISOString()));
+  }, [persistProgramProgress, programProgress, today.activeProgram]);
+
   const toggleProgramTask = useCallback(
     async (taskId: string) => {
       const activeProgram = today.activeProgram;
@@ -386,6 +402,7 @@ export function useAppState() {
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,
     programDayPlan,
+    programSummary,
     programCompletionPercent: today.activeProgram ? programCompletionPercent(today.activeProgram, programProgress) : 0,
     completeOnboarding,
     changeLanguage,
@@ -394,6 +411,7 @@ export function useAppState() {
     lockNow,
     openQuickLog: setSelectedQuickLog,
     resetOnboarding,
+    restProgramToday,
     setActiveTab,
     syncQueuedWrites,
     togglePrivacyVault,
@@ -490,6 +508,8 @@ function isNullableProgramProgress(value: unknown): value is ProgramProgress | n
       Array.isArray(value.completedDayIndexes) &&
       value.completedDayIndexes.every((day) => typeof day === "number") &&
       (value.completedTaskIdsByDay === undefined || isCompletedTaskMap(value.completedTaskIdsByDay)) &&
+      (value.restDayIndexes === undefined ||
+        (Array.isArray(value.restDayIndexes) && value.restDayIndexes.every((day) => typeof day === "number"))) &&
       (typeof value.lastCompletedAt === "string" || value.lastCompletedAt === null) &&
       typeof value.updatedAt === "string")
   );

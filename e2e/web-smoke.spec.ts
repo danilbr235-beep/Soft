@@ -95,6 +95,13 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("1 of 3 done")).toBeVisible();
   await page.getByLabel("Complete program day").click();
   await expect(page.getByText("Day 2 of 14")).toBeVisible();
+  await expect(page.getByText("1 completed")).toBeVisible();
+  await expect(page.getByText("Practice day")).toBeVisible();
+  await expect(page.getByText("Confidence map")).toBeVisible();
+  await page.getByLabel("Take a program rest day").click();
+  await expect(page.getByText("Day 3 of 14")).toBeVisible();
+  await expect(page.getByText("1 rest")).toBeVisible();
+  await expect(page.getByText("12 left")).toBeVisible();
 
   await page.getByLabel("Open Coach").click();
   await expect(page.getByText("How certain is this?")).toBeVisible();

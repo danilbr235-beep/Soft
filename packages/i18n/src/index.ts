@@ -1,4 +1,5 @@
 import type { AppLanguage, QuickLogType } from "@pmhc/types";
+import type { ProgramDayPhase } from "@pmhc/types";
 
 export type LocalizedTab = "Today" | "Track" | "Learn" | "Programs" | "Coach" | "Settings";
 
@@ -104,6 +105,12 @@ export type LanguageCopy = {
     percentComplete: (percent: number) => string;
     completeToday: string;
     completeProgramDay: string;
+    restToday: string;
+    restProgramDay: string;
+    completedDays: (count: number) => string;
+    restDays: (count: number) => string;
+    remainingDays: (count: number) => string;
+    phaseLabels: Record<ProgramDayPhase, string>;
     nextCandidates: string;
     candidates: string[];
     dayPlanTitle: string;
@@ -205,6 +212,11 @@ const taskTitlesEn: Record<string, string> = {
   "recovery-only": "Recovery-only action",
   "boundary-note": "Boundary note",
   "recovery-reset": "Recovery reset",
+  "confidence-map": "Confidence map",
+  "body-reset": "Body reset",
+  "tiny-action": "Tiny action",
+  "weekly-review": "Weekly review",
+  "next-week-boundary": "Next-week boundary",
 };
 
 const taskDescriptionsEn: Record<string, string> = {
@@ -219,6 +231,11 @@ const taskDescriptionsEn: Record<string, string> = {
   "recovery-only": "Choose a low-intensity action that does not chase performance.",
   "boundary-note": "Write what to avoid today so the plan stays conservative.",
   "recovery-reset": "Use one short downshift action before adding more data.",
+  "confidence-map": "Name the situation and the signal without turning it into a verdict.",
+  "body-reset": "Use one calm reset before any bigger experiment.",
+  "tiny-action": "Choose one small action that supports steadiness today.",
+  "weekly-review": "Look for one pattern without forcing a conclusion.",
+  "next-week-boundary": "Name one thing to keep light next week.",
 };
 
 const taskTitlesRu: Record<string, string> = {
@@ -233,6 +250,11 @@ const taskTitlesRu: Record<string, string> = {
   "recovery-only": "Только восстановление",
   "boundary-note": "Заметка о границах",
   "recovery-reset": "Короткий сброс напряжения",
+  "confidence-map": "Карта уверенности",
+  "body-reset": "Сброс напряжения",
+  "tiny-action": "Маленькое действие",
+  "weekly-review": "Итог недели",
+  "next-week-boundary": "Граница на следующую неделю",
 };
 
 const taskDescriptionsRu: Record<string, string> = {
@@ -247,6 +269,11 @@ const taskDescriptionsRu: Record<string, string> = {
   "recovery-only": "Выберите низкоинтенсивное действие без гонки за результатом.",
   "boundary-note": "Запишите, чего сегодня лучше не делать, чтобы план остался осторожным.",
   "recovery-reset": "Сделайте короткое восстановительное действие до новых логов.",
+  "confidence-map": "Назовите ситуацию и сигнал без вывода о себе.",
+  "body-reset": "Сделайте один спокойный сброс перед любым большим экспериментом.",
+  "tiny-action": "Выберите маленький шаг, который сегодня поддержит устойчивость.",
+  "weekly-review": "Найдите один паттерн, но не заставляйте себя делать вывод.",
+  "next-week-boundary": "Назовите одну вещь, которую на следующей неделе лучше оставить полегче.",
 };
 
 const planSummariesEn: Record<string, string> = {
@@ -401,6 +428,16 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       percentComplete: (percent) => `${percent}% complete`,
       completeToday: "Complete today",
       completeProgramDay: "Complete program day",
+      restToday: "Take rest day",
+      restProgramDay: "Take a program rest day",
+      completedDays: (count) => `${count} completed`,
+      restDays: (count) => `${count} rest`,
+      remainingDays: (count) => `${count} left`,
+      phaseLabels: {
+        baseline: "Baseline day",
+        practice: "Practice day",
+        recovery: "Recovery day",
+      },
       nextCandidates: "Next candidates",
       candidates: ["Pelvic floor consistency starter", "Sleep and environment reset", "Confidence reset"],
       dayPlanTitle: "Today's plan",
@@ -585,6 +622,16 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       percentComplete: (percent) => `${percent}% завершено`,
       completeToday: "Закрыть день",
       completeProgramDay: "Завершить день программы",
+      restToday: "День полегче",
+      restProgramDay: "Отметить день полегче",
+      completedDays: (count) => `${count} ${russianDayWord(count)} сделано`,
+      restDays: (count) => `${count} ${russianDayWord(count)} полегче`,
+      remainingDays: (count) => `${count} ${russianDayWord(count)} осталось`,
+      phaseLabels: {
+        baseline: "День наблюдения",
+        practice: "День практики",
+        recovery: "День восстановления",
+      },
       nextCandidates: "Что можно добавить позже",
       candidates: ["Мягкая регулярность для тазового дна", "Сон и восстановление", "Спокойная уверенность"],
       dayPlanTitle: "План на сегодня",
@@ -673,4 +720,23 @@ function russianLogWord(count: number) {
   }
 
   return "записей";
+}
+
+function russianDayWord(count: number) {
+  const lastTwo = count % 100;
+  const last = count % 10;
+
+  if (lastTwo >= 11 && lastTwo <= 14) {
+    return "дней";
+  }
+
+  if (last === 1) {
+    return "день";
+  }
+
+  if (last >= 2 && last <= 4) {
+    return "дня";
+  }
+
+  return "дней";
 }

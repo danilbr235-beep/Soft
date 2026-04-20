@@ -121,6 +121,8 @@ export type Program = {
 
 export type ProgramTaskKind = "check_in" | "practice" | "reflect" | "learn" | "recovery";
 
+export type ProgramDayPhase = "baseline" | "practice" | "recovery";
+
 export type ProgramDayTask = {
   id: string;
   kind: ProgramTaskKind;
@@ -132,10 +134,12 @@ export type ProgramDayTask = {
 export type ProgramDayPlan = {
   programId: string;
   dayIndex: number;
+  phase: ProgramDayPhase;
   title: string;
   summary: string;
   tasks: ProgramDayTask[];
   completedTaskIds: string[];
+  rested: boolean;
   completed: boolean;
 };
 
@@ -143,8 +147,17 @@ export type ProgramProgress = {
   programId: string;
   completedDayIndexes: number[];
   completedTaskIdsByDay?: Record<string, string[]>;
+  restDayIndexes?: number[];
   lastCompletedAt: string | null;
   updatedAt: string;
+};
+
+export type ProgramProgressSummary = {
+  completedDays: number;
+  restDays: number;
+  remainingDays: number;
+  resolvedDays: number;
+  totalDays: number;
 };
 
 export type LogEntry = {

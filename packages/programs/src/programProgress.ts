@@ -1,10 +1,19 @@
-import type { Program, ProgramDayPlan, ProgramDayTask, ProgramProgress, ProgramTaskKind } from "@pmhc/types";
+import type {
+  Program,
+  ProgramDayPhase,
+  ProgramDayPlan,
+  ProgramDayTask,
+  ProgramProgress,
+  ProgramProgressSummary,
+  ProgramTaskKind,
+} from "@pmhc/types";
 
 export function createProgramProgress(program: Program, updatedAt: string): ProgramProgress {
   return {
     programId: program.id,
     completedDayIndexes: [],
     completedTaskIdsByDay: {},
+    restDayIndexes: [],
     lastCompletedAt: null,
     updatedAt,
   };
@@ -25,6 +34,7 @@ export function completeCurrentProgramDay(
   return {
     programId: program.id,
     completedDayIndexes,
+    restDayIndexes: withoutDay(currentProgress.restDayIndexes, dayIndex),
     completedTaskIdsByDay: {
       ...currentProgress.completedTaskIdsByDay,
       [dayKey(dayIndex)]: dayPlan.tasks.map((task) => task.id),
@@ -36,20 +46,24 @@ export function completeCurrentProgramDay(
 
 export function buildProgramDayPlan(program: Program, progress: ProgramProgress | null): ProgramDayPlan {
   const dayIndex = clampDay(program.dayIndex, program.durationDays);
-  const tasks = tasksForProgram(program);
+  const phase = phaseForDay(dayIndex);
+  const tasks = tasksForProgram(program, phase);
   const completedTaskIds = getCompletedTaskIds(progress, program, dayIndex).filter((taskId) =>
     tasks.some((task) => task.id === taskId),
   );
   const completedDay = progress?.programId === program.id && progress.completedDayIndexes.includes(dayIndex);
+  const rested = progress?.programId === program.id && (progress.restDayIndexes ?? []).includes(dayIndex);
 
   return {
     programId: program.id,
     dayIndex,
+    phase,
     title: titleForProgram(program, dayIndex),
     summary: summaryForProgram(program),
     tasks,
     completedTaskIds,
-    completed: completedDay || completedTaskIds.length === tasks.length,
+    rested,
+    completed: rested || completedDay || completedTaskIds.length === tasks.length,
   };
 }
 
@@ -61,7 +75,7 @@ export function toggleCurrentProgramTask(
 ): ProgramProgress {
   const currentProgress = progress ?? createProgramProgress(program, updatedAt);
   const dayIndex = clampDay(program.dayIndex, program.durationDays);
-  const tasks = tasksForProgram(program);
+  const tasks = tasksForProgram(program, phaseForDay(dayIndex));
 
   if (!tasks.some((task) => task.id === taskId)) {
     return {
@@ -87,14 +101,38 @@ export function toggleCurrentProgramTask(
   };
 }
 
+export function markCurrentProgramRestDay(
+  program: Program,
+  progress: ProgramProgress | null,
+  restedAt: string,
+): ProgramProgress {
+  const currentProgress = progress ?? createProgramProgress(program, restedAt);
+  const dayIndex = clampDay(program.dayIndex, program.durationDays);
+  const restDayIndexes = Array.from(new Set([...(currentProgress.restDayIndexes ?? []), dayIndex])).sort((a, b) => a - b);
+
+  return {
+    ...currentProgress,
+    programId: program.id,
+    completedDayIndexes: withoutDay(currentProgress.completedDayIndexes, dayIndex),
+    restDayIndexes,
+    completedTaskIdsByDay: {
+      ...currentProgress.completedTaskIdsByDay,
+      [dayKey(dayIndex)]: [],
+    },
+    lastCompletedAt: restedAt,
+    updatedAt: restedAt,
+  };
+}
+
 export function applyProgramProgress(program: Program, progress: ProgramProgress | null): Program {
   if (!progress || progress.programId !== program.id) {
     return program;
   }
+  const resolvedDays = resolvedDayCount(progress);
 
   return {
     ...program,
-    dayIndex: clampDay(progress.completedDayIndexes.length + 1, program.durationDays),
+    dayIndex: clampDay(resolvedDays + 1, program.durationDays),
   };
 }
 
@@ -103,12 +141,52 @@ export function programCompletionPercent(program: Program, progress: ProgramProg
     return 0;
   }
 
-  const completedCount = Math.min(progress.completedDayIndexes.length, program.durationDays);
-  return Math.round((completedCount / program.durationDays) * 100);
+  return Math.round((Math.min(resolvedDayCount(progress), program.durationDays) / program.durationDays) * 100);
+}
+
+export function buildProgramProgressSummary(
+  program: Program,
+  progress: ProgramProgress | null,
+): ProgramProgressSummary {
+  if (!progress || progress.programId !== program.id) {
+    return {
+      completedDays: 0,
+      restDays: 0,
+      remainingDays: program.durationDays,
+      resolvedDays: 0,
+      totalDays: program.durationDays,
+    };
+  }
+
+  const completedDays = uniqueValidDays(progress.completedDayIndexes, program.durationDays).length;
+  const restDays = uniqueValidDays(progress.restDayIndexes ?? [], program.durationDays).filter(
+    (day) => !progress.completedDayIndexes.includes(day),
+  ).length;
+  const resolvedDays = Math.min(completedDays + restDays, program.durationDays);
+
+  return {
+    completedDays,
+    restDays,
+    remainingDays: Math.max(program.durationDays - resolvedDays, 0),
+    resolvedDays,
+    totalDays: program.durationDays,
+  };
 }
 
 function clampDay(dayIndex: number, durationDays: number): number {
   return Math.min(Math.max(dayIndex, 1), Math.max(durationDays, 1));
+}
+
+function withoutDay(days: number[] | undefined, dayIndex: number): number[] {
+  return (days ?? []).filter((day) => day !== dayIndex);
+}
+
+function resolvedDayCount(progress: ProgramProgress) {
+  return new Set([...progress.completedDayIndexes, ...(progress.restDayIndexes ?? [])]).size;
+}
+
+function uniqueValidDays(days: number[], durationDays: number) {
+  return Array.from(new Set(days)).filter((day) => day >= 1 && day <= durationDays);
 }
 
 function getCompletedTaskIds(progress: ProgramProgress | null, program: Program, dayIndex: number): string[] {
@@ -121,6 +199,18 @@ function getCompletedTaskIds(progress: ProgramProgress | null, program: Program,
 
 function dayKey(dayIndex: number) {
   return String(dayIndex);
+}
+
+function phaseForDay(dayIndex: number): ProgramDayPhase {
+  if (dayIndex % 7 === 0) {
+    return "recovery";
+  }
+
+  if (dayIndex === 1) {
+    return "baseline";
+  }
+
+  return "practice";
 }
 
 function titleForProgram(program: Program, dayIndex: number) {
@@ -163,7 +253,23 @@ function summaryForProgram(program: Program) {
   return "Collect a few calm signals and keep the next action small.";
 }
 
-function tasksForProgram(program: Program): ProgramDayTask[] {
+function tasksForProgram(program: Program, phase: ProgramDayPhase): ProgramDayTask[] {
+  if (phase === "recovery") {
+    return [
+      task("weekly-review", "reflect", "Weekly review", "Look for one pattern without forcing a conclusion.", 3),
+      task("recovery-reset", "recovery", "Recovery reset", "Use one short downshift action before adding more data.", 4),
+      task("next-week-boundary", "reflect", "Next-week boundary", "Name one thing to keep light next week.", 2),
+    ];
+  }
+
+  if (phase === "practice") {
+    return [
+      task("confidence-map", "reflect", "Confidence map", "Name the situation and the signal without turning it into a verdict.", 2),
+      task("body-reset", "recovery", "Body reset", "Use one calm reset before any bigger experiment.", 4),
+      task("tiny-action", "practice", "Tiny action", "Choose one small action that supports steadiness today.", 3),
+    ];
+  }
+
   if (program.id === "pelvic-floor-starter") {
     return [
       task("comfort-check", "check_in", "Comfort check", "Notice comfort first. If anything feels off, keep the day lighter.", 1),

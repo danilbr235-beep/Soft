@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { Program, ProgramDayPlan } from "@pmhc/types";
+import type { Program, ProgramDayPlan, ProgramProgressSummary } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 
@@ -10,7 +10,9 @@ type Props = {
   copy: LanguageCopy;
   completionPercent: number;
   dayPlan: ProgramDayPlan | null;
+  progressSummary: ProgramProgressSummary | null;
   onCompleteToday: () => void;
+  onRestToday: () => void;
   onToggleTask: (taskId: string) => void;
 };
 
@@ -19,7 +21,9 @@ export function ProgramsScreen({
   copy,
   completionPercent,
   dayPlan,
+  progressSummary,
   onCompleteToday,
+  onRestToday,
   onToggleTask,
 }: Props) {
   const dayLabel = activeProgram ? copy.programs.dayOf(activeProgram.dayIndex, activeProgram.durationDays) : copy.programs.noActiveDay;
@@ -38,21 +42,49 @@ export function ProgramsScreen({
           <View style={[styles.progressFill, { width: `${completionPercent}%` }]} />
         </View>
         <Text style={styles.body}>{copy.programs.percentComplete(completionPercent)}</Text>
-        <Pressable
-          accessibilityLabel={copy.programs.completeProgramDay}
-          accessibilityRole="button"
-          disabled={!activeProgram}
-          onPress={onCompleteToday}
-          style={[styles.button, !activeProgram && styles.disabledButton]}
-        >
-          <Text style={styles.buttonText}>{copy.programs.completeToday}</Text>
-        </Pressable>
+        {progressSummary ? (
+          <View style={styles.summaryGrid}>
+            <View style={styles.summaryTile}>
+              <Text style={styles.summaryValue}>{progressSummary.completedDays}</Text>
+              <Text style={styles.summaryLabel}>{copy.programs.completedDays(progressSummary.completedDays)}</Text>
+            </View>
+            <View style={styles.summaryTile}>
+              <Text style={styles.summaryValue}>{progressSummary.restDays}</Text>
+              <Text style={styles.summaryLabel}>{copy.programs.restDays(progressSummary.restDays)}</Text>
+            </View>
+            <View style={styles.summaryTile}>
+              <Text style={styles.summaryValue}>{progressSummary.remainingDays}</Text>
+              <Text style={styles.summaryLabel}>{copy.programs.remainingDays(progressSummary.remainingDays)}</Text>
+            </View>
+          </View>
+        ) : null}
+        <View style={styles.buttonRow}>
+          <Pressable
+            accessibilityLabel={copy.programs.completeProgramDay}
+            accessibilityRole="button"
+            disabled={!activeProgram}
+            onPress={onCompleteToday}
+            style={[styles.button, !activeProgram && styles.disabledButton]}
+          >
+            <Text style={styles.buttonText}>{copy.programs.completeToday}</Text>
+          </Pressable>
+          <Pressable
+            accessibilityLabel={copy.programs.restProgramDay}
+            accessibilityRole="button"
+            disabled={!activeProgram}
+            onPress={onRestToday}
+            style={[styles.secondaryButton, !activeProgram && styles.disabledButton]}
+          >
+            <Text style={styles.secondaryButtonText}>{copy.programs.restToday}</Text>
+          </Pressable>
+        </View>
       </Surface>
       {dayPlan ? (
         <Surface>
           <View style={styles.planHeader}>
             <View style={styles.planHeaderText}>
               <Text style={styles.sectionTitle}>{copy.programs.dayPlanTitle}</Text>
+              <Text style={styles.phaseLabel}>{copy.programs.phaseLabels[dayPlan.phase]}</Text>
               <Text style={styles.body}>{copy.programs.planSummaries[dayPlan.programId] ?? dayPlan.summary}</Text>
             </View>
             <View style={styles.progressPill}>
@@ -133,6 +165,30 @@ const styles = StyleSheet.create({
     borderRadius: radii.sm,
     backgroundColor: colors.moss,
   },
+  summaryGrid: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  summaryTile: {
+    flex: 1,
+    minHeight: 72,
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    backgroundColor: colors.panelSoft,
+    padding: spacing.sm,
+  },
+  summaryValue: {
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: "900",
+  },
+  summaryLabel: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "800",
+  },
   planHeader: {
     gap: spacing.md,
   },
@@ -149,6 +205,13 @@ const styles = StyleSheet.create({
   progressPillText: {
     color: colors.text,
     fontWeight: "800",
+  },
+  phaseLabel: {
+    alignSelf: "flex-start",
+    color: colors.moss,
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase",
   },
   taskList: {
     gap: spacing.sm,
@@ -213,6 +276,9 @@ const styles = StyleSheet.create({
   completedTaskStatus: {
     color: colors.moss,
   },
+  buttonRow: {
+    gap: spacing.sm,
+  },
   button: {
     minHeight: 48,
     alignItems: "center",
@@ -226,6 +292,19 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: colors.ink,
+    fontWeight: "900",
+  },
+  secondaryButton: {
+    minHeight: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    backgroundColor: colors.panelSoft,
+  },
+  secondaryButtonText: {
+    color: colors.text,
     fontWeight: "900",
   },
 });

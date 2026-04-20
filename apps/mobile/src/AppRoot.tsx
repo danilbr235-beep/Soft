@@ -91,7 +91,9 @@ function AppRootContent() {
             copy={copy}
             completionPercent={app.programCompletionPercent}
             dayPlan={app.programDayPlan}
+            progressSummary={app.programSummary}
             onCompleteToday={app.completeProgramToday}
+            onRestToday={app.restProgramToday}
             onToggleTask={app.toggleProgramTask}
           />
         ) : null}

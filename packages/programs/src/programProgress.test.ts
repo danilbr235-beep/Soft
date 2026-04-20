@@ -3,8 +3,10 @@ import type { Program, ProgramProgress } from "@pmhc/types";
 import {
   applyProgramProgress,
   buildProgramDayPlan,
+  buildProgramProgressSummary,
   completeCurrentProgramDay,
   createProgramProgress,
+  markCurrentProgramRestDay,
   programCompletionPercent,
   toggleCurrentProgramTask,
 } from "./programProgress";
@@ -23,6 +25,7 @@ describe("program progress helpers", () => {
       programId: "confidence-reset-14",
       completedDayIndexes: [],
       completedTaskIdsByDay: {},
+      restDayIndexes: [],
       lastCompletedAt: null,
       updatedAt: "2026-04-19T12:00:00.000Z",
     });
@@ -83,5 +86,45 @@ describe("program progress helpers", () => {
     expect(completed.completedDayIndexes).toEqual([1]);
     expect(plan.completed).toBe(true);
     expect(plan.completedTaskIds).toEqual(["baseline-check", "downshift-practice", "evening-reflection"]);
+  });
+
+  it("marks the current day as a rest day and advances without counting it as completed work", () => {
+    const progress = createProgramProgress(program, "2026-04-19T12:00:00.000Z");
+    const rested = markCurrentProgramRestDay(program, progress, "2026-04-19T13:00:00.000Z");
+    const plan = buildProgramDayPlan(program, rested);
+
+    expect(rested.restDayIndexes).toEqual([1]);
+    expect(plan.rested).toBe(true);
+    expect(plan.completed).toBe(true);
+    expect(applyProgramProgress(program, rested)).toMatchObject({ dayIndex: 2 });
+    expect(programCompletionPercent(program, rested)).toBe(7);
+  });
+
+  it("summarizes completed, rest, and remaining program days", () => {
+    const completed = completeCurrentProgramDay(
+      program,
+      createProgramProgress(program, "2026-04-19T12:00:00.000Z"),
+      "2026-04-19T13:00:00.000Z",
+    );
+    const progress = markCurrentProgramRestDay(applyProgramProgress(program, completed), completed, "2026-04-19T14:00:00.000Z");
+
+    expect(buildProgramProgressSummary(program, progress)).toEqual({
+      completedDays: 1,
+      restDays: 1,
+      remainingDays: 12,
+      resolvedDays: 2,
+      totalDays: 14,
+    });
+  });
+
+  it("varies the day plan across baseline, practice, and recovery days", () => {
+    const progress = createProgramProgress(program, "2026-04-19T12:00:00.000Z");
+    const dayTwo = buildProgramDayPlan({ ...program, dayIndex: 2 }, progress);
+    const daySeven = buildProgramDayPlan({ ...program, dayIndex: 7 }, progress);
+
+    expect(dayTwo.phase).toBe("practice");
+    expect(dayTwo.tasks.map((task) => task.id)).toEqual(["confidence-map", "body-reset", "tiny-action"]);
+    expect(daySeven.phase).toBe("recovery");
+    expect(daySeven.tasks.map((task) => task.id)).toEqual(["weekly-review", "recovery-reset", "next-week-boundary"]);
   });
 });
