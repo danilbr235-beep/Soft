@@ -53,7 +53,12 @@ function AppRootContent() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <StatusBar barStyle="light-content" />
-        <PrivacyLockScreen copy={copy} onUnlock={app.unlock} />
+        <PrivacyLockScreen
+          copy={copy}
+          failedAttempts={app.privacyLock.failedUnlockAttempts}
+          hasPrivacyPin={app.hasPrivacyPin}
+          onUnlock={app.unlock}
+        />
       </SafeAreaView>
     );
   }
@@ -103,10 +108,13 @@ function AppRootContent() {
         {app.activeTab === "Settings" ? (
           <SettingsScreen
             copy={copy}
+            hasPrivacyPin={app.hasPrivacyPin}
             language={app.language}
+            onClearPrivacyPin={app.clearPrivacyPin}
             privacyLock={app.privacyLock}
             onChangeLanguage={app.changeLanguage}
             onLockNow={app.lockNow}
+            onSetPrivacyPin={app.setPrivacyPin}
             onToggleVaultLock={app.togglePrivacyVault}
             resetOnboarding={app.resetOnboarding}
           />

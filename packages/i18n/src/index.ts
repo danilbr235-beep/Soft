@@ -158,6 +158,14 @@ export type LanguageCopy = {
     vaultOn: string;
     vaultOff: string;
     lockDemoVault: string;
+    pinTitle: string;
+    pinBody: string;
+    pinPlaceholder: string;
+    savePin: string;
+    updatePin: string;
+    clearPin: string;
+    pinIsSet: string;
+    pinNotSet: string;
     medicalBoundary: string;
     medicalBoundaryBody: string;
     reset: string;
@@ -167,6 +175,10 @@ export type LanguageCopy = {
     title: string;
     body: string;
     unlock: string;
+    pinPrompt: string;
+    pinPlaceholder: string;
+    unlockWithPin: string;
+    wrongPin: string;
   };
   quickLog: {
     labels: Record<QuickLogType, string>;
@@ -512,6 +524,14 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       vaultOn: "Vault lock on",
       vaultOff: "Vault lock off",
       lockDemoVault: "Lock demo vault",
+      pinTitle: "PIN unlock",
+      pinBody: "Set a 4-8 digit local demo PIN before locking the vault. This keeps the flow realistic while production secure storage is still later.",
+      pinPlaceholder: "Enter 4-8 digits",
+      savePin: "Save PIN",
+      updatePin: "Update PIN",
+      clearPin: "Remove PIN",
+      pinIsSet: "PIN is set for this local demo.",
+      pinNotSet: "No PIN is set yet.",
       medicalBoundary: "Medical boundary",
       medicalBoundaryBody: "This app supports education and tracking. It does not diagnose or replace professional care.",
       reset: "Reset local demo state",
@@ -521,6 +541,10 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       title: "Soft is locked",
       body: "Sensitive details are hidden until you unlock the demo vault.",
       unlock: "Unlock demo vault",
+      pinPrompt: "Enter your local demo PIN.",
+      pinPlaceholder: "PIN",
+      unlockWithPin: "Unlock with PIN",
+      wrongPin: "That PIN did not match. Try again calmly.",
     },
     quickLog: {
       labels: quickLogLabelsEn,
@@ -732,6 +756,14 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       vaultOn: "Замок включен",
       vaultOff: "Замок выключен",
       lockDemoVault: "Закрыть демо-замок",
+      pinTitle: "Открытие по PIN",
+      pinBody: "Задайте локальный демо-PIN из 4-8 цифр перед закрытием замка. Так сценарий ближе к настоящему приложению, а защищенное хранилище добавим позже.",
+      pinPlaceholder: "Введите 4-8 цифр",
+      savePin: "Сохранить PIN",
+      updatePin: "Обновить PIN",
+      clearPin: "Убрать PIN",
+      pinIsSet: "PIN задан для этого локального демо.",
+      pinNotSet: "PIN пока не задан.",
       medicalBoundary: "Медицинская граница",
       medicalBoundaryBody: "Приложение помогает учиться и наблюдать за собой. Оно не ставит диагнозы и не заменяет врача.",
       reset: "Сбросить локальное демо",
@@ -741,6 +773,10 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       title: "Soft закрыт",
       body: "Личные детали скрыты, пока вы не откроете демо-замок.",
       unlock: "Открыть демо-замок",
+      pinPrompt: "Введите локальный демо-PIN.",
+      pinPlaceholder: "PIN",
+      unlockWithPin: "Открыть по PIN",
+      wrongPin: "PIN не подошел. Попробуйте еще раз спокойно.",
     },
     quickLog: {
       labels: quickLogLabelsRu,

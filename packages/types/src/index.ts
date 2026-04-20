@@ -98,6 +98,9 @@ export type PrivacyLockState = {
   vaultLockEnabled: boolean;
   discreetNotifications: boolean;
   locked: boolean;
+  pinHash: string | null;
+  pinSalt: string | null;
+  failedUnlockAttempts: number;
   updatedAt: string;
 };
 

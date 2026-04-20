@@ -16,6 +16,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Supports English/Russian localization for the app shell, Today rules, Coach explanations, quick logs, and core content.
 - Summarizes local Track history into a baseline snapshot with recent counts, score averages, latest values, filters, edit/delete actions, and JSON export preview.
 - Adds varied Programs day plans with task-level local checklist progress, rest days, and progress summaries.
+- Adds a local demo PIN flow for the privacy vault while keeping production secure storage out of MVP scope.
 - Shows a startup loading state and recovery screen instead of leaving users on a blank page.
 - Includes Playwright web smoke tests for onboarding, Today, quick logging, Learn recommendations/detail/progress, Programs checklist, language switching, and sync status.
 
@@ -76,3 +77,4 @@ The app now supports:
 13. Startup recovery path for corrupted local demo state or render failures.
 14. Track history filters, local edit/delete, and JSON export preview.
 15. Learn recommendations from Today state, topic filters, detail pages, and saved/completed progress.
+16. Privacy vault PIN setup, wrong-PIN feedback, and PIN unlock in the local demo.

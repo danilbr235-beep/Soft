@@ -3,10 +3,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { markContentCompleted, mergeContentProgress, toggleContentSaved } from "@pmhc/learning";
 import { createOnboardingResult } from "@pmhc/onboarding";
 import {
+  clearPrivacyPin,
   createPrivacyLockState,
+  hasPrivacyPin,
   lockPrivacyVault,
+  normalizePrivacyLockState,
+  setPrivacyPin,
   toggleVaultLock,
-  unlockPrivacyVault,
+  unlockPrivacyVaultWithPin,
 } from "@pmhc/privacy";
 import {
   applyProgramProgress,
@@ -149,8 +153,11 @@ export function useAppState() {
         setSyncQueue(savedQueue);
         setContentProgress(savedContentProgress);
         setPrivacyLock(
-          savedPrivacyLock ??
-            (savedOnboarding ? createPrivacyLockState(savedOnboarding.privacy, savedOnboarding.completedAt) : fallbackPrivacyLock),
+          savedPrivacyLock
+            ? normalizePrivacyLockState(savedPrivacyLock)
+            : savedOnboarding
+              ? createPrivacyLockState(savedOnboarding.privacy, savedOnboarding.completedAt)
+              : fallbackPrivacyLock,
         );
         setProgramProgress(savedProgramProgress);
       } catch {
@@ -351,8 +358,21 @@ export function useAppState() {
     await persistPrivacyLock(lockPrivacyVault(privacyLock, new Date().toISOString()));
   }, [persistPrivacyLock, privacyLock]);
 
-  const unlock = useCallback(async () => {
-    await persistPrivacyLock(unlockPrivacyVault(privacyLock, new Date().toISOString()));
+  const unlock = useCallback(async (pin: string) => {
+    const result = unlockPrivacyVaultWithPin(privacyLock, pin, new Date().toISOString());
+    await persistPrivacyLock(result.state);
+    return result.unlocked;
+  }, [persistPrivacyLock, privacyLock]);
+
+  const setPrivacyPinCode = useCallback(
+    async (pin: string) => {
+      await persistPrivacyLock(setPrivacyPin(privacyLock, pin, new Date().toISOString()));
+    },
+    [persistPrivacyLock, privacyLock],
+  );
+
+  const clearPrivacyPinCode = useCallback(async () => {
+    await persistPrivacyLock(clearPrivacyPin(privacyLock, new Date().toISOString()));
   }, [persistPrivacyLock, privacyLock]);
 
   const completeProgramToday = useCallback(async () => {
@@ -401,12 +421,14 @@ export function useAppState() {
     today,
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,
+    hasPrivacyPin: hasPrivacyPin(privacyLock),
     programDayPlan,
     programSummary,
     programCompletionPercent: today.activeProgram ? programCompletionPercent(today.activeProgram, programProgress) : 0,
     completeOnboarding,
     changeLanguage,
     completeProgramToday,
+    clearPrivacyPin: clearPrivacyPinCode,
     deleteLog,
     lockNow,
     openQuickLog: setSelectedQuickLog,
@@ -414,6 +436,7 @@ export function useAppState() {
     restProgramToday,
     setActiveTab,
     syncQueuedWrites,
+    setPrivacyPin: setPrivacyPinCode,
     togglePrivacyVault,
     toggleProgramTask,
     toggleSavedContent,
@@ -496,6 +519,9 @@ function isNullablePrivacyLockState(value: unknown): value is PrivacyLockState |
       typeof value.vaultLockEnabled === "boolean" &&
       typeof value.discreetNotifications === "boolean" &&
       typeof value.locked === "boolean" &&
+      (typeof value.pinHash === "string" || value.pinHash === null || value.pinHash === undefined) &&
+      (typeof value.pinSalt === "string" || value.pinSalt === null || value.pinSalt === undefined) &&
+      (typeof value.failedUnlockAttempts === "number" || value.failedUnlockAttempts === undefined) &&
       typeof value.updatedAt === "string")
   );
 }

@@ -115,9 +115,16 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
 
   await page.getByLabel("Open Settings").click();
   await expect(page.getByText(/Vault lock is enabled/i)).toBeVisible();
+  await page.getByLabel("Enter 4-8 digits").fill("1234");
+  await page.getByLabel("Save PIN").click();
+  await expect(page.getByText("PIN is set for this local demo.")).toBeVisible();
   await page.getByLabel("Lock demo vault").click();
   await expect(page.getByText("Soft is locked")).toBeVisible();
-  await page.getByLabel("Unlock demo vault").click();
+  await page.getByRole("textbox", { name: "PIN" }).fill("0000");
+  await page.getByLabel("Unlock with PIN").click();
+  await expect(page.getByText("That PIN did not match. Try again calmly.")).toBeVisible();
+  await page.getByRole("textbox", { name: "PIN" }).fill("1234");
+  await page.getByLabel("Unlock with PIN").click();
   await expect(page.getByText("Privacy vault")).toBeVisible();
 });
 
