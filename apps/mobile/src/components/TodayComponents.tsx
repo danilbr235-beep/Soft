@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { Alert, CurrentPriority, DailyStateTile, QuickLogDefinition } from "@pmhc/types";
+import type { TodayStatusItem } from "../todayStatus";
 import { Surface } from "./Surface";
 
 type PriorityProps = {
@@ -54,6 +55,30 @@ export function AlertStrip({ alerts }: { alerts: Alert[] }) {
     <View style={[styles.alert, urgent && styles.urgentAlert]}>
       <Text style={styles.alertTitle}>{alert.title}</Text>
       <Text style={styles.alertMessage}>{alert.message}</Text>
+    </View>
+  );
+}
+
+export function TodayStatusRow({ items }: { items: TodayStatusItem[] }) {
+  return (
+    <View accessibilityLabel="Today status" style={styles.statusGrid}>
+      {items.map((item) => (
+        <View
+          key={item.id}
+          style={[
+            styles.statusChip,
+            item.tone === "good" ? styles.statusChipGood : null,
+            item.tone === "attention" ? styles.statusChipAttention : null,
+          ]}
+        >
+          <Text numberOfLines={1} style={styles.statusLabel}>
+            {item.label}
+          </Text>
+          <Text numberOfLines={1} style={styles.statusValue}>
+            {item.value}
+          </Text>
+        </View>
+      ))}
     </View>
   );
 }
@@ -183,6 +208,40 @@ const styles = StyleSheet.create({
   urgentAlert: {
     backgroundColor: "#2a1d1a",
     borderColor: colors.coral,
+  },
+  statusGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  statusChip: {
+    width: "48%",
+    minHeight: 58,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.panel,
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  statusChipGood: {
+    borderColor: colors.moss,
+  },
+  statusChipAttention: {
+    borderColor: colors.amber,
+  },
+  statusLabel: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  statusValue: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "800",
+    marginTop: spacing.xs,
   },
   alertTitle: {
     color: colors.text,

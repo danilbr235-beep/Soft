@@ -9,6 +9,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Opens into a calm mobile app shell with onboarding and bottom navigation.
 - Renders a Today screen from deterministic mock/rules data.
 - Supports fast quick-log entry points for high-signal daily tracking.
+- Shows a compact Today status row for mode, sync, privacy, and active program state.
 - Includes a curated Learn hub with Today-aware recommendations, categories, detail pages, starter Programs, Coach quick explanations, and Settings/Privacy surfaces.
 - Provides a mock API contract for `GET /today`, `POST /logs`, `GET /programs`, `GET /content/featured`, and `POST /coach/explain-priority`.
 - Keeps quick-log writes local-first with a sync queue and a demo sync-clear flow.
@@ -81,3 +82,4 @@ The app now supports:
 16. Privacy vault PIN setup, wrong-PIN feedback, and PIN unlock in the local demo.
 17. Privacy vault auto-lock after local inactivity.
 18. Coach quick questions for priority, alerts, confidence, and the next conservative step.
+19. Today status row for mode, sync, privacy vault state, and active program.

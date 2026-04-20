@@ -68,7 +68,13 @@ function AppRootContent() {
       <StatusBar barStyle="light-content" />
       <View style={styles.shell}>
         {app.activeTab === "Today" ? (
-          <TodayScreen copy={copy} today={app.today} onAskCoach={() => app.setActiveTab("Coach")} onLog={app.openQuickLog} />
+          <TodayScreen
+            copy={copy}
+            privacyLock={app.privacyLock}
+            today={app.today}
+            onAskCoach={() => app.setActiveTab("Coach")}
+            onLog={app.openQuickLog}
+          />
         ) : null}
         {app.activeTab === "Track" ? (
           <TrackScreen

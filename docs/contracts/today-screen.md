@@ -16,6 +16,7 @@ Required hierarchy:
 ## Behavior
 
 - Show one dominant priority.
+- The top status bar must summarize mode, sync state, privacy state, and active program.
 - Render cached or mock payload immediately.
 - Refresh progressively after logs or sync.
 - Keep Simple mode sparse.

@@ -46,6 +46,9 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Generate Today").click();
 
   await expect(page.getByText("Current priority", { exact: true })).toBeVisible();
+  await expect(page.getByText("Mode")).toBeVisible();
+  await expect(page.getByText("Up to date")).toBeVisible();
+  await expect(page.getByText("Vault on")).toBeVisible();
   await expect(page.getByText("Build your baseline")).toBeVisible();
   await page.getByText("Ask Coach why").click();
   await expect(page.getByText("How certain is this?")).toBeVisible();
@@ -54,6 +57,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Quick log Confidence").click();
   await expect(page.getByText("Log it quickly")).toBeVisible();
   await page.getByLabel("Save Confidence 7").click();
+  await expect(page.getByText("Pending sync")).toBeVisible();
 
   await page.getByLabel("Quick log Symptoms").click();
   await expect(page.getByText("Log it quickly")).toBeVisible();
@@ -80,6 +84,8 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
 
   await page.getByLabel("Sync demo writes").click();
   await expect(page.getByText("All local writes are synced.")).toBeVisible();
+  await page.getByLabel("Open Today").click();
+  await expect(page.getByText("Up to date")).toBeVisible();
 
   await page.getByLabel("Open Learn").click();
   await expect(page.getByText("Recommended for today")).toBeVisible();

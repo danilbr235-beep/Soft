@@ -15,7 +15,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 ## P1 Today
 
 - Make Today the operational source of truth for the app.
-- Strengthen the status row with privacy, sync, mode, and active program state.
+- Strengthen the status row with privacy, sync, mode, and active program state. (Initial slice complete.)
 - Recompute priority after every supported quick log.
 - Add clearer low-data states instead of overconfident recommendations.
 - Keep alerts severity-aware and visually distinct.

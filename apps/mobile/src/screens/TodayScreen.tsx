@@ -1,29 +1,34 @@
 import { StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, spacing } from "@pmhc/ui";
-import type { QuickLogDefinition, TodayPayload } from "@pmhc/types";
-import { AlertStrip, PriorityCard, QuickLogRow, StateGrid } from "../components/TodayComponents";
+import type { PrivacyLockState, QuickLogDefinition, TodayPayload } from "@pmhc/types";
+import { AlertStrip, PriorityCard, QuickLogRow, StateGrid, TodayStatusRow } from "../components/TodayComponents";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
+import { buildTodayStatusItems } from "../todayStatus";
 
 type Props = {
   today: TodayPayload;
   copy: LanguageCopy;
+  privacyLock: PrivacyLockState;
   onAskCoach: () => void;
   onLog: (definition: QuickLogDefinition) => void;
 };
 
-export function TodayScreen({ copy, onAskCoach, onLog, today }: Props) {
+export function TodayScreen({ copy, onAskCoach, onLog, privacyLock, today }: Props) {
   const activeProgramTitle = today.activeProgram
     ? copy.programs.programTitles[today.activeProgram.id] ?? today.activeProgram.title
     : copy.today.noActiveProgram;
+  const statusItems = buildTodayStatusItems({
+    copy,
+    privacyLock,
+    programTitle: today.activeProgram ? activeProgramTitle : null,
+    today,
+  });
 
   return (
-    <Screen
-      eyebrow={today.todayMode}
-      title={copy.today.title}
-      subtitle={`${activeProgramTitle} - ${today.syncStatus}`}
-    >
+    <Screen eyebrow={today.todayMode} title={copy.today.title} subtitle={activeProgramTitle}>
+      <TodayStatusRow items={statusItems} />
       <PriorityCard copy={copy} priority={today.currentPriority} onAskCoach={onAskCoach} />
       <StateGrid tiles={today.dailyState} />
       <AlertStrip alerts={today.alerts} />

@@ -1,4 +1,4 @@
-import type { AppLanguage, QuickLogType } from "@pmhc/types";
+import type { AppLanguage, QuickLogType, TodayMode } from "@pmhc/types";
 import type { ProgramDayPhase } from "@pmhc/types";
 
 export type LocalizedTab = "Today" | "Track" | "Learn" | "Programs" | "Coach" | "Settings";
@@ -10,6 +10,12 @@ type LearnCategoryCopy = Record<
   string
 >;
 type LearnRecommendationReasonCopy = Record<"priority" | "program" | "safety" | "starter", string>;
+type TodayStatusCopy = {
+  labels: Record<"mode" | "sync" | "privacy" | "program", string>;
+  modes: Record<TodayMode, string>;
+  sync: Record<"synced" | "pending" | "offline", string>;
+  privacy: Record<"vaultOn" | "discreet" | "standard", string>;
+};
 
 export type LanguageCopy = {
   common: {
@@ -60,6 +66,7 @@ export type LanguageCopy = {
     quickLog: string;
     liveUpdate: string;
     insight: string;
+    status: TodayStatusCopy;
   };
   track: {
     title: string;
@@ -405,6 +412,29 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       quickLog: "Quick log",
       liveUpdate: "Live update",
       insight: "Insight",
+      status: {
+        labels: {
+          mode: "Mode",
+          sync: "Sync",
+          privacy: "Privacy",
+          program: "Program",
+        },
+        modes: {
+          Light: "Light",
+          Standard: "Standard",
+          Focus: "Focus",
+        },
+        sync: {
+          synced: "Up to date",
+          pending: "Pending sync",
+          offline: "Offline",
+        },
+        privacy: {
+          vaultOn: "Vault on",
+          discreet: "Discreet",
+          standard: "Standard",
+        },
+      },
     },
     track: {
       title: "Track",
@@ -642,6 +672,29 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       quickLog: "Быстрый лог",
       liveUpdate: "Обновление",
       insight: "Наблюдение",
+      status: {
+        labels: {
+          mode: "Режим",
+          sync: "Синхронизация",
+          privacy: "Приватность",
+          program: "План",
+        },
+        modes: {
+          Light: "Лёгкий",
+          Standard: "Обычный",
+          Focus: "Фокус",
+        },
+        sync: {
+          synced: "Всё сохранено",
+          pending: "Ждёт синхронизации",
+          offline: "Офлайн",
+        },
+        privacy: {
+          vaultOn: "Замок включён",
+          discreet: "Незаметно",
+          standard: "Обычно",
+        },
+      },
     },
     track: {
       title: "Трек",
