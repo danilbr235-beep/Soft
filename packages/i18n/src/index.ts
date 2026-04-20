@@ -5,6 +5,11 @@ export type LocalizedTab = "Today" | "Track" | "Learn" | "Programs" | "Coach" | 
 
 type ActionKindCopy = Record<"Learn" | "Check-in" | "Practice" | "Reflect", string>;
 type TrackFilterCopy = Record<"all" | "scores" | "symptoms" | "routines", string>;
+type LearnCategoryCopy = Record<
+  "all" | "baseline" | "recovery" | "sleep" | "pelvic_floor" | "confidence" | "tracking" | "safety" | "privacy" | "general",
+  string
+>;
+type LearnRecommendationReasonCopy = Record<"priority" | "program" | "safety" | "starter", string>;
 
 export type LanguageCopy = {
   common: {
@@ -88,6 +93,16 @@ export type LanguageCopy = {
   learn: {
     title: string;
     subtitle: string;
+    recommended: string;
+    allContent: string;
+    categories: string;
+    categoryLabels: LearnCategoryCopy;
+    openDetail: (title: string) => string;
+    filterCategory: (label: string) => string;
+    backToLibrary: string;
+    detailMeta: (duration: string, source: string) => string;
+    recommendedReason: LearnRecommendationReasonCopy;
+    noCategoryItems: string;
     save: string;
     saved: string;
     unsave: string;
@@ -411,6 +426,32 @@ const copies: Record<AppLanguage, LanguageCopy> = {
     learn: {
       title: "Learn",
       subtitle: "Curated material tied to the current state, not a random link library.",
+      recommended: "Recommended for today",
+      allContent: "All content",
+      categories: "Categories",
+      categoryLabels: {
+        all: "All",
+        baseline: "Baseline",
+        recovery: "Recovery",
+        sleep: "Sleep",
+        pelvic_floor: "Pelvic floor",
+        confidence: "Confidence",
+        tracking: "Tracking",
+        safety: "Safety",
+        privacy: "Privacy",
+        general: "General",
+      },
+      openDetail: (title) => `Open ${title}`,
+      filterCategory: (label) => `Filter Learn content: ${label}`,
+      backToLibrary: "Back to library",
+      detailMeta: (duration, source) => `${duration} - ${source}`,
+      recommendedReason: {
+        priority: "Because it matches today's priority",
+        program: "Because it supports your active program",
+        safety: "A conservative safety read for today",
+        starter: "A useful starter read for low-data days",
+      },
+      noCategoryItems: "No reads in this category yet.",
       save: "Save",
       saved: "Saved",
       unsave: "Unsave",
@@ -605,6 +646,32 @@ const copies: Record<AppLanguage, LanguageCopy> = {
     learn: {
       title: "База",
       subtitle: "Короткие материалы по текущему состоянию, без случайной ленты ссылок.",
+      recommended: "Подходит на сегодня",
+      allContent: "Все материалы",
+      categories: "Темы",
+      categoryLabels: {
+        all: "Все",
+        baseline: "Базовая линия",
+        recovery: "Восстановление",
+        sleep: "Сон",
+        pelvic_floor: "Тазовое дно",
+        confidence: "Уверенность",
+        tracking: "Наблюдение",
+        safety: "Безопасность",
+        privacy: "Приватность",
+        general: "Общее",
+      },
+      openDetail: (title) => `Открыть: ${title}`,
+      filterCategory: (label) => `Фильтр базы: ${label}`,
+      backToLibrary: "Вернуться к базе",
+      detailMeta: (duration, source) => `${duration} - ${source}`,
+      recommendedReason: {
+        priority: "Это совпадает с главным фокусом на сегодня",
+        program: "Это поддерживает текущую программу",
+        safety: "Спокойный материал, чтобы не повышать нагрузку лишний раз",
+        starter: "Хороший старт, пока данных еще мало",
+      },
+      noCategoryItems: "В этой теме пока нет материалов.",
       save: "Сохранить",
       saved: "Сохранено",
       unsave: "Убрать",

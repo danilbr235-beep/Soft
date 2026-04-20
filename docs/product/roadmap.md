@@ -42,11 +42,11 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 
 ## P1 Learn Hub
 
-- Add content detail pages.
-- Group content by baseline, recovery, sleep, pelvic floor, confidence, privacy, and safety.
-- Support saved, completed, and recommended content states.
+- Add content detail pages. (Initial slice complete.)
+- Group content by baseline, recovery, sleep, pelvic floor, confidence, privacy, and safety. (Initial topic filter slice complete.)
+- Support saved, completed, and recommended content states. (Initial slice complete.)
 - Localize core Learn content into natural Russian, not literal translation.
-- Tie featured content to Today state and active program.
+- Tie featured content to Today state and active program. (Initial deterministic recommendation slice complete.)
 - Keep trust level and source metadata visible.
 
 ## P1 Coach
@@ -127,7 +127,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 1. Finish P0 Stability Pack.
 2. Build Track 2.0: history, edit/delete, weekly snapshot, export.
 3. Build Programs 2.0: detail screen, varied day plans, skip/rest, summaries.
-4. Build Learn detail pages and Russian content polish.
+4. Build deeper Learn detail pages, more content, and Russian content polish.
 5. Add real privacy lock.
 6. Add backend and production sync.
 7. Add AI/RAG and device integrations only after safety and content foundations are strong.

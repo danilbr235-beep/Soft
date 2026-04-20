@@ -82,10 +82,16 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("All local writes are synced.")).toBeVisible();
 
   await page.getByLabel("Open Learn").click();
+  await expect(page.getByText("Recommended for today")).toBeVisible();
+  await page.getByLabel("Open Build a baseline without overchecking").first().click();
+  await expect(page.getByText("Because it matches today's priority")).toBeVisible();
   await page.getByLabel("Save Build a baseline without overchecking").click();
   await expect(page.getByLabel("Unsave Build a baseline without overchecking")).toBeVisible();
   await page.getByLabel("Mark complete Build a baseline without overchecking").click();
   await expect(page.getByLabel("Completed Build a baseline without overchecking")).toBeVisible();
+  await page.getByLabel("Back to library").click();
+  await page.getByLabel("Filter Learn content: Recovery").click();
+  await expect(page.getByText("Sleep setup for next-day readiness").first()).toBeVisible();
 
   await page.getByLabel("Open Programs").click();
   await expect(page.getByText("Day 1 of 14")).toBeVisible();

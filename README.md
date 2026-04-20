@@ -9,7 +9,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Opens into a calm mobile app shell with onboarding and bottom navigation.
 - Renders a Today screen from deterministic mock/rules data.
 - Supports fast quick-log entry points for high-signal daily tracking.
-- Includes a curated Learn hub, starter Programs, Coach explanations, and Settings/Privacy surfaces.
+- Includes a curated Learn hub with Today-aware recommendations, categories, detail pages, starter Programs, Coach explanations, and Settings/Privacy surfaces.
 - Provides a mock API contract for `GET /today`, `POST /logs`, `GET /programs`, `GET /content/featured`, and `POST /coach/explain-priority`.
 - Keeps quick-log writes local-first with a sync queue and a demo sync-clear flow.
 - Turns onboarding answers into a persisted profile, baseline, privacy defaults, and starter program.
@@ -17,7 +17,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Summarizes local Track history into a baseline snapshot with recent counts, score averages, latest values, filters, edit/delete actions, and JSON export preview.
 - Adds varied Programs day plans with task-level local checklist progress, rest days, and progress summaries.
 - Shows a startup loading state and recovery screen instead of leaving users on a blank page.
-- Includes Playwright web smoke tests for onboarding, Today, quick logging, Learn progress, Programs checklist, language switching, and sync status.
+- Includes Playwright web smoke tests for onboarding, Today, quick logging, Learn recommendations/detail/progress, Programs checklist, language switching, and sync status.
 
 ## What This MVP Does Not Do
 
@@ -75,3 +75,4 @@ The app now supports:
 12. Programs day plans with conservative tasks, saved checklist state, rest days, and summary counts.
 13. Startup recovery path for corrupted local demo state or render failures.
 14. Track history filters, local edit/delete, and JSON export preview.
+15. Learn recommendations from Today state, topic filters, detail pages, and saved/completed progress.

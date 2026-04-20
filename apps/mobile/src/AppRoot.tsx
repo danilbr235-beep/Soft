@@ -78,11 +78,13 @@ function AppRootContent() {
         ) : null}
         {app.activeTab === "Learn" ? (
           <LearnScreen
+            activeProgramCategory={app.today.activeProgram?.category ?? null}
             content={app.content}
             copy={copy}
             language={app.language}
             onMarkCompleted={app.completeContent}
             onToggleSaved={app.toggleSavedContent}
+            priorityDomain={app.today.currentPriority.domain}
           />
         ) : null}
         {app.activeTab === "Programs" ? (
