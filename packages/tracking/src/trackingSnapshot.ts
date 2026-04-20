@@ -17,17 +17,34 @@ export type TrackingSnapshot = {
   hasSafetySignal: boolean;
 };
 
+export type TrackingWeeklySnapshotStatus = "no_data" | "low_data" | "steady" | "changed" | "caution";
+
+export type TrackingWeeklySnapshotCard =
+  | {
+      kind: "score";
+      type: Exclude<QuickLogType, "symptom_checkin">;
+      average: number | null;
+      latest: number | null;
+      count: number;
+      trend: TrackingSignalSummary["trend"];
+      status: TrackingWeeklySnapshotStatus;
+    }
+  | {
+      kind: "symptom";
+      type: "symptom_checkin";
+      count: number;
+      hasSafetySignal: boolean;
+      status: TrackingWeeklySnapshotStatus;
+    };
+
 const scoreSignalTypes: QuickLogType[] = ["sleep_quality", "energy", "confidence", "libido"];
+const weeklyCardTypes: QuickLogType[] = [...scoreSignalTypes, "symptom_checkin"];
 const recentWindowDays = 7;
 const msPerDay = 24 * 60 * 60 * 1000;
 
 export function buildTrackingSnapshot(logs: LogEntry[], now = new Date()): TrackingSnapshot {
-  const nowMs = now.getTime();
+  const recentLogs = recentLogsFor(logs, now);
   const todayKey = now.toISOString().slice(0, 10);
-  const recentLogs = logs.filter((log) => {
-    const occurredAt = Date.parse(log.occurredAt);
-    return Number.isFinite(occurredAt) && occurredAt <= nowMs && occurredAt >= nowMs - recentWindowDays * msPerDay;
-  });
   const latestLogAt = latestByTime(logs)?.occurredAt ?? null;
 
   return {
@@ -37,6 +54,42 @@ export function buildTrackingSnapshot(logs: LogEntry[], now = new Date()): Track
     scoreSignals: scoreSignalTypes.map((type) => summarizeScoreSignal(recentLogs, type)),
     hasSafetySignal: recentLogs.some((log) => log.type === "symptom_checkin" && hasSymptomRedFlag(log.value)),
   };
+}
+
+export function buildWeeklySnapshotCards(logs: LogEntry[], now = new Date()): TrackingWeeklySnapshotCard[] {
+  const recentLogs = recentLogsFor(logs, now);
+
+  return weeklyCardTypes.map((type) => {
+    if (type === "symptom_checkin") {
+      const symptomLogs = recentLogs.filter((log) => log.type === "symptom_checkin");
+      const hasSafetySignal = symptomLogs.some((log) => hasSymptomRedFlag(log.value));
+
+      return {
+        kind: "symptom",
+        type,
+        count: symptomLogs.length,
+        hasSafetySignal,
+        status: hasSafetySignal ? "caution" : symptomLogs.length > 0 ? "steady" : "no_data",
+      };
+    }
+
+    const signal = summarizeScoreSignal(recentLogs, type);
+
+    return {
+      kind: "score",
+      ...signal,
+      type: signal.type as Exclude<QuickLogType, "symptom_checkin">,
+      status: weeklyScoreStatus(signal),
+    };
+  });
+}
+
+function recentLogsFor(logs: LogEntry[], now: Date) {
+  const nowMs = now.getTime();
+  return logs.filter((log) => {
+    const occurredAt = Date.parse(log.occurredAt);
+    return Number.isFinite(occurredAt) && occurredAt <= nowMs && occurredAt >= nowMs - recentWindowDays * msPerDay;
+  });
 }
 
 function summarizeScoreSignal(logs: LogEntry[], type: QuickLogType): TrackingSignalSummary {
@@ -65,6 +118,18 @@ function summarizeScoreSignal(logs: LogEntry[], type: QuickLogType): TrackingSig
     count: values.length,
     trend: trendFor(latest, previous),
   };
+}
+
+function weeklyScoreStatus(signal: TrackingSignalSummary): TrackingWeeklySnapshotStatus {
+  if (signal.count === 0) {
+    return "no_data";
+  }
+
+  if (signal.count === 1) {
+    return "low_data";
+  }
+
+  return signal.trend === "flat" ? "steady" : "changed";
 }
 
 function latestByTime(logs: LogEntry[]) {

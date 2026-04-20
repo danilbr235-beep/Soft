@@ -16,6 +16,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Turns onboarding answers into a persisted profile, baseline, privacy defaults, and starter program.
 - Supports English/Russian localization for the app shell, Today rules, Coach explanations, quick logs, and core content.
 - Summarizes local Track history into a baseline snapshot with recent counts, score averages, latest values, filters, edit/delete actions, and JSON export preview.
+- Adds weekly Track snapshot cards for sleep, energy, confidence, libido, and symptoms.
 - Adds varied Programs day plans with task-level local checklist progress, rest days, and progress summaries.
 - Adds a local demo PIN flow for the privacy vault while keeping production secure storage out of MVP scope.
 - Auto-locks the privacy vault after a short inactivity window in the local demo.
@@ -83,3 +84,4 @@ The app now supports:
 17. Privacy vault auto-lock after local inactivity.
 18. Coach quick questions for priority, alerts, confidence, and the next conservative step.
 19. Today status row for mode, sync, privacy vault state, and active program.
+20. Track weekly snapshot cards with conservative low-data and caution states.

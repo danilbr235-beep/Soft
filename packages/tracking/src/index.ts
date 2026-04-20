@@ -1,5 +1,10 @@
-export { buildTrackingSnapshot } from "./trackingSnapshot";
-export type { TrackingSnapshot, TrackingSignalSummary } from "./trackingSnapshot";
+export { buildTrackingSnapshot, buildWeeklySnapshotCards } from "./trackingSnapshot";
+export type {
+  TrackingSnapshot,
+  TrackingSignalSummary,
+  TrackingWeeklySnapshotCard,
+  TrackingWeeklySnapshotStatus,
+} from "./trackingSnapshot";
 export {
   buildTrackingExport,
   deleteTrackingLog,

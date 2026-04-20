@@ -69,6 +69,10 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Baseline snapshot")).toBeVisible();
   await expect(page.getByText("2 today - 2 last 7 days")).toBeVisible();
   await expect(page.getByText("Average 7/10 - latest 7/10")).toBeVisible();
+  await expect(page.getByText("Weekly snapshot")).toBeVisible();
+  await expect(page.getByText("7/10 avg")).toBeVisible();
+  await expect(page.getByText("1 check-in")).toBeVisible();
+  await expect(page.getByText("Caution signal", { exact: true })).toBeVisible();
   await expect(page.getByText("Confidence: 7/10")).toBeVisible();
   await expect(page.getByText("Safety note")).toBeVisible();
   await page.getByLabel("Filter Track logs: Scores").click();

@@ -16,6 +16,7 @@ type TodayStatusCopy = {
   sync: Record<"synced" | "pending" | "offline", string>;
   privacy: Record<"vaultOn" | "discreet" | "standard", string>;
 };
+type WeeklySnapshotStatusCopy = Record<"no_data" | "low_data" | "steady" | "changed" | "caution", string>;
 
 export type LanguageCopy = {
   common: {
@@ -76,6 +77,13 @@ export type LanguageCopy = {
     noTrendYet: string;
     scoreDetail: (average: number, latest: number) => string;
     noScoreData: string;
+    weeklySnapshotTitle: string;
+    weeklySnapshotBody: string;
+    weeklyAverage: (average: number) => string;
+    weeklyScoreMeta: (count: number, status: string) => string;
+    weeklySymptomValue: (count: number) => string;
+    weeklySymptomMeta: (status: string) => string;
+    weeklyStatusLabels: WeeklySnapshotStatusCopy;
     safetyNoteTitle: string;
     safetyNoteBody: string;
     syncQueue: string;
@@ -444,6 +452,19 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       noTrendYet: "No trend yet. A few calm logs will make this useful.",
       scoreDetail: (average, latest) => `Average ${average}/10 - latest ${latest}/10`,
       noScoreData: "No data yet",
+      weeklySnapshotTitle: "Weekly snapshot",
+      weeklySnapshotBody: "A cautious seven-day view. It shows signals, not causes.",
+      weeklyAverage: (average) => `${average}/10 avg`,
+      weeklyScoreMeta: (count, status) => `${count} ${count === 1 ? "log" : "logs"} - ${status}`,
+      weeklySymptomValue: (count) => `${count} ${count === 1 ? "check-in" : "check-ins"}`,
+      weeklySymptomMeta: (status) => status,
+      weeklyStatusLabels: {
+        no_data: "No data yet",
+        low_data: "Needs more data",
+        steady: "Steady",
+        changed: "Changed",
+        caution: "Caution signal",
+      },
       safetyNoteTitle: "Safety note",
       safetyNoteBody: "A recent symptom log has a caution signal. Keep tracking conservative and avoid intense protocols today.",
       syncQueue: "Sync queue",
@@ -704,6 +725,19 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       noTrendYet: "Тренда пока нет. Несколько спокойных записей уже дадут больше ясности.",
       scoreDetail: (average, latest) => `среднее ${average}/10 - последнее ${latest}/10`,
       noScoreData: "Пока нет данных",
+      weeklySnapshotTitle: "Неделя в сигналах",
+      weeklySnapshotBody: "Осторожный взгляд за 7 дней: здесь видны сигналы, а не причины.",
+      weeklyAverage: (average) => `${average}/10 в среднем`,
+      weeklyScoreMeta: (count, status) => `${count} ${russianLogWord(count)} - ${status}`,
+      weeklySymptomValue: (count) => `${count} ${russianCheckinWord(count)}`,
+      weeklySymptomMeta: (status) => status,
+      weeklyStatusLabels: {
+        no_data: "Пока нет данных",
+        low_data: "Нужно больше данных",
+        steady: "Ровно",
+        changed: "Есть изменение",
+        caution: "Осторожный сигнал",
+      },
       safetyNoteTitle: "Осторожный сигнал",
       safetyNoteBody: "В недавнем логе есть симптом, с которым лучше не повышать интенсивность. Сегодня держим план мягким.",
       syncQueue: "Локальная очередь",
@@ -929,4 +963,23 @@ function russianMinuteWord(count: number) {
   }
 
   return "минут";
+}
+
+function russianCheckinWord(count: number) {
+  const lastTwo = count % 100;
+  const last = count % 10;
+
+  if (lastTwo >= 11 && lastTwo <= 14) {
+    return "чек-инов";
+  }
+
+  if (last === 1) {
+    return "чек-ин";
+  }
+
+  if (last >= 2 && last <= 4) {
+    return "чек-ина";
+  }
+
+  return "чек-инов";
 }

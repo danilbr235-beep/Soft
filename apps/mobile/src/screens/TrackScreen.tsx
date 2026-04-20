@@ -5,9 +5,10 @@ import { createSymptomCheckinValue } from "@pmhc/safety";
 import {
   buildTrackingExport,
   buildTrackingSnapshot,
+  buildWeeklySnapshotCards,
   filterTrackingLogs,
 } from "@pmhc/tracking";
-import type { TrackingLogFilter } from "@pmhc/tracking";
+import type { TrackingLogFilter, TrackingWeeklySnapshotCard } from "@pmhc/tracking";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { LogEntry, QuickLogDefinition } from "@pmhc/types";
 import { Screen } from "../components/Screen";
@@ -46,6 +47,7 @@ export function TrackScreen({
     label: copy.quickLog.labels[log.type],
   }));
   const snapshot = buildTrackingSnapshot(logs);
+  const weeklyCards = buildWeeklySnapshotCards(logs);
   const filteredLogs = useMemo(() => filterTrackingLogs(logs, selectedFilter), [logs, selectedFilter]);
   const filterOptions: TrackingLogFilter[] = ["all", "scores", "symptoms", "routines"];
 
@@ -86,6 +88,22 @@ export function TrackScreen({
           <Text style={styles.body}>{copy.track.safetyNoteBody}</Text>
         </Surface>
       ) : null}
+      <Surface>
+        <Text style={styles.title}>{copy.track.weeklySnapshotTitle}</Text>
+        <Text style={styles.body}>{copy.track.weeklySnapshotBody}</Text>
+        <View style={styles.signalGrid}>
+          {weeklyCards.map((card) => (
+            <View
+              key={card.type}
+              style={[styles.signalTile, card.status === "caution" ? styles.cautionTile : null]}
+            >
+              <Text style={styles.signalLabel}>{copy.quickLog.labels[card.type]}</Text>
+              <Text style={styles.signalValue}>{formatWeeklyCardValue(card, copy)}</Text>
+              <Text style={styles.signalDetail}>{formatWeeklyCardMeta(card, copy)}</Text>
+            </View>
+          ))}
+        </View>
+      </Surface>
       <Surface>
         <Text style={styles.title}>{copy.track.syncQueue}</Text>
         <Text style={styles.body}>
@@ -208,6 +226,24 @@ function formatLogValue(log: LogEntry, copy: LanguageCopy) {
   return JSON.stringify(value);
 }
 
+function formatWeeklyCardValue(card: TrackingWeeklySnapshotCard, copy: LanguageCopy) {
+  if (card.kind === "symptom") {
+    return copy.track.weeklySymptomValue(card.count);
+  }
+
+  return card.average == null ? "--" : copy.track.weeklyAverage(card.average);
+}
+
+function formatWeeklyCardMeta(card: TrackingWeeklySnapshotCard, copy: LanguageCopy) {
+  const status = copy.track.weeklyStatusLabels[card.status];
+
+  if (card.kind === "symptom") {
+    return copy.track.weeklySymptomMeta(status);
+  }
+
+  return copy.track.weeklyScoreMeta(card.count, status);
+}
+
 function nextDemoValue(log: LogEntry) {
   if (typeof log.value === "number") {
     const options = [1, 3, 5, 7, 10];
@@ -294,6 +330,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.panelSoft,
     padding: spacing.md,
     gap: spacing.xs,
+  },
+  cautionTile: {
+    borderColor: colors.amber,
+    backgroundColor: "#2a2617",
   },
   signalLabel: {
     color: colors.muted,
