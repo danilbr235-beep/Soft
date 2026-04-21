@@ -6,8 +6,12 @@ import {
   buildProgramProgressSummary,
   completeCurrentProgramDay,
   createProgramProgress,
+  isProgramPaused,
   markCurrentProgramRestDay,
+  pauseProgramProgress,
   programCompletionPercent,
+  resumeProgramProgress,
+  skipCurrentProgramDay,
   toggleCurrentProgramTask,
 } from "./programProgress";
 
@@ -26,7 +30,9 @@ describe("program progress helpers", () => {
       completedDayIndexes: [],
       completedTaskIdsByDay: {},
       restDayIndexes: [],
+      skippedDayIndexes: [],
       lastCompletedAt: null,
+      pausedAt: null,
       updatedAt: "2026-04-19T12:00:00.000Z",
     });
   });
@@ -100,21 +106,49 @@ describe("program progress helpers", () => {
     expect(programCompletionPercent(program, rested)).toBe(7);
   });
 
+  it("marks the current day as skipped and advances without counting it as completed or rest", () => {
+    const progress = createProgramProgress(program, "2026-04-19T12:00:00.000Z");
+    const skipped = skipCurrentProgramDay(program, progress, "2026-04-19T13:00:00.000Z");
+
+    expect(skipped.skippedDayIndexes).toEqual([1]);
+    expect(skipped.completedDayIndexes).toEqual([]);
+    expect(skipped.restDayIndexes).toEqual([]);
+    expect(applyProgramProgress(program, skipped)).toMatchObject({ dayIndex: 2 });
+    expect(programCompletionPercent(program, skipped)).toBe(7);
+  });
+
   it("summarizes completed, rest, and remaining program days", () => {
     const completed = completeCurrentProgramDay(
       program,
       createProgramProgress(program, "2026-04-19T12:00:00.000Z"),
       "2026-04-19T13:00:00.000Z",
     );
-    const progress = markCurrentProgramRestDay(applyProgramProgress(program, completed), completed, "2026-04-19T14:00:00.000Z");
+    const skipped = skipCurrentProgramDay(applyProgramProgress(program, completed), completed, "2026-04-19T14:00:00.000Z");
+    const progress = markCurrentProgramRestDay(applyProgramProgress(program, skipped), skipped, "2026-04-19T15:00:00.000Z");
 
     expect(buildProgramProgressSummary(program, progress)).toEqual({
       completedDays: 1,
       restDays: 1,
-      remainingDays: 12,
-      resolvedDays: 2,
+      skippedDays: 1,
+      remainingDays: 11,
+      resolvedDays: 3,
       totalDays: 14,
+      paused: false,
     });
+  });
+
+  it("can pause and resume a program without advancing the day, and pauses block task changes", () => {
+    const progress = createProgramProgress(program, "2026-04-19T12:00:00.000Z");
+    const paused = pauseProgramProgress(program, progress, "2026-04-19T12:30:00.000Z");
+    const toggledWhilePaused = toggleCurrentProgramTask(program, paused, "baseline-check", "2026-04-19T12:40:00.000Z");
+    const resumed = resumeProgramProgress(program, toggledWhilePaused, "2026-04-19T12:45:00.000Z");
+    const toggledAfterResume = toggleCurrentProgramTask(program, resumed, "baseline-check", "2026-04-19T12:50:00.000Z");
+
+    expect(isProgramPaused(program, paused)).toBe(true);
+    expect(applyProgramProgress(program, paused)).toMatchObject({ dayIndex: 1 });
+    expect(buildProgramDayPlan(program, toggledWhilePaused).completedTaskIds).toEqual([]);
+    expect(isProgramPaused(program, resumed)).toBe(false);
+    expect(buildProgramDayPlan(program, toggledAfterResume).completedTaskIds).toEqual(["baseline-check"]);
   });
 
   it("varies the day plan across baseline, practice, and recovery days", () => {

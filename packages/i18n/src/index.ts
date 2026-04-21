@@ -158,13 +158,20 @@ export type LanguageCopy = {
     completeProgramDay: string;
     restToday: string;
     restProgramDay: string;
+    skipToday: string;
+    skipProgramDay: string;
+    pauseProgram: string;
+    resumeProgram: string;
     completedDays: (count: number) => string;
     restDays: (count: number) => string;
+    skippedDays: (count: number) => string;
     remainingDays: (count: number) => string;
     phaseLabels: Record<ProgramDayPhase, string>;
     nextCandidates: string;
     candidates: string[];
     dayPlanTitle: string;
+    pausedTitle: string;
+    pausedBody: string;
     openDetail: string;
     backToPrograms: string;
     detailOverview: string;
@@ -601,8 +608,13 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       completeProgramDay: "Complete program day",
       restToday: "Take rest day",
       restProgramDay: "Take a program rest day",
+      skipToday: "Skip today",
+      skipProgramDay: "Skip program day",
+      pauseProgram: "Pause program",
+      resumeProgram: "Resume program",
       completedDays: (count) => `${count} completed`,
       restDays: (count) => `${count} rest`,
+      skippedDays: (count) => `${count} skipped`,
       remainingDays: (count) => `${count} left`,
       phaseLabels: {
         baseline: "Baseline day",
@@ -612,6 +624,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       nextCandidates: "Next candidates",
       candidates: ["Pelvic floor consistency starter", "Sleep and environment reset", "Confidence reset"],
       dayPlanTitle: "Today's plan",
+      pausedTitle: "Program paused for now",
+      pausedBody: "The current day is kept in place. Resume when you want to continue without losing context.",
       openDetail: "Open plan details",
       backToPrograms: "Back to program",
       detailOverview: "Plan details",
@@ -961,8 +975,13 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       completeProgramDay: "Завершить день программы",
       restToday: "День полегче",
       restProgramDay: "Отметить день полегче",
+      skipToday: "Пропустить сегодня",
+      skipProgramDay: "Пропустить день программы",
+      pauseProgram: "Поставить на паузу",
+      resumeProgram: "Продолжить программу",
       completedDays: (count) => `${count} ${russianDayWord(count)} сделано`,
       restDays: (count) => `${count} ${russianDayWord(count)} полегче`,
+      skippedDays: (count) => `${count} ${russianDayWord(count)} пропущено`,
       remainingDays: (count) => `${count} ${russianDayWord(count)} осталось`,
       phaseLabels: {
         baseline: "День наблюдения",
@@ -972,6 +991,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       nextCandidates: "Что можно добавить позже",
       candidates: ["Мягкая регулярность для тазового дна", "Сон и восстановление", "Спокойная уверенность"],
       dayPlanTitle: "План на сегодня",
+      pausedTitle: "Программа пока на паузе",
+      pausedBody: "Текущий день сохранен на месте. Можно спокойно вернуться к нему позже без потери контекста.",
       openDetail: "Открыть детали плана",
       backToPrograms: "Назад к программе",
       detailOverview: "Детали плана",

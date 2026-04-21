@@ -110,6 +110,10 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Day 1 of 14")).toBeVisible();
   await expect(page.getByText("Adjustment for today")).toBeVisible();
   await expect(page.getByText("Start with the check-in task and wait for the next signal before adding more.")).toBeVisible();
+  await page.getByLabel("Pause program").click();
+  await expect(page.getByText("Program paused for now")).toBeVisible();
+  await page.getByLabel("Resume program").click();
+  await expect(page.getByText("Program paused for now")).toBeHidden();
   await expect(page.getByText("Today's plan")).toBeVisible();
   await expect(page.getByText("Open plan details")).toBeVisible();
   await page.getByLabel("Open plan details").click();
@@ -126,10 +130,14 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Practice day")).toBeVisible();
   await expect(page.getByText("Practice lightly")).toBeVisible();
   await expect(page.getByText("Confidence map")).toBeVisible();
-  await page.getByLabel("Take a program rest day").click();
+  await page.getByLabel("Skip program day").click();
   await expect(page.getByText("Day 3 of 14")).toBeVisible();
+  await expect(page.getByText("1 skipped")).toBeVisible();
+  await page.getByLabel("Take a program rest day").click();
+  await expect(page.getByText("Day 4 of 14")).toBeVisible();
   await expect(page.getByText("1 rest")).toBeVisible();
-  await expect(page.getByText("12 left")).toBeVisible();
+  await expect(page.getByText("1 skipped")).toBeVisible();
+  await expect(page.getByText("11 left")).toBeVisible();
 
   await page.getByLabel("Open Coach").click();
   await expect(page.getByText("How certain is this?")).toBeVisible();

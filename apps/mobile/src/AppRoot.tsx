@@ -106,9 +106,13 @@ function AppRootContent() {
             completionPercent={app.programCompletionPercent}
             currentPriority={app.today.currentPriority}
             dayPlan={app.programDayPlan}
+            isPaused={app.programPaused}
             progressSummary={app.programSummary}
             onCompleteToday={app.completeProgramToday}
+            onPauseProgram={app.pauseProgram}
             onRestToday={app.restProgramToday}
+            onResumeProgram={app.resumeProgram}
+            onSkipToday={app.skipProgramToday}
             onToggleTask={app.toggleProgramTask}
             todayMode={app.today.todayMode}
           />

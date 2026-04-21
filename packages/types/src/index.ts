@@ -153,16 +153,20 @@ export type ProgramProgress = {
   completedDayIndexes: number[];
   completedTaskIdsByDay?: Record<string, string[]>;
   restDayIndexes?: number[];
+  skippedDayIndexes?: number[];
   lastCompletedAt: string | null;
+  pausedAt?: string | null;
   updatedAt: string;
 };
 
 export type ProgramProgressSummary = {
   completedDays: number;
   restDays: number;
+  skippedDays: number;
   remainingDays: number;
   resolvedDays: number;
   totalDays: number;
+  paused: boolean;
 };
 
 export type LogEntry = {

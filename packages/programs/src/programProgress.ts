@@ -14,7 +14,9 @@ export function createProgramProgress(program: Program, updatedAt: string): Prog
     completedDayIndexes: [],
     completedTaskIdsByDay: {},
     restDayIndexes: [],
+    skippedDayIndexes: [],
     lastCompletedAt: null,
+    pausedAt: null,
     updatedAt,
   };
 }
@@ -25,6 +27,12 @@ export function completeCurrentProgramDay(
   completedAt: string,
 ): ProgramProgress {
   const currentProgress = progress ?? createProgramProgress(program, completedAt);
+  if (isProgramPaused(program, currentProgress)) {
+    return {
+      ...currentProgress,
+      updatedAt: completedAt,
+    };
+  }
   const dayIndex = clampDay(program.dayIndex, program.durationDays);
   const dayPlan = buildProgramDayPlan(program, currentProgress);
   const completedDayIndexes = Array.from(new Set([...currentProgress.completedDayIndexes, dayIndex])).sort(
@@ -35,11 +43,13 @@ export function completeCurrentProgramDay(
     programId: program.id,
     completedDayIndexes,
     restDayIndexes: withoutDay(currentProgress.restDayIndexes, dayIndex),
+    skippedDayIndexes: withoutDay(currentProgress.skippedDayIndexes, dayIndex),
     completedTaskIdsByDay: {
       ...currentProgress.completedTaskIdsByDay,
       [dayKey(dayIndex)]: dayPlan.tasks.map((task) => task.id),
     },
     lastCompletedAt: completedAt,
+    pausedAt: currentProgress.pausedAt ?? null,
     updatedAt: completedAt,
   };
 }
@@ -74,6 +84,12 @@ export function toggleCurrentProgramTask(
   updatedAt: string,
 ): ProgramProgress {
   const currentProgress = progress ?? createProgramProgress(program, updatedAt);
+  if (isProgramPaused(program, currentProgress)) {
+    return {
+      ...currentProgress,
+      updatedAt,
+    };
+  }
   const dayIndex = clampDay(program.dayIndex, program.durationDays);
   const tasks = tasksForProgram(program, phaseForDay(dayIndex));
 
@@ -107,6 +123,12 @@ export function markCurrentProgramRestDay(
   restedAt: string,
 ): ProgramProgress {
   const currentProgress = progress ?? createProgramProgress(program, restedAt);
+  if (isProgramPaused(program, currentProgress)) {
+    return {
+      ...currentProgress,
+      updatedAt: restedAt,
+    };
+  }
   const dayIndex = clampDay(program.dayIndex, program.durationDays);
   const restDayIndexes = Array.from(new Set([...(currentProgress.restDayIndexes ?? []), dayIndex])).sort((a, b) => a - b);
 
@@ -115,13 +137,80 @@ export function markCurrentProgramRestDay(
     programId: program.id,
     completedDayIndexes: withoutDay(currentProgress.completedDayIndexes, dayIndex),
     restDayIndexes,
+    skippedDayIndexes: withoutDay(currentProgress.skippedDayIndexes, dayIndex),
     completedTaskIdsByDay: {
       ...currentProgress.completedTaskIdsByDay,
       [dayKey(dayIndex)]: [],
     },
     lastCompletedAt: restedAt,
+    pausedAt: currentProgress.pausedAt ?? null,
     updatedAt: restedAt,
   };
+}
+
+export function skipCurrentProgramDay(
+  program: Program,
+  progress: ProgramProgress | null,
+  skippedAt: string,
+): ProgramProgress {
+  const currentProgress = progress ?? createProgramProgress(program, skippedAt);
+  if (isProgramPaused(program, currentProgress)) {
+    return {
+      ...currentProgress,
+      updatedAt: skippedAt,
+    };
+  }
+  const dayIndex = clampDay(program.dayIndex, program.durationDays);
+  const skippedDayIndexes = Array.from(new Set([...(currentProgress.skippedDayIndexes ?? []), dayIndex])).sort((a, b) => a - b);
+
+  return {
+    ...currentProgress,
+    programId: program.id,
+    completedDayIndexes: withoutDay(currentProgress.completedDayIndexes, dayIndex),
+    restDayIndexes: withoutDay(currentProgress.restDayIndexes, dayIndex),
+    skippedDayIndexes,
+    completedTaskIdsByDay: {
+      ...currentProgress.completedTaskIdsByDay,
+      [dayKey(dayIndex)]: [],
+    },
+    lastCompletedAt: skippedAt,
+    pausedAt: currentProgress.pausedAt ?? null,
+    updatedAt: skippedAt,
+  };
+}
+
+export function pauseProgramProgress(
+  program: Program,
+  progress: ProgramProgress | null,
+  pausedAt: string,
+): ProgramProgress {
+  const currentProgress = progress ?? createProgramProgress(program, pausedAt);
+
+  return {
+    ...currentProgress,
+    programId: program.id,
+    pausedAt,
+    updatedAt: pausedAt,
+  };
+}
+
+export function resumeProgramProgress(
+  program: Program,
+  progress: ProgramProgress | null,
+  resumedAt: string,
+): ProgramProgress {
+  const currentProgress = progress ?? createProgramProgress(program, resumedAt);
+
+  return {
+    ...currentProgress,
+    programId: program.id,
+    pausedAt: null,
+    updatedAt: resumedAt,
+  };
+}
+
+export function isProgramPaused(program: Program, progress: ProgramProgress | null) {
+  return progress?.programId === program.id && progress.pausedAt != null;
 }
 
 export function applyProgramProgress(program: Program, progress: ProgramProgress | null): Program {
@@ -152,24 +241,34 @@ export function buildProgramProgressSummary(
     return {
       completedDays: 0,
       restDays: 0,
+      skippedDays: 0,
       remainingDays: program.durationDays,
       resolvedDays: 0,
       totalDays: program.durationDays,
+      paused: false,
     };
   }
 
-  const completedDays = uniqueValidDays(progress.completedDayIndexes, program.durationDays).length;
-  const restDays = uniqueValidDays(progress.restDayIndexes ?? [], program.durationDays).filter(
-    (day) => !progress.completedDayIndexes.includes(day),
-  ).length;
-  const resolvedDays = Math.min(completedDays + restDays, program.durationDays);
+  const uniqueCompletedDays = uniqueValidDays(progress.completedDayIndexes, program.durationDays);
+  const uniqueRestDays = uniqueValidDays(progress.restDayIndexes ?? [], program.durationDays).filter(
+    (day) => !uniqueCompletedDays.includes(day),
+  );
+  const uniqueSkippedDays = uniqueValidDays(progress.skippedDayIndexes ?? [], program.durationDays).filter(
+    (day) => !uniqueCompletedDays.includes(day) && !uniqueRestDays.includes(day),
+  );
+  const completedDays = uniqueCompletedDays.length;
+  const restDays = uniqueRestDays.length;
+  const skippedDays = uniqueSkippedDays.length;
+  const resolvedDays = Math.min(completedDays + restDays + skippedDays, program.durationDays);
 
   return {
     completedDays,
     restDays,
+    skippedDays,
     remainingDays: Math.max(program.durationDays - resolvedDays, 0),
     resolvedDays,
     totalDays: program.durationDays,
+    paused: progress.pausedAt != null,
   };
 }
 
@@ -182,7 +281,11 @@ function withoutDay(days: number[] | undefined, dayIndex: number): number[] {
 }
 
 function resolvedDayCount(progress: ProgramProgress) {
-  return new Set([...progress.completedDayIndexes, ...(progress.restDayIndexes ?? [])]).size;
+  return new Set([
+    ...progress.completedDayIndexes,
+    ...(progress.restDayIndexes ?? []),
+    ...(progress.skippedDayIndexes ?? []),
+  ]).size;
 }
 
 function uniqueValidDays(days: number[], durationDays: number) {

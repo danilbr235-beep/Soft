@@ -21,8 +21,12 @@ import {
   buildProgramProgressSummary,
   completeCurrentProgramDay,
   createProgramProgress,
+  isProgramPaused,
   markCurrentProgramRestDay,
+  pauseProgramProgress,
   programCompletionPercent,
+  resumeProgramProgress,
+  skipCurrentProgramDay,
   toggleCurrentProgramTask,
 } from "@pmhc/programs";
 import { buildTodayPayload } from "@pmhc/rules";
@@ -213,6 +217,9 @@ export function useAppState() {
   }, [programProgress, today.activeProgram]);
   const programSummary = useMemo<ProgramProgressSummary | null>(() => {
     return today.activeProgram ? buildProgramProgressSummary(today.activeProgram, programProgress) : null;
+  }, [programProgress, today.activeProgram]);
+  const programPaused = useMemo(() => {
+    return today.activeProgram ? isProgramPaused(today.activeProgram, programProgress) : false;
   }, [programProgress, today.activeProgram]);
 
   const persistLogs = useCallback(async (nextLogs: LogEntry[]) => {
@@ -465,6 +472,36 @@ export function useAppState() {
     await persistProgramProgress(markCurrentProgramRestDay(activeProgram, programProgress, new Date().toISOString()));
   }, [persistProgramProgress, programProgress, today.activeProgram]);
 
+  const skipProgramToday = useCallback(async () => {
+    const activeProgram = today.activeProgram;
+
+    if (!activeProgram) {
+      return;
+    }
+
+    await persistProgramProgress(skipCurrentProgramDay(activeProgram, programProgress, new Date().toISOString()));
+  }, [persistProgramProgress, programProgress, today.activeProgram]);
+
+  const pauseProgram = useCallback(async () => {
+    const activeProgram = today.activeProgram;
+
+    if (!activeProgram) {
+      return;
+    }
+
+    await persistProgramProgress(pauseProgramProgress(activeProgram, programProgress, new Date().toISOString()));
+  }, [persistProgramProgress, programProgress, today.activeProgram]);
+
+  const resumeProgram = useCallback(async () => {
+    const activeProgram = today.activeProgram;
+
+    if (!activeProgram) {
+      return;
+    }
+
+    await persistProgramProgress(resumeProgramProgress(activeProgram, programProgress, new Date().toISOString()));
+  }, [persistProgramProgress, programProgress, today.activeProgram]);
+
   const toggleProgramTask = useCallback(
     async (taskId: string) => {
       const activeProgram = today.activeProgram;
@@ -493,6 +530,7 @@ export function useAppState() {
     privacyLock,
     hasPrivacyPin: hasPrivacyPin(privacyLock),
     programDayPlan,
+    programPaused,
     programSummary,
     programCompletionPercent: today.activeProgram ? programCompletionPercent(today.activeProgram, programProgress) : 0,
     completeOnboarding,
@@ -502,9 +540,12 @@ export function useAppState() {
     deleteLog,
     lockNow,
     openQuickLog: setSelectedQuickLog,
+    pauseProgram,
     resetOnboarding,
+    resumeProgram,
     restProgramToday,
     setActiveTab,
+    skipProgramToday,
     syncQueuedWrites,
     setPrivacyPin: setPrivacyPinCode,
     togglePrivacyVault,
@@ -608,7 +649,10 @@ function isNullableProgramProgress(value: unknown): value is ProgramProgress | n
       (value.completedTaskIdsByDay === undefined || isCompletedTaskMap(value.completedTaskIdsByDay)) &&
       (value.restDayIndexes === undefined ||
         (Array.isArray(value.restDayIndexes) && value.restDayIndexes.every((day) => typeof day === "number"))) &&
+      (value.skippedDayIndexes === undefined ||
+        (Array.isArray(value.skippedDayIndexes) && value.skippedDayIndexes.every((day) => typeof day === "number"))) &&
       (typeof value.lastCompletedAt === "string" || value.lastCompletedAt === null) &&
+      (typeof value.pausedAt === "string" || value.pausedAt === null || value.pausedAt === undefined) &&
       typeof value.updatedAt === "string")
   );
 }

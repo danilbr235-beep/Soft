@@ -20,9 +20,11 @@ describe("program detail summary", () => {
       buildProgramDetailSummary(baseProgram, dayPlan, {
         completedDays: 0,
         restDays: 0,
+        skippedDays: 0,
         remainingDays: 14,
         resolvedDays: 0,
         totalDays: 14,
+        paused: false,
       }),
     ).toMatchObject({
       checklistState: "not_started",
@@ -51,9 +53,11 @@ describe("program detail summary", () => {
       buildProgramDetailSummary(practiceProgram, dayPlan, {
         completedDays: 1,
         restDays: 0,
+        skippedDays: 0,
         remainingDays: 12,
         resolvedDays: 2,
         totalDays: 14,
+        paused: false,
       }),
     ).toMatchObject({
       checklistState: "in_progress",
@@ -81,9 +85,11 @@ describe("program detail summary", () => {
       buildProgramDetailSummary(recoveryProgram, dayPlan, {
         completedDays: 4,
         restDays: 1,
+        skippedDays: 0,
         remainingDays: 9,
         resolvedDays: 5,
         totalDays: 14,
+        paused: false,
       }),
     ).toMatchObject({
       checklistState: "rest_day",
@@ -107,9 +113,11 @@ describe("program detail summary", () => {
       buildProgramDetailSummary(closingProgram, dayPlan, {
         completedDays: 11,
         restDays: 2,
+        skippedDays: 0,
         remainingDays: 1,
         resolvedDays: 13,
         totalDays: 14,
+        paused: false,
       }),
     ).toMatchObject({
       completionBand: "closing",

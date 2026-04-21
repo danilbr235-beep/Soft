@@ -14,9 +14,13 @@ type Props = {
   completionPercent: number;
   currentPriority: CurrentPriority;
   dayPlan: ProgramDayPlan | null;
+  isPaused: boolean;
   progressSummary: ProgramProgressSummary | null;
   onCompleteToday: () => void;
+  onPauseProgram: () => void;
   onRestToday: () => void;
+  onResumeProgram: () => void;
+  onSkipToday: () => void;
   onToggleTask: (taskId: string) => void;
   todayMode: TodayMode;
 };
@@ -28,9 +32,13 @@ export function ProgramsScreen({
   completionPercent,
   currentPriority,
   dayPlan,
+  isPaused,
   progressSummary,
   onCompleteToday,
+  onPauseProgram,
   onRestToday,
+  onResumeProgram,
+  onSkipToday,
   onToggleTask,
   todayMode,
 }: Props) {
@@ -60,6 +68,7 @@ export function ProgramsScreen({
       todayMode,
     });
   }, [alerts, currentPriority, dayPlan, progressSummary, todayMode]);
+  const disableProgramActions = !activeProgram || isPaused;
 
   function renderTaskList() {
     if (!dayPlan) {
@@ -77,9 +86,10 @@ export function ProgramsScreen({
             <Pressable
               accessibilityLabel={completed ? copy.programs.markTaskOpen(taskTitle) : copy.programs.markTaskDone(taskTitle)}
               accessibilityRole="button"
+              disabled={isPaused}
               key={task.id}
               onPress={() => onToggleTask(task.id)}
-              style={[styles.taskRow, completed && styles.completedTaskRow]}
+              style={[styles.taskRow, completed && styles.completedTaskRow, isPaused && styles.disabledButton]}
             >
               <View style={[styles.taskCheck, completed && styles.completedTaskCheck]}>
                 <Text style={[styles.taskCheckText, completed && styles.completedTaskCheckText]}>
@@ -97,6 +107,62 @@ export function ProgramsScreen({
             </Pressable>
           );
         })}
+      </View>
+    );
+  }
+
+  function renderPausedBanner() {
+    if (!isPaused) {
+      return null;
+    }
+
+    return (
+      <Surface>
+        <Text style={styles.eyebrow}>{copy.programs.pausedTitle}</Text>
+        <Text style={styles.body}>{copy.programs.pausedBody}</Text>
+      </Surface>
+    );
+  }
+
+  function renderActionButtons() {
+    return (
+      <View style={styles.buttonRow}>
+        <Pressable
+          accessibilityLabel={copy.programs.completeProgramDay}
+          accessibilityRole="button"
+          disabled={disableProgramActions}
+          onPress={onCompleteToday}
+          style={[styles.button, disableProgramActions && styles.disabledButton]}
+        >
+          <Text style={styles.buttonText}>{copy.programs.completeToday}</Text>
+        </Pressable>
+        <Pressable
+          accessibilityLabel={copy.programs.restProgramDay}
+          accessibilityRole="button"
+          disabled={disableProgramActions}
+          onPress={onRestToday}
+          style={[styles.secondaryButton, disableProgramActions && styles.disabledButton]}
+        >
+          <Text style={styles.secondaryButtonText}>{copy.programs.restToday}</Text>
+        </Pressable>
+        <Pressable
+          accessibilityLabel={copy.programs.skipProgramDay}
+          accessibilityRole="button"
+          disabled={disableProgramActions}
+          onPress={onSkipToday}
+          style={[styles.secondaryButton, disableProgramActions && styles.disabledButton]}
+        >
+          <Text style={styles.secondaryButtonText}>{copy.programs.skipToday}</Text>
+        </Pressable>
+        <Pressable
+          accessibilityLabel={isPaused ? copy.programs.resumeProgram : copy.programs.pauseProgram}
+          accessibilityRole="button"
+          disabled={!activeProgram}
+          onPress={isPaused ? onResumeProgram : onPauseProgram}
+          style={[styles.secondaryButton, !activeProgram && styles.disabledButton]}
+        >
+          <Text style={styles.secondaryButtonText}>{isPaused ? copy.programs.resumeProgram : copy.programs.pauseProgram}</Text>
+        </Pressable>
       </View>
     );
   }
@@ -163,12 +229,15 @@ export function ProgramsScreen({
           <Text style={styles.body}>{copy.programs.detailConservativeNotes[detailSummary.pace]}</Text>
         </Surface>
 
+        {renderPausedBanner()}
+
         <Surface>
           <Text style={styles.sectionTitle}>{copy.programs.detailSummaryTitle}</Text>
           <View style={styles.detailSummaryList}>
             <Text style={styles.body}>{copy.programs.percentComplete(completionPercent)}</Text>
             <Text style={styles.body}>{copy.programs.completedDays(progressSummary.completedDays)}</Text>
             <Text style={styles.body}>{copy.programs.restDays(progressSummary.restDays)}</Text>
+            <Text style={styles.body}>{copy.programs.skippedDays(progressSummary.skippedDays)}</Text>
             <Text style={styles.body}>{copy.programs.remainingDays(progressSummary.remainingDays)}</Text>
             <Text style={styles.body}>
               {detailSummary.nextMilestoneDay
@@ -192,26 +261,7 @@ export function ProgramsScreen({
             </View>
           </View>
           {renderTaskList()}
-          <View style={styles.buttonRow}>
-            <Pressable
-              accessibilityLabel={copy.programs.completeProgramDay}
-              accessibilityRole="button"
-              disabled={!activeProgram}
-              onPress={onCompleteToday}
-              style={[styles.button, !activeProgram && styles.disabledButton]}
-            >
-              <Text style={styles.buttonText}>{copy.programs.completeToday}</Text>
-            </Pressable>
-            <Pressable
-              accessibilityLabel={copy.programs.restProgramDay}
-              accessibilityRole="button"
-              disabled={!activeProgram}
-              onPress={onRestToday}
-              style={[styles.secondaryButton, !activeProgram && styles.disabledButton]}
-            >
-              <Text style={styles.secondaryButtonText}>{copy.programs.restToday}</Text>
-            </Pressable>
-          </View>
+          {renderActionButtons()}
         </Surface>
       </Screen>
     );
@@ -238,31 +288,17 @@ export function ProgramsScreen({
               <Text style={styles.summaryLabel}>{copy.programs.restDays(progressSummary.restDays)}</Text>
             </View>
             <View style={styles.summaryTile}>
+              <Text style={styles.summaryValue}>{progressSummary.skippedDays}</Text>
+              <Text style={styles.summaryLabel}>{copy.programs.skippedDays(progressSummary.skippedDays)}</Text>
+            </View>
+            <View style={styles.summaryTile}>
               <Text style={styles.summaryValue}>{progressSummary.remainingDays}</Text>
               <Text style={styles.summaryLabel}>{copy.programs.remainingDays(progressSummary.remainingDays)}</Text>
             </View>
           </View>
         ) : null}
-        <View style={styles.buttonRow}>
-          <Pressable
-            accessibilityLabel={copy.programs.completeProgramDay}
-            accessibilityRole="button"
-            disabled={!activeProgram}
-            onPress={onCompleteToday}
-            style={[styles.button, !activeProgram && styles.disabledButton]}
-          >
-            <Text style={styles.buttonText}>{copy.programs.completeToday}</Text>
-          </Pressable>
-          <Pressable
-            accessibilityLabel={copy.programs.restProgramDay}
-            accessibilityRole="button"
-            disabled={!activeProgram}
-            onPress={onRestToday}
-            style={[styles.secondaryButton, !activeProgram && styles.disabledButton]}
-          >
-            <Text style={styles.secondaryButtonText}>{copy.programs.restToday}</Text>
-          </Pressable>
-        </View>
+        {renderPausedBanner()}
+        {renderActionButtons()}
       </Surface>
       {renderAdjustmentCard()}
       {dayPlan && detailSummary ? (
@@ -335,10 +371,12 @@ const styles = StyleSheet.create({
   },
   summaryGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.sm,
   },
   summaryTile: {
-    flex: 1,
+    minWidth: "47%",
+    flexGrow: 1,
     minHeight: 72,
     justifyContent: "center",
     borderWidth: 1,

@@ -29,9 +29,11 @@ const basePlan = {
 const baseSummary = {
   completedDays: 0,
   restDays: 0,
+  skippedDays: 0,
   remainingDays: 14,
   resolvedDays: 0,
   totalDays: 14,
+  paused: false,
 } satisfies ProgramProgressSummary;
 
 const baselinePriority = {
@@ -131,6 +133,7 @@ describe("program adjustment summary", () => {
           ...baseSummary,
           completedDays: 11,
           restDays: 2,
+          skippedDays: 0,
           remainingDays: 1,
           resolvedDays: 13,
         },
