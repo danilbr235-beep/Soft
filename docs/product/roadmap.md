@@ -37,8 +37,8 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Give each day its own task plan instead of repeating the same daily template. (Initial varied day-plan slice complete.)
 - Support skip, rest day, and pause without shame-oriented copy. (Rest day slice complete.)
 - Track completed, skipped, and recovery-only days. (Completed/rest summary complete.)
-- Recommend program adjustments from rule outputs.
-- Add completion summaries with a conservative next step.
+- Recommend program adjustments from rule outputs. (Initial slice complete.)
+- Add completion summaries with a conservative next step. (Initial slice complete.)
 
 ## P1 Learn Hub
 

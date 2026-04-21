@@ -25,6 +25,11 @@ type ProgramDetailChecklistStateCopy = Record<"not_started" | "in_progress" | "d
 type ProgramDetailFocusCopy = Record<"observe" | "practice" | "recover", string>;
 type ProgramDetailPaceCopy = Record<"light" | "steady" | "downshift", string>;
 type ProgramDetailCompletionBandCopy = Record<"starting" | "building" | "closing" | "complete", string>;
+type ProgramAdjustmentKindCopy = Record<"downshift" | "recovery" | "baseline" | "steady" | "closeout", string>;
+type ProgramAdjustmentNextStepCopy = Record<
+  "take_rest_day" | "keep_one_task" | "start_with_check_in" | "close_day_gently" | "review_boundary",
+  string
+>;
 
 export type LanguageCopy = {
   common: {
@@ -172,6 +177,14 @@ export type LanguageCopy = {
     detailConservativeNotes: ProgramDetailPaceCopy;
     detailNextMilestone: (day: number) => string;
     detailFinalMilestone: string;
+    adjustmentTitle: string;
+    adjustmentKinds: ProgramAdjustmentKindCopy;
+    adjustmentBodies: ProgramAdjustmentKindCopy;
+    adjustmentReason: (reason: string) => string;
+    adjustmentAvoid: (text: string) => string;
+    adjustmentTarget: (count: number) => string;
+    adjustmentNextStepTitle: string;
+    adjustmentNextSteps: ProgramAdjustmentNextStepCopy;
     taskProgress: (done: number, total: number) => string;
     markTaskDone: (title: string) => string;
     markTaskOpen: (title: string) => string;
@@ -638,6 +651,33 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       },
       detailNextMilestone: (day) => `Next milestone: day ${day}`,
       detailFinalMilestone: "This is the final scheduled day in the current program.",
+      adjustmentTitle: "Adjustment for today",
+      adjustmentKinds: {
+        downshift: "Downshift the plan",
+        recovery: "Keep the plan light",
+        baseline: "Start small",
+        steady: "Stay with the current pace",
+        closeout: "Close the program gently",
+      },
+      adjustmentBodies: {
+        downshift: "Today's signals point to a lighter version of the program.",
+        recovery: "The rules are leaning toward recovery, so the plan should stay small and repeatable.",
+        baseline: "There still is not enough signal for intensity. Use the plan to observe, not to prove anything.",
+        steady: "No caution signal is asking for a bigger change. Keep the plan consistent and stop before strain.",
+        closeout: "You are at the end of the current plan. Finish neatly instead of adding extra work.",
+      },
+      adjustmentReason: (reason) => `Based on: ${reason}`,
+      adjustmentAvoid: (text) => `Avoid today: ${text}`,
+      adjustmentTarget: (count) =>
+        count <= 0 ? "No more tasks needed today." : count === 1 ? "Aim for at most one more task today." : `Aim for up to ${count} more tasks, then stop.`,
+      adjustmentNextStepTitle: "Next conservative step",
+      adjustmentNextSteps: {
+        take_rest_day: "Use the rest-day button and let the program stay light today.",
+        keep_one_task: "Pick the smallest remaining task and leave the rest for later.",
+        start_with_check_in: "Start with the check-in task and wait for the next signal before adding more.",
+        close_day_gently: "Finish the current task if needed, then close the day without adding extras.",
+        review_boundary: "Close the day and note one boundary to keep the next step conservative.",
+      },
       taskProgress: (done, total) => `${done} of ${total} done`,
       markTaskDone: (title) => `Mark ${title} done`,
       markTaskOpen: (title) => `Reopen ${title}`,
@@ -971,6 +1011,37 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       },
       detailNextMilestone: (day) => `Следующий рубеж: день ${day}`,
       detailFinalMilestone: "Это последний запланированный день текущей программы.",
+      adjustmentTitle: "Корректировка на сегодня",
+      adjustmentKinds: {
+        downshift: "Снизить нагрузку",
+        recovery: "Оставить план легким",
+        baseline: "Начать с малого",
+        steady: "Сохранить текущий темп",
+        closeout: "Спокойно завершить цикл",
+      },
+      adjustmentBodies: {
+        downshift: "Текущие сигналы просят упростить программу и не продавливать день через силу.",
+        recovery: "По правилам сегодня приоритет у восстановления, поэтому план лучше оставить коротким и щадящим.",
+        baseline: "Данных пока мало для более смелого шага. Сегодня задача — спокойно собрать сигнал, а не что-то себе доказывать.",
+        steady: "Сигналов на резкую смену плана нет. Можно держать ритм, но лучше остановиться чуть раньше, чем перегрузить день.",
+        closeout: "Это финальный отрезок текущего плана. Лучше аккуратно закрыть цикл, чем добавлять лишнюю нагрузку.",
+      },
+      adjustmentReason: (reason) => `Опора на сигнал: ${reason}`,
+      adjustmentAvoid: (text) => `Сегодня лучше не делать так: ${text}`,
+      adjustmentTarget: (count) =>
+        count <= 0
+          ? "На сегодня задач уже достаточно."
+          : count === 1
+            ? "Если продолжать, то максимум одна небольшая задача."
+            : `Если продолжать, остановись после ${count} задач.`,
+      adjustmentNextStepTitle: "Следующий осторожный шаг",
+      adjustmentNextSteps: {
+        take_rest_day: "Нажми на день полегче и не добавляй сегодня новых задач.",
+        keep_one_task: "Выбери самую небольшую оставшуюся задачу, а остальное оставь на потом.",
+        start_with_check_in: "Начни с чек-ина и посмотри на следующий сигнал, прежде чем добавлять что-то еще.",
+        close_day_gently: "Если нужно, доведи текущую задачу и спокойно закрой день без добавочной нагрузки.",
+        review_boundary: "Закрой день и отметь одну границу, которая поможет сохранить следующий шаг спокойным.",
+      },
       taskProgress: (done, total) => `${done} из ${total} уже сделано`,
       markTaskDone: (title) => `Отметить: ${title}`,
       markTaskOpen: (title) => `Вернуть: ${title}`,

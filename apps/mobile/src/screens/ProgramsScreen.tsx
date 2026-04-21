@@ -1,32 +1,38 @@
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { buildProgramDetailSummary } from "@pmhc/programs";
+import { buildProgramAdjustmentSummary, buildProgramDetailSummary } from "@pmhc/programs";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { Program, ProgramDayPlan, ProgramProgressSummary } from "@pmhc/types";
+import type { Alert, CurrentPriority, Program, ProgramDayPlan, ProgramProgressSummary, TodayMode } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 
 type Props = {
+  alerts: Alert[];
   activeProgram: Program | null;
   copy: LanguageCopy;
   completionPercent: number;
+  currentPriority: CurrentPriority;
   dayPlan: ProgramDayPlan | null;
   progressSummary: ProgramProgressSummary | null;
   onCompleteToday: () => void;
   onRestToday: () => void;
   onToggleTask: (taskId: string) => void;
+  todayMode: TodayMode;
 };
 
 export function ProgramsScreen({
+  alerts,
   activeProgram,
   copy,
   completionPercent,
+  currentPriority,
   dayPlan,
   progressSummary,
   onCompleteToday,
   onRestToday,
   onToggleTask,
+  todayMode,
 }: Props) {
   const [showDetail, setShowDetail] = useState(false);
   const dayLabel = activeProgram ? copy.programs.dayOf(activeProgram.dayIndex, activeProgram.durationDays) : copy.programs.noActiveDay;
@@ -41,6 +47,19 @@ export function ProgramsScreen({
 
     return buildProgramDetailSummary(activeProgram, dayPlan, progressSummary);
   }, [activeProgram, dayPlan, progressSummary]);
+  const adjustmentSummary = useMemo(() => {
+    if (!dayPlan || !progressSummary) {
+      return null;
+    }
+
+    return buildProgramAdjustmentSummary({
+      alerts,
+      currentPriority,
+      dayPlan,
+      progressSummary,
+      todayMode,
+    });
+  }, [alerts, currentPriority, dayPlan, progressSummary, todayMode]);
 
   function renderTaskList() {
     if (!dayPlan) {
@@ -79,6 +98,31 @@ export function ProgramsScreen({
           );
         })}
       </View>
+    );
+  }
+
+  function renderAdjustmentCard() {
+    if (!adjustmentSummary) {
+      return null;
+    }
+
+    return (
+      <Surface>
+        <Text style={styles.eyebrow}>{copy.programs.adjustmentTitle}</Text>
+        <Text style={styles.sectionTitle}>{copy.programs.adjustmentKinds[adjustmentSummary.kind]}</Text>
+        <Text style={styles.body}>{copy.programs.adjustmentBodies[adjustmentSummary.kind]}</Text>
+        <View style={styles.detailSummaryList}>
+          <Text style={styles.metaText}>{copy.programs.adjustmentReason(adjustmentSummary.reasonTitle)}</Text>
+          {adjustmentSummary.avoidToday ? (
+            <Text style={styles.metaText}>{copy.programs.adjustmentAvoid(adjustmentSummary.avoidToday)}</Text>
+          ) : null}
+          <Text style={styles.metaText}>{copy.programs.adjustmentTarget(adjustmentSummary.remainingTaskTarget)}</Text>
+        </View>
+        <View style={styles.detailSummaryList}>
+          <Text style={styles.detailLabel}>{copy.programs.adjustmentNextStepTitle}</Text>
+          <Text style={styles.body}>{copy.programs.adjustmentNextSteps[adjustmentSummary.nextStep]}</Text>
+        </View>
+      </Surface>
     );
   }
 
@@ -133,6 +177,8 @@ export function ProgramsScreen({
             </Text>
           </View>
         </Surface>
+
+        {renderAdjustmentCard()}
 
         <Surface>
           <View style={styles.planHeader}>
@@ -218,6 +264,7 @@ export function ProgramsScreen({
           </Pressable>
         </View>
       </Surface>
+      {renderAdjustmentCard()}
       {dayPlan && detailSummary ? (
         <Surface>
           <View style={styles.planHeader}>
@@ -469,6 +516,10 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 15,
     fontWeight: "800",
+    lineHeight: 20,
+  },
+  metaText: {
+    color: colors.steel,
     lineHeight: 20,
   },
 });

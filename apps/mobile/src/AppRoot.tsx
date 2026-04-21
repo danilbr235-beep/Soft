@@ -100,14 +100,17 @@ function AppRootContent() {
         ) : null}
         {app.activeTab === "Programs" ? (
           <ProgramsScreen
+            alerts={app.today.alerts}
             activeProgram={app.today.activeProgram}
             copy={copy}
             completionPercent={app.programCompletionPercent}
+            currentPriority={app.today.currentPriority}
             dayPlan={app.programDayPlan}
             progressSummary={app.programSummary}
             onCompleteToday={app.completeProgramToday}
             onRestToday={app.restProgramToday}
             onToggleTask={app.toggleProgramTask}
+            todayMode={app.today.todayMode}
           />
         ) : null}
         {app.activeTab === "Coach" ? <CoachScreen copy={copy} language={app.language} today={app.today} /> : null}
