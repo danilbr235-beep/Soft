@@ -20,6 +20,11 @@ type WeeklySnapshotStatusCopy = Record<"no_data" | "low_data" | "steady" | "chan
 type PatternHintLabelCopy = Record<"sleep_energy" | "sleep_confidence" | "confidence_libido" | "low_data", string>;
 type PatternDirectionCopy = Record<"together" | "opposite" | "unknown", string>;
 type PatternConfidenceCopy = Record<"low" | "medium", string>;
+type ProgramDetailLabelCopy = Record<"status" | "focus" | "pace" | "stage", string>;
+type ProgramDetailChecklistStateCopy = Record<"not_started" | "in_progress" | "done" | "rest_day", string>;
+type ProgramDetailFocusCopy = Record<"observe" | "practice" | "recover", string>;
+type ProgramDetailPaceCopy = Record<"light" | "steady" | "downshift", string>;
+type ProgramDetailCompletionBandCopy = Record<"starting" | "building" | "closing" | "complete", string>;
 
 export type LanguageCopy = {
   common: {
@@ -155,6 +160,18 @@ export type LanguageCopy = {
     nextCandidates: string;
     candidates: string[];
     dayPlanTitle: string;
+    openDetail: string;
+    backToPrograms: string;
+    detailOverview: string;
+    detailSummaryTitle: string;
+    detailLabels: ProgramDetailLabelCopy;
+    detailChecklistStates: ProgramDetailChecklistStateCopy;
+    detailFocusLabels: ProgramDetailFocusCopy;
+    detailPaceLabels: ProgramDetailPaceCopy;
+    detailCompletionBands: ProgramDetailCompletionBandCopy;
+    detailConservativeNotes: ProgramDetailPaceCopy;
+    detailNextMilestone: (day: number) => string;
+    detailFinalMilestone: string;
     taskProgress: (done: number, total: number) => string;
     markTaskDone: (title: string) => string;
     markTaskOpen: (title: string) => string;
@@ -582,6 +599,45 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       nextCandidates: "Next candidates",
       candidates: ["Pelvic floor consistency starter", "Sleep and environment reset", "Confidence reset"],
       dayPlanTitle: "Today's plan",
+      openDetail: "Open plan details",
+      backToPrograms: "Back to program",
+      detailOverview: "Plan details",
+      detailSummaryTitle: "Progress summary",
+      detailLabels: {
+        status: "Status",
+        focus: "Focus",
+        pace: "Pace",
+        stage: "Stage",
+      },
+      detailChecklistStates: {
+        not_started: "Not started",
+        in_progress: "In progress",
+        done: "Done for today",
+        rest_day: "Rest day",
+      },
+      detailFocusLabels: {
+        observe: "Observe first",
+        practice: "Practice lightly",
+        recover: "Recover first",
+      },
+      detailPaceLabels: {
+        light: "Keep it light",
+        steady: "Steady pace",
+        downshift: "Downshift day",
+      },
+      detailCompletionBands: {
+        starting: "Starting point",
+        building: "Building consistency",
+        closing: "Final stretch",
+        complete: "Program complete",
+      },
+      detailConservativeNotes: {
+        light: "Start with observation and one calm action. There is no need to force volume today.",
+        steady: "Keep the work small and repeatable. Stop before strain so the plan stays sustainable.",
+        downshift: "Use today to reduce intensity, protect comfort, and keep the next step conservative.",
+      },
+      detailNextMilestone: (day) => `Next milestone: day ${day}`,
+      detailFinalMilestone: "This is the final scheduled day in the current program.",
       taskProgress: (done, total) => `${done} of ${total} done`,
       markTaskDone: (title) => `Mark ${title} done`,
       markTaskOpen: (title) => `Reopen ${title}`,
@@ -876,6 +932,45 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       nextCandidates: "Что можно добавить позже",
       candidates: ["Мягкая регулярность для тазового дна", "Сон и восстановление", "Спокойная уверенность"],
       dayPlanTitle: "План на сегодня",
+      openDetail: "Открыть детали плана",
+      backToPrograms: "Назад к программе",
+      detailOverview: "Детали плана",
+      detailSummaryTitle: "Сводка по прогрессу",
+      detailLabels: {
+        status: "Статус",
+        focus: "Фокус",
+        pace: "Темп",
+        stage: "Этап",
+      },
+      detailChecklistStates: {
+        not_started: "Еще не начато",
+        in_progress: "В процессе",
+        done: "На сегодня закрыто",
+        rest_day: "День полегче",
+      },
+      detailFocusLabels: {
+        observe: "Сначала наблюдение",
+        practice: "Мягкая практика",
+        recover: "Сначала восстановление",
+      },
+      detailPaceLabels: {
+        light: "Легкий темп",
+        steady: "Ровный темп",
+        downshift: "День на снижение нагрузки",
+      },
+      detailCompletionBands: {
+        starting: "Старт",
+        building: "Наращивание ритма",
+        closing: "Финальный отрезок",
+        complete: "Программа завершена",
+      },
+      detailConservativeNotes: {
+        light: "Начни с наблюдения и одного спокойного шага. Сегодня не нужно брать объемом.",
+        steady: "Держи нагрузку небольшой и повторяемой. Лучше остановиться раньше, чем уйти в напряжение.",
+        downshift: "Сегодня задача — снизить нагрузку, сохранить комфорт и оставить следующий шаг осторожным.",
+      },
+      detailNextMilestone: (day) => `Следующий рубеж: день ${day}`,
+      detailFinalMilestone: "Это последний запланированный день текущей программы.",
       taskProgress: (done, total) => `${done} из ${total} уже сделано`,
       markTaskDone: (title) => `Отметить: ${title}`,
       markTaskOpen: (title) => `Вернуть: ${title}`,

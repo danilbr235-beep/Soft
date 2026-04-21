@@ -33,7 +33,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 
 ## P1 Programs
 
-- Add a program detail screen.
+- Add a program detail screen. (Initial detail slice complete.)
 - Give each day its own task plan instead of repeating the same daily template. (Initial varied day-plan slice complete.)
 - Support skip, rest day, and pause without shame-oriented copy. (Rest day slice complete.)
 - Track completed, skipped, and recovery-only days. (Completed/rest summary complete.)
