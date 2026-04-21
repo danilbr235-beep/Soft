@@ -23,6 +23,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Adds Programs adjustment guidance from Today rules, with a conservative next step and lighter-plan fallback.
 - Adds skip, pause, and resume controls for Programs without losing the current day context.
 - Adds a completion wrap-up for finished Programs with a conservative next step based on the cycle outcome.
+- Recommends one or two next program paths after completion based on how the cycle ended.
 - Adds a local demo PIN flow for the privacy vault while keeping production secure storage out of MVP scope.
 - Auto-locks the privacy vault after a short inactivity window in the local demo.
 - Shows a startup loading state and recovery screen instead of leaving users on a blank page.
@@ -94,4 +95,4 @@ The app now supports:
 22. Programs detail view with a conservative phase summary and current-day checklist.
 23. Programs adjustment guidance from current Today priority and alerts.
 24. Programs skip and pause/resume flow with preserved local progress.
-25. Programs completion wrap-up with steady/mixed/recovery endings and a conservative next step.
+25. Programs completion wrap-up with steady/mixed/recovery endings, a conservative next step, and dynamic next-path recommendations.

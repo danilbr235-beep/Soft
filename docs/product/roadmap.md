@@ -39,6 +39,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Track completed, skipped, and recovery-only days. (Completed/rest/skipped summary complete.)
 - Recommend program adjustments from rule outputs. (Initial slice complete.)
 - Add completion summaries with a conservative next step. (Completion summary slice complete.)
+- Recommend one or two next paths after completion based on the cycle outcome. (Initial dynamic next-path slice complete.)
 
 ## P1 Learn Hub
 

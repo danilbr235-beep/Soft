@@ -32,6 +32,11 @@ type ProgramAdjustmentNextStepCopy = Record<
 >;
 type ProgramCompletionStateCopy = Record<"steady_finish" | "mixed_finish" | "recovery_finish", string>;
 type ProgramCompletionNextStepCopy = Record<"choose_next_light" | "rebuild_baseline" | "keep_recovery_light", string>;
+type ProgramNextPathPriorityCopy = Record<"primary" | "secondary", string>;
+type ProgramNextPathReasonCopy = Record<
+  "baseline_rebuild" | "sleep_support" | "body_consistency" | "confidence_layer" | "recovery_guardrail",
+  string
+>;
 
 export type LanguageCopy = {
   common: {
@@ -170,7 +175,11 @@ export type LanguageCopy = {
     remainingDays: (count: number) => string;
     phaseLabels: Record<ProgramDayPhase, string>;
     nextCandidates: string;
+    recommendedNextPaths: string;
     candidates: string[];
+    nextPathIntro: ProgramCompletionStateCopy;
+    nextPathPriorityLabels: ProgramNextPathPriorityCopy;
+    nextPathReasons: ProgramNextPathReasonCopy;
     dayPlanTitle: string;
     pausedTitle: string;
     pausedBody: string;
@@ -631,7 +640,24 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         recovery: "Recovery day",
       },
       nextCandidates: "Next candidates",
+      recommendedNextPaths: "Recommended next paths",
       candidates: ["Pelvic floor consistency starter", "Sleep and environment reset", "Confidence reset"],
+      nextPathIntro: {
+        steady_finish: "You closed this cycle cleanly. The next move can stay structured and light.",
+        mixed_finish: "Use the useful signal, then return to a calmer base before adding more intensity.",
+        recovery_finish: "Recent caution signals still point the next step toward comfort-first paths.",
+      },
+      nextPathPriorityLabels: {
+        primary: "Start here",
+        secondary: "Also fits",
+      },
+      nextPathReasons: {
+        baseline_rebuild: "A short baseline loop can rebuild signal without pressure.",
+        sleep_support: "Sleep and recovery support can make the next cycle easier to sustain.",
+        body_consistency: "A gentle consistency block can reinforce what held up without chasing volume.",
+        confidence_layer: "A light confidence loop keeps structure without jumping intensity.",
+        recovery_guardrail: "Recovery mode protects comfort while the signal stays cautious.",
+      },
       dayPlanTitle: "Today's plan",
       pausedTitle: "Program paused for now",
       pausedBody: "The current day is kept in place. Resume when you want to continue without losing context.",
@@ -1017,7 +1043,24 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         recovery: "День восстановления",
       },
       nextCandidates: "Что можно добавить позже",
+      recommendedNextPaths: "Что выбрать дальше",
       candidates: ["Мягкая регулярность для тазового дна", "Сон и восстановление", "Спокойная уверенность"],
+      nextPathIntro: {
+        steady_finish: "Цикл закрыт ровно. Дальше лучше выбрать такой же спокойный, но структурный шаг.",
+        mixed_finish: "Полезный сигнал уже есть. Дальше лучше вернуться к более спокойной базе, чем сразу повышать нагрузку.",
+        recovery_finish: "Последние сигналы все еще про осторожность, поэтому следующий шаг лучше оставить в режиме комфорта и восстановления.",
+      },
+      nextPathPriorityLabels: {
+        primary: "Начать с этого",
+        secondary: "Также подойдет",
+      },
+      nextPathReasons: {
+        baseline_rebuild: "Короткая базовая программа поможет снова собрать сигнал без лишнего давления.",
+        sleep_support: "Поддержка сна и восстановления сделает следующий цикл устойчивее.",
+        body_consistency: "Мягкая работа на регулярность укрепит ритм без попытки взять объемом.",
+        confidence_layer: "Спокойный цикл на уверенность добавит структуры, не разгоняя интенсивность.",
+        recovery_guardrail: "Режим восстановления помогает сохранить комфорт, пока сигналы остаются осторожными.",
+      },
       dayPlanTitle: "План на сегодня",
       pausedTitle: "Программа пока на паузе",
       pausedBody: "Текущий день сохранен на месте. Можно спокойно вернуться к нему позже без потери контекста.",

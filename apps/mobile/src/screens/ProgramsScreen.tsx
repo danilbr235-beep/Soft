@@ -4,6 +4,7 @@ import {
   buildProgramAdjustmentSummary,
   buildProgramCompletionSummary,
   buildProgramDetailSummary,
+  buildProgramNextPaths,
 } from "@pmhc/programs";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
@@ -83,6 +84,17 @@ export function ProgramsScreen({
       progressSummary,
     });
   }, [alerts, currentPriority, progressSummary]);
+  const nextPathRecommendations = useMemo(() => {
+    if (!activeProgram || !completionSummary || !progressSummary) {
+      return [];
+    }
+
+    return buildProgramNextPaths({
+      activeProgram,
+      completionState: completionSummary.state,
+      progressSummary,
+    });
+  }, [activeProgram, completionSummary, progressSummary]);
   const programFinished = completionSummary != null;
   const disableProgramActions = !activeProgram || isPaused || programFinished;
   const disableTaskActions = isPaused || programFinished;
@@ -241,6 +253,36 @@ export function ProgramsScreen({
     );
   }
 
+  function renderNextPathsCard() {
+    const showRecommendations = completionSummary != null && nextPathRecommendations.length > 0;
+
+    return (
+      <Surface>
+        <Text style={styles.sectionTitle}>
+          {showRecommendations ? copy.programs.recommendedNextPaths : copy.programs.nextCandidates}
+        </Text>
+        {showRecommendations ? (
+          <View style={styles.candidateList}>
+            <Text style={styles.body}>{copy.programs.nextPathIntro[completionSummary.state]}</Text>
+            {nextPathRecommendations.map((candidate) => (
+              <View key={candidate.programId} style={styles.candidateRow}>
+                <Text style={styles.detailLabel}>{copy.programs.nextPathPriorityLabels[candidate.priority]}</Text>
+                <Text style={styles.taskTitle}>{copy.programs.programTitles[candidate.programId]}</Text>
+                <Text style={styles.body}>{copy.programs.nextPathReasons[candidate.reason]}</Text>
+              </View>
+            ))}
+          </View>
+        ) : (
+          copy.programs.candidates.map((candidate) => (
+            <Text key={candidate} style={styles.body}>
+              {candidate}
+            </Text>
+          ))
+        )}
+      </Surface>
+    );
+  }
+
   if (showDetail && activeProgram && dayPlan && progressSummary && detailSummary) {
     return (
       <Screen title={copy.programs.title} subtitle={copy.programs.subtitle}>
@@ -379,12 +421,7 @@ export function ProgramsScreen({
           </Pressable>
         </Surface>
       ) : null}
-      <Surface>
-        <Text style={styles.sectionTitle}>{copy.programs.nextCandidates}</Text>
-        {copy.programs.candidates.map((candidate) => (
-          <Text key={candidate} style={styles.body}>{candidate}</Text>
-        ))}
-      </Surface>
+      {renderNextPathsCard()}
     </Screen>
   );
 }
@@ -600,6 +637,15 @@ const styles = StyleSheet.create({
   },
   detailSummaryList: {
     gap: spacing.xs,
+  },
+  candidateList: {
+    gap: spacing.sm,
+  },
+  candidateRow: {
+    gap: spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+    paddingTop: spacing.sm,
   },
   detailValue: {
     color: colors.text,

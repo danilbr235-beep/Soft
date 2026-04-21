@@ -201,6 +201,10 @@ test("completed program shows a conservative wrap-up", async ({ page }) => {
   await expect(
     page.getByText("Take the useful signal from this cycle and spend a few days rebuilding baseline before choosing intensity."),
   ).toBeVisible();
+  await expect(page.getByText("Recommended next paths")).toBeVisible();
+  await expect(page.getByText("7-day clarity baseline")).toBeVisible();
+  await expect(page.getByText("Sleep and environment reset")).toBeVisible();
+  await expect(page.getByText("A short baseline loop can rebuild signal without pressure.")).toBeVisible();
   await expect(page.getByText("100% complete")).toBeVisible();
   await expect(page.getByLabel("Complete program day")).toHaveCount(0);
 });
