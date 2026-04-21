@@ -1,6 +1,10 @@
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { buildProgramAdjustmentSummary, buildProgramDetailSummary } from "@pmhc/programs";
+import {
+  buildProgramAdjustmentSummary,
+  buildProgramCompletionSummary,
+  buildProgramDetailSummary,
+} from "@pmhc/programs";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { Alert, CurrentPriority, Program, ProgramDayPlan, ProgramProgressSummary, TodayMode } from "@pmhc/types";
@@ -68,7 +72,20 @@ export function ProgramsScreen({
       todayMode,
     });
   }, [alerts, currentPriority, dayPlan, progressSummary, todayMode]);
-  const disableProgramActions = !activeProgram || isPaused;
+  const completionSummary = useMemo(() => {
+    if (!progressSummary) {
+      return null;
+    }
+
+    return buildProgramCompletionSummary({
+      alerts,
+      currentPriority,
+      progressSummary,
+    });
+  }, [alerts, currentPriority, progressSummary]);
+  const programFinished = completionSummary != null;
+  const disableProgramActions = !activeProgram || isPaused || programFinished;
+  const disableTaskActions = isPaused || programFinished;
 
   function renderTaskList() {
     if (!dayPlan) {
@@ -86,10 +103,10 @@ export function ProgramsScreen({
             <Pressable
               accessibilityLabel={completed ? copy.programs.markTaskOpen(taskTitle) : copy.programs.markTaskDone(taskTitle)}
               accessibilityRole="button"
-              disabled={isPaused}
+              disabled={disableTaskActions}
               key={task.id}
               onPress={() => onToggleTask(task.id)}
-              style={[styles.taskRow, completed && styles.completedTaskRow, isPaused && styles.disabledButton]}
+              style={[styles.taskRow, completed && styles.completedTaskRow, disableTaskActions && styles.disabledButton]}
             >
               <View style={[styles.taskCheck, completed && styles.completedTaskCheck]}>
                 <Text style={[styles.taskCheckText, completed && styles.completedTaskCheckText]}>
@@ -125,6 +142,10 @@ export function ProgramsScreen({
   }
 
   function renderActionButtons() {
+    if (programFinished) {
+      return null;
+    }
+
     return (
       <View style={styles.buttonRow}>
         <Pressable
@@ -168,7 +189,7 @@ export function ProgramsScreen({
   }
 
   function renderAdjustmentCard() {
-    if (!adjustmentSummary) {
+    if (!adjustmentSummary || completionSummary) {
       return null;
     }
 
@@ -187,6 +208,34 @@ export function ProgramsScreen({
         <View style={styles.detailSummaryList}>
           <Text style={styles.detailLabel}>{copy.programs.adjustmentNextStepTitle}</Text>
           <Text style={styles.body}>{copy.programs.adjustmentNextSteps[adjustmentSummary.nextStep]}</Text>
+        </View>
+      </Surface>
+    );
+  }
+
+  function renderCompletionCard() {
+    if (!completionSummary || !progressSummary) {
+      return null;
+    }
+
+    return (
+      <Surface>
+        <Text style={styles.eyebrow}>{copy.programs.completionTitle}</Text>
+        <Text style={styles.sectionTitle}>{copy.programs.completionStates[completionSummary.state]}</Text>
+        <Text style={styles.body}>{copy.programs.completionBodies[completionSummary.state]}</Text>
+        <View style={styles.detailSummaryList}>
+          <Text style={styles.metaText}>{copy.programs.completionReason(completionSummary.reasonTitle)}</Text>
+          <Text style={styles.metaText}>
+            {copy.programs.completionReview(
+              progressSummary.completedDays,
+              progressSummary.restDays,
+              progressSummary.skippedDays,
+            )}
+          </Text>
+        </View>
+        <View style={styles.detailSummaryList}>
+          <Text style={styles.detailLabel}>{copy.programs.completionNextStepTitle}</Text>
+          <Text style={styles.body}>{copy.programs.completionNextSteps[completionSummary.nextStep]}</Text>
         </View>
       </Surface>
     );
@@ -247,6 +296,7 @@ export function ProgramsScreen({
           </View>
         </Surface>
 
+        {renderCompletionCard()}
         {renderAdjustmentCard()}
 
         <Surface>
@@ -298,6 +348,7 @@ export function ProgramsScreen({
           </View>
         ) : null}
         {renderPausedBanner()}
+        {renderCompletionCard()}
         {renderActionButtons()}
       </Surface>
       {renderAdjustmentCard()}

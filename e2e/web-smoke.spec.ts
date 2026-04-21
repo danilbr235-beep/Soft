@@ -163,6 +163,48 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Privacy vault")).toBeVisible();
 });
 
+test("completed program shows a conservative wrap-up", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByText("Start privately").click();
+  await page.getByLabel("Confidence").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Mixed signals").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Simple mode").click();
+  await page.getByLabel("Generate Today").click();
+
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "pmhc:program-progress",
+      JSON.stringify({
+        programId: "confidence-reset-14",
+        completedDayIndexes: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+        completedTaskIdsByDay: {},
+        restDayIndexes: [10, 11],
+        skippedDayIndexes: [12, 13, 14],
+        lastCompletedAt: "2026-04-19T14:00:00.000Z",
+        pausedAt: null,
+        updatedAt: "2026-04-19T14:00:00.000Z",
+      }),
+    );
+  });
+  await page.reload();
+  if ((await page.getByLabel("Unlock demo vault").count()) > 0) {
+    await page.getByLabel("Unlock demo vault").click();
+  }
+
+  await page.getByLabel("Open Programs").click();
+  await expect(page.getByText("Program wrap-up")).toBeVisible();
+  await expect(page.getByText("A mixed but useful finish")).toBeVisible();
+  await expect(page.getByText("Completed 9, rest 2, skipped 3.")).toBeVisible();
+  await expect(
+    page.getByText("Take the useful signal from this cycle and spend a few days rebuilding baseline before choosing intensity."),
+  ).toBeVisible();
+  await expect(page.getByText("100% complete")).toBeVisible();
+  await expect(page.getByLabel("Complete program day")).toHaveCount(0);
+});
+
 test("can choose English or Russian from onboarding and settings", async ({ page }) => {
   await page.goto("/");
 

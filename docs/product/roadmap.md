@@ -38,7 +38,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Support skip, rest day, and pause without shame-oriented copy. (Initial skip/rest/pause slice complete.)
 - Track completed, skipped, and recovery-only days. (Completed/rest/skipped summary complete.)
 - Recommend program adjustments from rule outputs. (Initial slice complete.)
-- Add completion summaries with a conservative next step. (Initial slice complete.)
+- Add completion summaries with a conservative next step. (Completion summary slice complete.)
 
 ## P1 Learn Hub
 

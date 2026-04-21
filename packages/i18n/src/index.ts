@@ -30,6 +30,8 @@ type ProgramAdjustmentNextStepCopy = Record<
   "take_rest_day" | "keep_one_task" | "start_with_check_in" | "close_day_gently" | "review_boundary",
   string
 >;
+type ProgramCompletionStateCopy = Record<"steady_finish" | "mixed_finish" | "recovery_finish", string>;
+type ProgramCompletionNextStepCopy = Record<"choose_next_light" | "rebuild_baseline" | "keep_recovery_light", string>;
 
 export type LanguageCopy = {
   common: {
@@ -192,6 +194,13 @@ export type LanguageCopy = {
     adjustmentTarget: (count: number) => string;
     adjustmentNextStepTitle: string;
     adjustmentNextSteps: ProgramAdjustmentNextStepCopy;
+    completionTitle: string;
+    completionStates: ProgramCompletionStateCopy;
+    completionBodies: ProgramCompletionStateCopy;
+    completionReason: (reason: string) => string;
+    completionReview: (completed: number, rest: number, skipped: number) => string;
+    completionNextStepTitle: string;
+    completionNextSteps: ProgramCompletionNextStepCopy;
     taskProgress: (done: number, total: number) => string;
     markTaskDone: (title: string) => string;
     markTaskOpen: (title: string) => string;
@@ -692,6 +701,25 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         close_day_gently: "Finish the current task if needed, then close the day without adding extras.",
         review_boundary: "Close the day and note one boundary to keep the next step conservative.",
       },
+      completionTitle: "Program wrap-up",
+      completionStates: {
+        steady_finish: "A steady finish",
+        mixed_finish: "A mixed but useful finish",
+        recovery_finish: "Finish in recovery mode",
+      },
+      completionBodies: {
+        steady_finish: "The cycle is closed. Keep the next step measured instead of stacking extra work onto a good finish.",
+        mixed_finish: "This cycle still produced useful signal. Use the pattern, then rebuild from a light baseline instead of judging the misses.",
+        recovery_finish: "The cycle is complete, but the recent signals still call for a conservative recovery window before anything more demanding.",
+      },
+      completionReason: (reason) => `Finish context: ${reason}`,
+      completionReview: (completed, rest, skipped) => `Completed ${completed}, rest ${rest}, skipped ${skipped}.`,
+      completionNextStepTitle: "Conservative next step",
+      completionNextSteps: {
+        choose_next_light: "Review the cycle, then start the next program only if you can keep the opening days light.",
+        rebuild_baseline: "Take the useful signal from this cycle and spend a few days rebuilding baseline before choosing intensity.",
+        keep_recovery_light: "Stay in recovery mode for now and keep the next few days focused on comfort, not progression.",
+      },
       taskProgress: (done, total) => `${done} of ${total} done`,
       markTaskDone: (title) => `Mark ${title} done`,
       markTaskOpen: (title) => `Reopen ${title}`,
@@ -1062,6 +1090,25 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         start_with_check_in: "Начни с чек-ина и посмотри на следующий сигнал, прежде чем добавлять что-то еще.",
         close_day_gently: "Если нужно, доведи текущую задачу и спокойно закрой день без добавочной нагрузки.",
         review_boundary: "Закрой день и отметь одну границу, которая поможет сохранить следующий шаг спокойным.",
+      },
+      completionTitle: "Итог программы",
+      completionStates: {
+        steady_finish: "Ровное завершение",
+        mixed_finish: "Неровное, но полезное завершение",
+        recovery_finish: "Завершение в режиме восстановления",
+      },
+      completionBodies: {
+        steady_finish: "Цикл закрыт. Лучше сохранить этот спокойный темп, чем сразу навешивать на себя лишнюю нагрузку.",
+        mixed_finish: "Даже такой цикл дал полезные сигналы. Возьми из него то, что сработало, и спокойно вернись к базовой линии без самокритики.",
+        recovery_finish: "Цикл завершен, но последние сигналы все еще просят осторожности. Следующий шаг лучше оставить в режиме восстановления.",
+      },
+      completionReason: (reason) => `Контекст завершения: ${reason}`,
+      completionReview: (completed, rest, skipped) => `Сделано ${completed}, дней полегче ${rest}, пропущено ${skipped}.`,
+      completionNextStepTitle: "Следующий осторожный шаг",
+      completionNextSteps: {
+        choose_next_light: "Посмотри на итог цикла и переходи к следующей программе только если можешь начать ее мягко.",
+        rebuild_baseline: "Возьми полезный сигнал из этого цикла и несколько дней спокойно восстанови базовую линию перед новым усилением.",
+        keep_recovery_light: "Пока лучше остаться в режиме восстановления и посвятить ближайшие дни комфорту, а не прогрессии.",
       },
       taskProgress: (done, total) => `${done} из ${total} уже сделано`,
       markTaskDone: (title) => `Отметить: ${title}`,
