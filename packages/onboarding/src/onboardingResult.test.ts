@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createOnboardingResult } from "./onboardingResult";
+import { createOnboardingResult, getStarterProgramById } from "./onboardingResult";
 import type { OnboardingDraft } from "@pmhc/types";
 
 const draft: OnboardingDraft = {
@@ -52,5 +52,15 @@ describe("createOnboardingResult", () => {
 
     expect(result.profile.conservativeGuidance).toBe(true);
     expect(result.recommendedProgram.id).toBe("conservative-recovery");
+  });
+
+  it("can look up a starter program by id for later cycle switches", () => {
+    expect(getStarterProgramById("sleep-environment-reset")).toMatchObject({
+      id: "sleep-environment-reset",
+      category: "sleep",
+      durationDays: 14,
+      dayIndex: 1,
+    });
+    expect(getStarterProgramById("missing-program")).toBeNull();
   });
 });

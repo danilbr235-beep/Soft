@@ -67,6 +67,10 @@ export function createOnboardingResult(
   };
 }
 
+export function getStarterProgramById(programId: string): Program | null {
+  return Object.values(starterPrograms).find((program) => program.id === programId) ?? null;
+}
+
 function chooseProgram(draft: OnboardingDraft): Program {
   if (draft.primaryGoal === "pelvic_floor") {
     return starterPrograms.pelvicFloor;

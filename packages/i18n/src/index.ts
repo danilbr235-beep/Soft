@@ -180,6 +180,8 @@ export type LanguageCopy = {
     nextPathIntro: ProgramCompletionStateCopy;
     nextPathPriorityLabels: ProgramNextPathPriorityCopy;
     nextPathReasons: ProgramNextPathReasonCopy;
+    startProgram: string;
+    startRecommendedProgram: (title: string) => string;
     dayPlanTitle: string;
     pausedTitle: string;
     pausedBody: string;
@@ -658,6 +660,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         confidence_layer: "A light confidence loop keeps structure without jumping intensity.",
         recovery_guardrail: "Recovery mode protects comfort while the signal stays cautious.",
       },
+      startProgram: "Start this program",
+      startRecommendedProgram: (title) => `Start ${title}`,
       dayPlanTitle: "Today's plan",
       pausedTitle: "Program paused for now",
       pausedBody: "The current day is kept in place. Resume when you want to continue without losing context.",
@@ -1061,6 +1065,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         confidence_layer: "Спокойный цикл на уверенность добавит структуры, не разгоняя интенсивность.",
         recovery_guardrail: "Режим восстановления помогает сохранить комфорт, пока сигналы остаются осторожными.",
       },
+      startProgram: "Запустить программу",
+      startRecommendedProgram: (title) => `Запустить программу: ${title}`,
       dayPlanTitle: "План на сегодня",
       pausedTitle: "Программа пока на паузе",
       pausedBody: "Текущий день сохранен на месте. Можно спокойно вернуться к нему позже без потери контекста.",

@@ -5,6 +5,7 @@ import {
   buildProgramCompletionSummary,
   buildProgramDetailSummary,
   buildProgramNextPaths,
+  type ProgramNextPathId,
 } from "@pmhc/programs";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
@@ -25,6 +26,7 @@ type Props = {
   onPauseProgram: () => void;
   onRestToday: () => void;
   onResumeProgram: () => void;
+  onStartRecommendedProgram: (programId: ProgramNextPathId) => void;
   onSkipToday: () => void;
   onToggleTask: (taskId: string) => void;
   todayMode: TodayMode;
@@ -43,6 +45,7 @@ export function ProgramsScreen({
   onPauseProgram,
   onRestToday,
   onResumeProgram,
+  onStartRecommendedProgram,
   onSkipToday,
   onToggleTask,
   todayMode,
@@ -269,6 +272,14 @@ export function ProgramsScreen({
                 <Text style={styles.detailLabel}>{copy.programs.nextPathPriorityLabels[candidate.priority]}</Text>
                 <Text style={styles.taskTitle}>{copy.programs.programTitles[candidate.programId]}</Text>
                 <Text style={styles.body}>{copy.programs.nextPathReasons[candidate.reason]}</Text>
+                <Pressable
+                  accessibilityLabel={copy.programs.startRecommendedProgram(copy.programs.programTitles[candidate.programId])}
+                  accessibilityRole="button"
+                  onPress={() => onStartRecommendedProgram(candidate.programId)}
+                  style={styles.secondaryButton}
+                >
+                  <Text style={styles.secondaryButtonText}>{copy.programs.startProgram}</Text>
+                </Pressable>
               </View>
             ))}
           </View>

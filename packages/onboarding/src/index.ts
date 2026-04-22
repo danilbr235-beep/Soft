@@ -1,1 +1,1 @@
-export { createOnboardingResult, starterPrograms } from "./onboardingResult";
+export { createOnboardingResult, getStarterProgramById, starterPrograms } from "./onboardingResult";

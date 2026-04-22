@@ -112,6 +112,7 @@ function AppRootContent() {
             onPauseProgram={app.pauseProgram}
             onRestToday={app.restProgramToday}
             onResumeProgram={app.resumeProgram}
+            onStartRecommendedProgram={app.startRecommendedProgram}
             onSkipToday={app.skipProgramToday}
             onToggleTask={app.toggleProgramTask}
             todayMode={app.today.todayMode}

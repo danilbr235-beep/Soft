@@ -207,6 +207,12 @@ test("completed program shows a conservative wrap-up", async ({ page }) => {
   await expect(page.getByText("A short baseline loop can rebuild signal without pressure.")).toBeVisible();
   await expect(page.getByText("100% complete")).toBeVisible();
   await expect(page.getByLabel("Complete program day")).toHaveCount(0);
+
+  await page.getByLabel("Start 7-day clarity baseline").click();
+  await expect(page.getByText("Day 1 of 7")).toBeVisible();
+  await expect(page.getByText("7-day clarity baseline")).toBeVisible();
+  await expect(page.getByText("Program wrap-up")).toHaveCount(0);
+  await expect(page.getByLabel("Complete program day")).toBeVisible();
 });
 
 test("can choose English or Russian from onboarding and settings", async ({ page }) => {

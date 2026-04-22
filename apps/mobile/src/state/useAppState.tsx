@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState } from "react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { markContentCompleted, mergeContentProgress, toggleContentSaved } from "@pmhc/learning";
-import { createOnboardingResult } from "@pmhc/onboarding";
+import { createOnboardingResult, getStarterProgramById } from "@pmhc/onboarding";
 import {
   clearPrivacyPin,
   createPrivacyLockState,
@@ -515,6 +515,33 @@ export function useAppState() {
     [persistProgramProgress, programProgress, today.activeProgram],
   );
 
+  const startRecommendedProgram = useCallback(
+    async (programId: string) => {
+      if (!onboarding) {
+        return;
+      }
+
+      const nextProgram = getStarterProgramById(programId);
+
+      if (!nextProgram) {
+        return;
+      }
+
+      const now = new Date().toISOString();
+      const nextOnboarding: OnboardingResult = {
+        ...onboarding,
+        recommendedProgram: nextProgram,
+      };
+
+      setOnboarding(nextOnboarding);
+      await Promise.all([
+        onboardingRepository.save(nextOnboarding),
+        persistProgramProgress(createProgramProgress(nextProgram, now)),
+      ]);
+    },
+    [onboarding, persistProgramProgress],
+  );
+
   return {
     activeTab,
     content,
@@ -545,6 +572,7 @@ export function useAppState() {
     resumeProgram,
     restProgramToday,
     setActiveTab,
+    startRecommendedProgram,
     skipProgramToday,
     syncQueuedWrites,
     setPrivacyPin: setPrivacyPinCode,
