@@ -36,6 +36,7 @@ describe("program review", () => {
       leadingState: "recovery_finish",
       focus: "protect_recovery",
       latestProgramId: "conservative-recovery",
+      trend: "toward_recovery",
     });
   });
 
@@ -55,6 +56,7 @@ describe("program review", () => {
       leadingState: "mixed_finish",
       focus: "rebuild_with_short_cycles",
       totalSkippedDays: 6,
+      trend: "holding_pattern",
     });
   });
 
@@ -85,6 +87,7 @@ describe("program review", () => {
       leadingState: "steady_finish",
       focus: "build_on_stability",
       totalCompletedDays: 26,
+      trend: "toward_stability",
     });
   });
 });

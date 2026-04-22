@@ -28,6 +28,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Support edit and delete for local logs. (Initial slice complete.)
 - Add weekly snapshots for sleep, energy, confidence, libido, and symptoms. (Initial slice complete.)
 - Show conservative correlation hints without pretending causality. (Initial paired-log hints slice complete.)
+- Surface recent finished-program review inside Track so cycle context is visible next to daily logs. (Initial reusable review slice complete.)
 - Add CSV/JSON export for local data. (JSON preview complete.)
 - Keep quick logs low-friction and one-handed on mobile.
 
@@ -43,6 +44,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Let users start the recommended next path directly from the wrap-up. (Initial one-tap switch slice complete.)
 - Preserve finished cycles in local history after each switch so later reviews have real program transitions. (Initial local history slice complete.)
 - Add a compact review of recent cycles so Programs can summarize pattern direction before a fuller Review surface exists. (Initial cycle-review slice complete.)
+- Add a simple recent-direction trend over the last cycles and keep that review logic reusable outside Programs. (Initial trend/reuse slice complete.)
 
 ## P1 Learn Hub
 

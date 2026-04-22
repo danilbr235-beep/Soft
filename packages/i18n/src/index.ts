@@ -41,6 +41,10 @@ type ProgramReviewFocusCopy = Record<
   "build_on_stability" | "rebuild_with_short_cycles" | "protect_recovery",
   string
 >;
+type ProgramReviewTrendCopy = Record<
+  "toward_stability" | "holding_pattern" | "toward_recovery",
+  string
+>;
 
 function russianCycleWord(count: number) {
   const lastTwo = count % 100;
@@ -141,6 +145,8 @@ export type LanguageCopy = {
     pendingWrites: (count: number) => string;
     synced: string;
     syncAction: string;
+    programReviewTitle: string;
+    programReviewBody: string;
     recentLogs: string;
     filterTitle: string;
     filterLabels: TrackFilterCopy;
@@ -211,6 +217,8 @@ export type LanguageCopy = {
     reviewTitle: string;
     reviewBody: string;
     reviewFocuses: ProgramReviewFocusCopy;
+    reviewTrendTitle: string;
+    reviewTrendLabels: ProgramReviewTrendCopy;
     reviewTotals: (cycles: number, completed: number, rest: number, skipped: number) => string;
     reviewLatest: (title: string) => string;
     dayPlanTitle: string;
@@ -591,6 +599,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       pendingWrites: (count) => `${count} pending local write${count === 1 ? "" : "s"}`,
       synced: "All local writes are synced.",
       syncAction: "Sync demo writes",
+      programReviewTitle: "Program review",
+      programReviewBody: "A compact read of recent finished cycles, separate from daily logs.",
       recentLogs: "Recent logs",
       filterTitle: "Filter history",
       filterLabels: {
@@ -702,6 +712,12 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         build_on_stability: "Recent cycles look steadier. The next block can build on consistency without chasing volume.",
         rebuild_with_short_cycles: "Recent cycles suggest shorter, calmer rebuilds are still the better fit than pushing intensity.",
         protect_recovery: "Recent history still leans toward recovery-first guardrails before adding anything more demanding.",
+      },
+      reviewTrendTitle: "Recent direction",
+      reviewTrendLabels: {
+        toward_stability: "The recent sequence is trending toward steadier finishes.",
+        holding_pattern: "The recent sequence is holding a mixed pattern rather than clearly improving or worsening.",
+        toward_recovery: "The recent sequence is drifting toward more cautious recovery-heavy finishes.",
       },
       reviewTotals: (cycles, completed, rest, skipped) =>
         `${cycles} cycle${cycles === 1 ? "" : "s"} tracked - ${completed} completed, ${rest} rest, ${skipped} skipped.`,
@@ -1009,6 +1025,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       pendingWrites: (count) => `${count} записей ждут синхронизации`,
       synced: "Все локальные записи синхронизированы.",
       syncAction: "Синхронизировать демо-записи",
+      programReviewTitle: "Обзор программ",
+      programReviewBody: "Короткий вывод по последним завершенным циклам отдельно от ежедневных логов.",
       recentLogs: "Последние записи",
       filterTitle: "Фильтр истории",
       filterLabels: {
@@ -1120,6 +1138,12 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         build_on_stability: "Последние циклы выглядят ровнее. Следующий этап можно строить на регулярности, не повышая нагрузку слишком быстро.",
         rebuild_with_short_cycles: "Последние циклы подсказывают, что пока лучше работают короткие и спокойные перезапуски, а не попытка давить интенсивностью.",
         protect_recovery: "Последняя история все еще смещена в сторону восстановления, поэтому и следующий шаг лучше держать в более щадящем режиме.",
+      },
+      reviewTrendTitle: "Последнее направление",
+      reviewTrendLabels: {
+        toward_stability: "Последняя последовательность циклов движется к более ровным завершениям.",
+        holding_pattern: "Последние циклы пока держатся в смешанном паттерне без явного движения в лучшую или более осторожную сторону.",
+        toward_recovery: "Последняя последовательность циклов смещается в сторону более осторожных восстановительных завершений.",
       },
       reviewTotals: (cycles, completed, rest, skipped) =>
         `${cycles} ${russianCycleWord(cycles)} в истории - сделано ${completed}, дней полегче ${rest}, пропущено ${skipped}.`,

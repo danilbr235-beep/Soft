@@ -85,6 +85,7 @@ function AppRootContent() {
             onUpdateLog={app.updateLogValue}
             onLog={app.openQuickLog}
             onSync={app.syncQueuedWrites}
+            programHistory={app.programHistory}
           />
         ) : null}
         {app.activeTab === "Learn" ? (

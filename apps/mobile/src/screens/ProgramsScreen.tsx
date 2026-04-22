@@ -340,6 +340,8 @@ export function ProgramsScreen({
         <Text style={styles.taskTitle}>{copy.programs.completionStates[reviewSummary.leadingState]}</Text>
         <Text style={styles.body}>{copy.programs.reviewFocuses[reviewSummary.focus]}</Text>
         <View style={styles.detailSummaryList}>
+          <Text style={styles.detailLabel}>{copy.programs.reviewTrendTitle}</Text>
+          <Text style={styles.body}>{copy.programs.reviewTrendLabels[reviewSummary.trend]}</Text>
           <Text style={styles.metaText}>
             {copy.programs.reviewTotals(
               reviewSummary.cycleCount,

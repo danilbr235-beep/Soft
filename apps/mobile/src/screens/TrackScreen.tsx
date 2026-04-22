@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
+import { buildProgramReview } from "@pmhc/programs";
 import { createSymptomCheckinValue } from "@pmhc/safety";
 import {
   buildTrackingExport,
@@ -11,7 +12,7 @@ import {
 } from "@pmhc/tracking";
 import type { TrackingLogFilter, TrackingPatternHint, TrackingWeeklySnapshotCard } from "@pmhc/tracking";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { LogEntry, QuickLogDefinition } from "@pmhc/types";
+import type { LogEntry, ProgramHistoryEntry, QuickLogDefinition } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 import { QuickLogRow } from "../components/TodayComponents";
@@ -32,6 +33,7 @@ export function TrackScreen({
   onSync,
   onUpdateLog,
   pendingSyncCount,
+  programHistory,
 }: {
   logs: LogEntry[];
   copy: LanguageCopy;
@@ -40,6 +42,7 @@ export function TrackScreen({
   onSync: () => void;
   onUpdateLog: (logId: string, value: unknown) => void;
   pendingSyncCount: number;
+  programHistory: ProgramHistoryEntry[];
 }) {
   const [selectedFilter, setSelectedFilter] = useState<TrackingLogFilter>("all");
   const [exportText, setExportText] = useState<string | null>(null);
@@ -51,6 +54,7 @@ export function TrackScreen({
   const weeklyCards = buildWeeklySnapshotCards(logs);
   const patternHints = buildTrackingPatternHints(logs);
   const filteredLogs = useMemo(() => filterTrackingLogs(logs, selectedFilter), [logs, selectedFilter]);
+  const programReview = useMemo(() => buildProgramReview(programHistory), [programHistory]);
   const filterOptions: TrackingLogFilter[] = ["all", "scores", "symptoms", "routines"];
 
   function prepareExport() {
@@ -122,6 +126,29 @@ export function TrackScreen({
           </View>
         ))}
       </Surface>
+      {programReview ? (
+        <Surface>
+          <Text style={styles.title}>{copy.track.programReviewTitle}</Text>
+          <Text style={styles.body}>{copy.track.programReviewBody}</Text>
+          <Text style={styles.hintTitle}>{copy.programs.completionStates[programReview.leadingState]}</Text>
+          <Text style={styles.body}>{copy.programs.reviewFocuses[programReview.focus]}</Text>
+          <Text style={styles.signalDetail}>{copy.programs.reviewTrendTitle}</Text>
+          <Text style={styles.body}>{copy.programs.reviewTrendLabels[programReview.trend]}</Text>
+          <Text style={styles.hintMeta}>
+            {copy.programs.reviewTotals(
+              programReview.cycleCount,
+              programReview.totalCompletedDays,
+              programReview.totalRestDays,
+              programReview.totalSkippedDays,
+            )}
+          </Text>
+          <Text style={styles.hintMeta}>
+            {copy.programs.reviewLatest(
+              copy.programs.programTitles[programReview.latestProgramId] ?? programReview.latestProgramId,
+            )}
+          </Text>
+        </Surface>
+      ) : null}
       <Surface>
         <Text style={styles.title}>{copy.track.syncQueue}</Text>
         <Text style={styles.body}>

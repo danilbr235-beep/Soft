@@ -219,6 +219,15 @@ test("completed program shows a conservative wrap-up", async ({ page }) => {
   await expect(page.getByText("Recent cycles", { exact: true })).toBeVisible();
   await expect(page.getByText("Continued with: 7-day clarity baseline")).toBeVisible();
   await expect(page.getByText("A mixed but useful finish").first()).toBeVisible();
+
+  await page.getByLabel("Open Track").click();
+  await expect(page.getByText("Program review")).toBeVisible();
+  await expect(page.getByText("A compact read of recent finished cycles, separate from daily logs.")).toBeVisible();
+  await expect(page.getByText("Recent direction")).toBeVisible();
+  await expect(
+    page.getByText("The recent sequence is holding a mixed pattern rather than clearly improving or worsening."),
+  ).toBeVisible();
+  await expect(page.getByText("Latest completed cycle: 14-day confidence reset")).toBeVisible();
 });
 
 test("can choose English or Russian from onboarding and settings", async ({ page }) => {

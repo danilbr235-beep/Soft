@@ -4,6 +4,10 @@ export type ProgramReviewFocus =
   | "build_on_stability"
   | "rebuild_with_short_cycles"
   | "protect_recovery";
+export type ProgramReviewTrend =
+  | "toward_stability"
+  | "holding_pattern"
+  | "toward_recovery";
 
 export type ProgramReviewSummary = {
   cycleCount: number;
@@ -13,6 +17,7 @@ export type ProgramReviewSummary = {
   leadingState: ProgramCompletionState;
   focus: ProgramReviewFocus;
   latestProgramId: string;
+  trend: ProgramReviewTrend;
 };
 
 export function buildProgramReview(history: ProgramHistoryEntry[]): ProgramReviewSummary | null {
@@ -46,6 +51,7 @@ export function buildProgramReview(history: ProgramHistoryEntry[]): ProgramRevie
       leadingState: "recovery_finish",
       focus: "protect_recovery",
       latestProgramId: recentHistory[0].programId,
+      trend: buildProgramReviewTrend(recentHistory, stateCounts),
     };
   }
 
@@ -58,6 +64,7 @@ export function buildProgramReview(history: ProgramHistoryEntry[]): ProgramRevie
       leadingState: "mixed_finish",
       focus: "rebuild_with_short_cycles",
       latestProgramId: recentHistory[0].programId,
+      trend: buildProgramReviewTrend(recentHistory, stateCounts),
     };
   }
 
@@ -69,5 +76,48 @@ export function buildProgramReview(history: ProgramHistoryEntry[]): ProgramRevie
     leadingState: "steady_finish",
     focus: "build_on_stability",
     latestProgramId: recentHistory[0].programId,
+    trend: buildProgramReviewTrend(recentHistory, stateCounts),
   };
+}
+
+function buildProgramReviewTrend(
+  history: ProgramHistoryEntry[],
+  stateCounts: Record<ProgramCompletionState, number>,
+): ProgramReviewTrend {
+  if (history.length < 2) {
+    return trendFromState(history[0]?.completionState ?? "mixed_finish");
+  }
+
+  const latestRank = completionStateRank(history[0].completionState);
+  const oldestRank = completionStateRank(history[history.length - 1].completionState);
+
+  if (latestRank < oldestRank || stateCounts.steady_finish >= 2) {
+    return "toward_stability";
+  }
+
+  if (latestRank > oldestRank || stateCounts.recovery_finish >= 2) {
+    return "toward_recovery";
+  }
+
+  return "holding_pattern";
+}
+
+function trendFromState(state: ProgramCompletionState): ProgramReviewTrend {
+  if (state === "steady_finish") {
+    return "toward_stability";
+  }
+
+  if (state === "recovery_finish") {
+    return "toward_recovery";
+  }
+
+  return "holding_pattern";
+}
+
+function completionStateRank(state: ProgramCompletionState) {
+  return {
+    steady_finish: 0,
+    mixed_finish: 1,
+    recovery_finish: 2,
+  }[state];
 }
