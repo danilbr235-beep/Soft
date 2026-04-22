@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { Alert, CurrentPriority, DailyStateTile, QuickLogDefinition } from "@pmhc/types";
+import type { DailySession, DailySessionStepId } from "../dailySession";
 import type { TodayStatusItem } from "../todayStatus";
 import { Surface } from "./Surface";
 
@@ -106,6 +107,60 @@ export function QuickLogRow({
         </Pressable>
       ))}
     </View>
+  );
+}
+
+export function DailySessionBlock({
+  session,
+  onOpenStep,
+}: {
+  session: DailySession;
+  onOpenStep: (stepId: DailySessionStepId) => void;
+}) {
+  return (
+    <Surface>
+      <View style={styles.sessionHeader}>
+        <View style={styles.sessionHeaderText}>
+          <Text style={styles.kicker}>{session.title}</Text>
+          <Text style={styles.body}>{session.body}</Text>
+        </View>
+        <Text style={styles.sessionProgress}>{session.progressLabel}</Text>
+      </View>
+      <View style={styles.sessionList}>
+        {session.steps.map((step) => (
+          <View
+            key={step.id}
+            style={[
+              styles.sessionStep,
+              step.state === "active" ? styles.sessionStepActive : null,
+              step.state === "done" ? styles.sessionStepDone : null,
+            ]}
+          >
+            <View style={styles.rowBetween}>
+              <Text style={styles.sessionStepTitle}>{step.title}</Text>
+              <Text
+                style={[
+                  styles.sessionState,
+                  step.state === "active" ? styles.sessionStateActive : null,
+                  step.state === "done" ? styles.sessionStateDone : null,
+                ]}
+              >
+                {step.statusLabel}
+              </Text>
+            </View>
+            <Text style={styles.body}>{step.body}</Text>
+            <Pressable
+              accessibilityLabel={step.openLabel}
+              accessibilityRole="button"
+              onPress={() => onOpenStep(step.id)}
+              style={styles.sessionButton}
+            >
+              <Text style={styles.sessionButtonText}>{step.cta}</Text>
+            </Pressable>
+          </View>
+        ))}
+      </View>
+    </Surface>
   );
 }
 
@@ -271,5 +326,67 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontWeight: "700",
     fontSize: 13,
+  },
+  sessionHeader: {
+    alignItems: "flex-start",
+    gap: spacing.sm,
+  },
+  sessionHeaderText: {
+    gap: spacing.xs,
+  },
+  sessionProgress: {
+    color: colors.steel,
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  sessionList: {
+    gap: spacing.sm,
+  },
+  sessionStep: {
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.md,
+  },
+  sessionStepActive: {
+    borderColor: colors.moss,
+    backgroundColor: colors.panelSoft,
+  },
+  sessionStepDone: {
+    borderColor: colors.steel,
+  },
+  sessionStepTitle: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: "800",
+  },
+  sessionState: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  sessionStateActive: {
+    color: colors.moss,
+  },
+  sessionStateDone: {
+    color: colors.text,
+  },
+  sessionButton: {
+    minHeight: 42,
+    alignItems: "center",
+    alignSelf: "flex-start",
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+  },
+  sessionButtonText: {
+    color: colors.text,
+    fontSize: 13,
+    fontWeight: "800",
   },
 });

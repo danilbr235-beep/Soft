@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
 import {
@@ -23,9 +23,11 @@ type Props = {
   language: AppLanguage;
   onToggleSaved: (itemId: string) => void;
   onMarkCompleted: (itemId: string) => void;
+  preferredItemId: string | null;
   priorityDomain: PriorityDomain;
   reviewDigestNextStep: ContentRecommendationDigestNextStep;
   reviewDigestTone: ContentRecommendationDigestTone;
+  onClearPreferredItem: () => void;
 };
 
 const defaultFilters: LearnFilter[] = [
@@ -46,12 +48,20 @@ export function LearnScreen({
   language,
   onMarkCompleted,
   onToggleSaved,
+  onClearPreferredItem,
   priorityDomain,
+  preferredItemId,
   reviewDigestNextStep,
   reviewDigestTone,
 }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<LearnFilter>("all");
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (preferredItemId) {
+      setSelectedItemId(preferredItemId);
+    }
+  }, [preferredItemId]);
 
   const recommendations = useMemo(
     () =>
@@ -115,7 +125,10 @@ export function LearnScreen({
         <Pressable
           accessibilityLabel={copy.learn.backToLibrary}
           accessibilityRole="button"
-          onPress={() => setSelectedItemId(null)}
+          onPress={() => {
+            setSelectedItemId(null);
+            onClearPreferredItem();
+          }}
           style={styles.backButton}
         >
           <Text style={styles.backButtonText}>{copy.learn.backToLibrary}</Text>

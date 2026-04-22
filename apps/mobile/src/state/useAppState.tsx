@@ -53,6 +53,13 @@ import type {
 } from "@pmhc/types";
 import { QuickLogSheet } from "../components/QuickLogSheet";
 import { starterContent } from "../data/starterContent";
+import {
+  buildDailySession,
+  isDailySessionProgressStore,
+  markDailySessionStepComplete,
+  type DailySessionProgressStore,
+  type DailySessionStepId,
+} from "../dailySession";
 import { type ReviewSection } from "../reviewRecap";
 import {
   appendReviewPacketHistory,
@@ -74,6 +81,7 @@ const [
   programProgressKey,
   programHistoryKey,
   reviewPacketHistoryKey,
+  dailySessionProgressKey,
 ] = appStorageKeys;
 
 const onboardingRepository = createJsonRepository<OnboardingResult | null>(
@@ -113,6 +121,12 @@ const reviewPacketHistoryRepository = createJsonRepository<ReviewPacketHistoryEn
   reviewPacketHistoryKey,
   [],
   isReviewPacketHistoryArray,
+);
+const dailySessionProgressRepository = createJsonRepository<DailySessionProgressStore>(
+  AsyncStorage,
+  dailySessionProgressKey,
+  {},
+  isDailySessionProgressStore,
 );
 
 const fallbackOnboarding = createOnboardingResult({
@@ -157,6 +171,8 @@ export function useAppState() {
   const [programProgress, setProgramProgress] = useState<ProgramProgress | null>(null);
   const [programHistory, setProgramHistory] = useState<ProgramHistoryEntry[]>([]);
   const [reviewPackets, setReviewPackets] = useState<ReviewPacketHistoryEntry[]>([]);
+  const [dailySessionProgress, setDailySessionProgress] = useState<DailySessionProgressStore>({});
+  const [learnFocusItemId, setLearnFocusItemId] = useState<string | null>(null);
   const [selectedQuickLog, setSelectedQuickLog] = useState<QuickLogDefinition | null>(null);
   const [isReady, setIsReady] = useState(false);
   const content: ContentItem[] = useMemo(
@@ -179,6 +195,7 @@ export function useAppState() {
           savedProgramProgress,
           savedProgramHistory,
           savedReviewPackets,
+          savedDailySessionProgress,
         ] =
           await Promise.all([
             onboardingRepository.load(),
@@ -189,6 +206,7 @@ export function useAppState() {
             programProgressRepository.load(),
             programHistoryRepository.load(),
             reviewPacketHistoryRepository.load(),
+            dailySessionProgressRepository.load(),
           ]);
 
         if (!mounted) {
@@ -210,6 +228,7 @@ export function useAppState() {
         setProgramProgress(savedProgramProgress);
         setProgramHistory(savedProgramHistory);
         setReviewPackets(savedReviewPackets);
+        setDailySessionProgress(savedDailySessionProgress);
       } catch {
         if (!mounted) {
           return;
@@ -224,6 +243,7 @@ export function useAppState() {
         setProgramProgress(null);
         setProgramHistory([]);
         setReviewPackets([]);
+        setDailySessionProgress({});
       } finally {
         if (mounted) {
           setIsReady(true);
@@ -271,6 +291,29 @@ export function useAppState() {
   const programPaused = useMemo(() => {
     return today.activeProgram ? isProgramPaused(today.activeProgram, programProgress) : false;
   }, [programProgress, today.activeProgram]);
+  const dailySession = useMemo(() => {
+    return buildDailySession({
+      content,
+      language,
+      logs,
+      programProgress,
+      progressEntry: dailySessionProgress[today.date],
+      reviewPackets,
+      reviewDigestNextStep: reviewDigest.nextStep,
+      reviewDigestTone: reviewDigest.tone,
+      today,
+    });
+  }, [
+    content,
+    dailySessionProgress,
+    language,
+    logs,
+    programProgress,
+    reviewDigest.nextStep,
+    reviewDigest.tone,
+    reviewPackets,
+    today,
+  ]);
 
   const persistLogs = useCallback(async (nextLogs: LogEntry[]) => {
     setLogs(nextLogs);
@@ -371,6 +414,18 @@ export function useAppState() {
     setReviewPackets(nextHistory);
     await reviewPacketHistoryRepository.save(nextHistory);
   }, []);
+  const persistDailySessionProgress = useCallback(async (nextProgress: DailySessionProgressStore) => {
+    setDailySessionProgress(nextProgress);
+    await dailySessionProgressRepository.save(nextProgress);
+  }, []);
+  const completeDailySessionStep = useCallback(
+    async (stepId: DailySessionStepId) => {
+      await persistDailySessionProgress(
+        markDailySessionStepComplete(dailySessionProgress, today.date, stepId, new Date().toISOString()),
+      );
+    },
+    [dailySessionProgress, persistDailySessionProgress, today.date],
+  );
 
   const saveQuickLog = useCallback(
     async (definition: QuickLogDefinition, value: unknown) => {
@@ -388,9 +443,12 @@ export function useAppState() {
       });
 
       await Promise.all([persistLogs([nextLog, ...logs]), persistSyncQueue([...syncQueue, syncJob])]);
+      if (dailySession.quizLog?.type === definition.type) {
+        await completeDailySessionStep("quiz");
+      }
       setSelectedQuickLog(null);
     },
-    [logs, persistLogs, persistSyncQueue, syncQueue],
+    [completeDailySessionStep, dailySession.quizLog, logs, persistLogs, persistSyncQueue, syncQueue],
   );
 
   const completeOnboarding = useCallback(
@@ -406,9 +464,16 @@ export function useAppState() {
         persistProgramProgress(nextProgramProgress),
         persistProgramHistory([]),
         persistReviewPackets([]),
+        persistDailySessionProgress({}),
       ]);
     },
-    [persistPrivacyLock, persistProgramHistory, persistProgramProgress, persistReviewPackets],
+    [
+      persistDailySessionProgress,
+      persistPrivacyLock,
+      persistProgramHistory,
+      persistProgramProgress,
+      persistReviewPackets,
+    ],
   );
 
   const changeLanguage = useCallback(
@@ -448,6 +513,8 @@ export function useAppState() {
     setProgramProgress(null);
     setProgramHistory([]);
     setReviewPackets([]);
+    setDailySessionProgress({});
+    setLearnFocusItemId(null);
     await Promise.all([
       onboardingRepository.clear(),
       logsRepository.clear(),
@@ -457,6 +524,7 @@ export function useAppState() {
       programProgressRepository.clear(),
       programHistoryRepository.clear(),
       reviewPacketHistoryRepository.clear(),
+      dailySessionProgressRepository.clear(),
     ]);
   }, []);
 
@@ -489,8 +557,12 @@ export function useAppState() {
   const completeContent = useCallback(
     async (itemId: string) => {
       await persistContentProgress(markContentCompleted(contentProgress, itemId, new Date().toISOString()));
+      if (learnFocusItemId === itemId) {
+        await completeDailySessionStep("lesson");
+        setLearnFocusItemId(null);
+      }
     },
-    [contentProgress, persistContentProgress],
+    [completeDailySessionStep, contentProgress, learnFocusItemId, persistContentProgress],
   );
 
   const togglePrivacyVault = useCallback(async () => {
@@ -526,7 +598,8 @@ export function useAppState() {
     }
 
     await persistProgramProgress(completeCurrentProgramDay(activeProgram, programProgress, new Date().toISOString()));
-  }, [persistProgramProgress, programProgress, today.activeProgram]);
+    await completeDailySessionStep("practice");
+  }, [completeDailySessionStep, persistProgramProgress, programProgress, today.activeProgram]);
 
   const restProgramToday = useCallback(async () => {
     const activeProgram = today.activeProgram;
@@ -536,7 +609,8 @@ export function useAppState() {
     }
 
     await persistProgramProgress(markCurrentProgramRestDay(activeProgram, programProgress, new Date().toISOString()));
-  }, [persistProgramProgress, programProgress, today.activeProgram]);
+    await completeDailySessionStep("practice");
+  }, [completeDailySessionStep, persistProgramProgress, programProgress, today.activeProgram]);
 
   const skipProgramToday = useCallback(async () => {
     const activeProgram = today.activeProgram;
@@ -546,7 +620,8 @@ export function useAppState() {
     }
 
     await persistProgramProgress(skipCurrentProgramDay(activeProgram, programProgress, new Date().toISOString()));
-  }, [persistProgramProgress, programProgress, today.activeProgram]);
+    await completeDailySessionStep("practice");
+  }, [completeDailySessionStep, persistProgramProgress, programProgress, today.activeProgram]);
 
   const pauseProgram = useCallback(async () => {
     const activeProgram = today.activeProgram;
@@ -577,8 +652,9 @@ export function useAppState() {
       }
 
       await persistProgramProgress(toggleCurrentProgramTask(activeProgram, programProgress, taskId, new Date().toISOString()));
+      await completeDailySessionStep("practice");
     },
-    [persistProgramProgress, programProgress, today.activeProgram],
+    [completeDailySessionStep, persistProgramProgress, programProgress, today.activeProgram],
   );
 
   const startRecommendedProgram = useCallback(
@@ -620,6 +696,7 @@ export function useAppState() {
       };
 
       setOnboarding(nextOnboarding);
+      setLearnFocusItemId(null);
       await Promise.all([
         onboardingRepository.save(nextOnboarding),
         persistProgramHistory(nextHistory),
@@ -638,15 +715,48 @@ export function useAppState() {
       });
 
       await persistReviewPackets(appendReviewPacketHistory(reviewPackets, nextEntry));
+      await completeDailySessionStep("reflection");
     },
-    [persistReviewPackets, reviewPackets],
+    [completeDailySessionStep, persistReviewPackets, reviewPackets],
+  );
+  const clearLearnFocus = useCallback(() => {
+    setLearnFocusItemId(null);
+  }, []);
+  const openDailySessionStep = useCallback(
+    (stepId: DailySessionStepId) => {
+      if (stepId === "lesson") {
+        setLearnFocusItemId(dailySession.lessonItemId);
+        setActiveTab("Learn");
+        return;
+      }
+
+      if (stepId === "quiz") {
+        if (dailySession.quizLog) {
+          setSelectedQuickLog(dailySession.quizLog);
+          return;
+        }
+
+        setActiveTab("Track");
+        return;
+      }
+
+      if (stepId === "practice") {
+        setActiveTab(today.activeProgram ? "Programs" : "Track");
+        return;
+      }
+
+      setActiveTab("Review");
+    },
+    [dailySession.lessonItemId, dailySession.quizLog, today.activeProgram],
   );
 
   return {
     activeTab,
     content,
+    dailySession,
     hasCompletedOnboarding: onboarding != null,
     isReady,
+    learnFocusItemId,
     logs,
     quickLogSheet: selectedQuickLog ? (
       <QuickLogSheet definition={selectedQuickLog} language={language} onClose={() => setSelectedQuickLog(null)} onSave={saveQuickLog} />
@@ -667,8 +777,10 @@ export function useAppState() {
     changeLanguage,
     completeProgramToday,
     clearPrivacyPin: clearPrivacyPinCode,
+    clearLearnFocus,
     deleteLog,
     lockNow,
+    openDailySessionStep,
     openQuickLog: setSelectedQuickLog,
     pauseProgram,
     resetOnboarding,

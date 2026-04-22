@@ -62,14 +62,23 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Vault on")).toBeVisible();
   await expect(page.getByText("Build your baseline")).toBeVisible();
   await expect(page.getByText("Start with two calm scores before anything more ambitious.")).toBeVisible();
+  await expect(page.getByText("Daily session")).toBeVisible();
+  await expect(page.getByText("0 of 4 done")).toBeVisible();
+  await page.getByLabel("Open daily session step: Lesson").click();
+  await expect(page.getByText("Build a baseline without overchecking")).toBeVisible();
+  await page.getByLabel("Mark complete Build a baseline without overchecking").click();
+  await page.getByLabel("Back to library").click();
+  await page.getByLabel("Open Today").click();
+  await expect(page.getByText("1 of 4 done")).toBeVisible();
+  await page.getByLabel("Open daily session step: Quiz").click();
+  await expect(page.getByText("Log it quickly")).toBeVisible();
+  await page.getByLabel("Save Confidence 7").click();
+  await expect(page.getByText("2 of 4 done")).toBeVisible();
   await expect(page.getByText("Two-score reset")).toBeVisible();
   await page.getByText("Ask Coach why").click();
   await expect(page.getByText("How certain is this?")).toBeVisible();
   await page.getByLabel("Open Today").click();
 
-  await page.getByLabel("Quick log Confidence").click();
-  await expect(page.getByText("Log it quickly")).toBeVisible();
-  await page.getByLabel("Save Confidence 7").click();
   await expect(page.getByText("Pending sync")).toBeVisible();
 
   await page.getByLabel("Quick log Symptoms").click();
@@ -152,10 +161,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Open Learn").click();
   await expect(page.getByText("Recommended for today")).toBeVisible();
   await page.getByLabel("Open Build a baseline without overchecking").first().click();
-  await expect(page.getByText("Because it fits your current review digest")).toBeVisible();
   await page.getByLabel("Save Build a baseline without overchecking").click();
-  await expect(page.getByLabel("Unsave Build a baseline without overchecking")).toBeVisible();
-  await page.getByLabel("Mark complete Build a baseline without overchecking").click();
   await expect(page.getByLabel("Completed Build a baseline without overchecking")).toBeVisible();
   await page.getByLabel("Back to library").click();
   await page.getByLabel("Filter Learn content: Recovery").click();

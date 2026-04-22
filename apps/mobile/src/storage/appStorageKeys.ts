@@ -7,6 +7,7 @@ export const appStorageKeys = [
   "pmhc:program-progress",
   "pmhc:program-history",
   "pmhc:review-packets",
+  "pmhc:daily-session",
 ] as const;
 
 export const debugStorageKeys = ["pmhc:debug-force-error"] as const;

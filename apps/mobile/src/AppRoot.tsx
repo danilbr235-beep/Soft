@@ -71,9 +71,11 @@ function AppRootContent() {
         {app.activeTab === "Today" ? (
           <TodayScreen
             copy={copy}
+            dailySession={app.dailySession}
             privacyLock={app.privacyLock}
             today={app.today}
             onAskCoach={() => app.setActiveTab("Coach")}
+            onOpenDailySessionStep={app.openDailySessionStep}
             onLog={app.openQuickLog}
           />
         ) : null}
@@ -105,7 +107,9 @@ function AppRootContent() {
             copy={copy}
             language={app.language}
             onMarkCompleted={app.completeContent}
+            onClearPreferredItem={app.clearLearnFocus}
             onToggleSaved={app.toggleSavedContent}
+            preferredItemId={app.learnFocusItemId}
             priorityDomain={app.today.currentPriority.domain}
             reviewDigestNextStep={app.reviewDigest.nextStep}
             reviewDigestTone={app.reviewDigest.tone}
