@@ -9,8 +9,9 @@ import {
   type ProgramNextPathId,
 } from "@pmhc/programs";
 import type { LanguageCopy } from "@pmhc/i18n";
+import { buildTrackingReviewDigest } from "@pmhc/tracking";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { Alert, CurrentPriority, Program, ProgramDayPlan, ProgramHistoryEntry, ProgramProgressSummary, TodayMode } from "@pmhc/types";
+import type { Alert, CurrentPriority, LogEntry, Program, ProgramDayPlan, ProgramHistoryEntry, ProgramProgressSummary, TodayMode } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 
@@ -23,6 +24,7 @@ type Props = {
   dayPlan: ProgramDayPlan | null;
   history: ProgramHistoryEntry[];
   isPaused: boolean;
+  logs: LogEntry[];
   progressSummary: ProgramProgressSummary | null;
   onCompleteToday: () => void;
   onPauseProgram: () => void;
@@ -43,6 +45,7 @@ export function ProgramsScreen({
   dayPlan,
   history,
   isPaused,
+  logs,
   progressSummary,
   onCompleteToday,
   onPauseProgram,
@@ -102,6 +105,7 @@ export function ProgramsScreen({
     });
   }, [activeProgram, completionSummary, progressSummary]);
   const reviewSummary = useMemo(() => buildProgramReview(history), [history]);
+  const reviewDigest = useMemo(() => buildTrackingReviewDigest(logs, history), [logs, history]);
   const programFinished = completionSummary != null;
   const disableProgramActions = !activeProgram || isPaused || programFinished;
   const disableTaskActions = isPaused || programFinished;
@@ -360,6 +364,40 @@ export function ProgramsScreen({
     );
   }
 
+  function renderDigestCard() {
+    if (logs.length === 0 && history.length === 0) {
+      return null;
+    }
+
+    return (
+      <Surface>
+        <Text style={styles.sectionTitle}>{copy.track.reviewDigestTitle}</Text>
+        <Text style={styles.body}>{copy.track.reviewDigestBody}</Text>
+        <Text style={styles.taskTitle}>{copy.track.reviewDigestTones[reviewDigest.tone]}</Text>
+        <Text style={styles.body}>{copy.track.reviewDigestReasons[reviewDigest.reason]}</Text>
+        <View style={styles.detailSummaryList}>
+          <Text style={styles.detailLabel}>{copy.track.reviewDigestConfidenceTitle}</Text>
+          <Text style={styles.body}>{copy.track.reviewDigestConfidenceLabels[reviewDigest.confidence]}</Text>
+          <Text style={styles.detailLabel}>{copy.track.reviewDigestNextStepTitle}</Text>
+          <Text style={styles.body}>{copy.track.reviewDigestNextSteps[reviewDigest.nextStep]}</Text>
+          <Text style={styles.metaText}>
+            {copy.track.reviewDigestWindows(
+              copy.track.weeklyReviewTones[reviewDigest.weeklyTone],
+              copy.track.monthlyReviewTones[reviewDigest.monthlyTone],
+            )}
+          </Text>
+          {reviewDigest.latestProgramId ? (
+            <Text style={styles.metaText}>
+              {copy.track.reviewDigestLatestProgram(
+                copy.programs.programTitles[reviewDigest.latestProgramId] ?? reviewDigest.latestProgramId,
+              )}
+            </Text>
+          ) : null}
+        </View>
+      </Surface>
+    );
+  }
+
   if (showDetail && activeProgram && dayPlan && progressSummary && detailSummary) {
     return (
       <Screen title={copy.programs.title} subtitle={copy.programs.subtitle}>
@@ -471,6 +509,7 @@ export function ProgramsScreen({
         {renderActionButtons()}
       </Surface>
       {renderAdjustmentCard()}
+      {renderDigestCard()}
       {dayPlan && detailSummary ? (
         <Surface>
           <View style={styles.planHeader}>

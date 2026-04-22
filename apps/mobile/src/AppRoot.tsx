@@ -109,6 +109,7 @@ function AppRootContent() {
             dayPlan={app.programDayPlan}
             history={app.programHistory}
             isPaused={app.programPaused}
+            logs={app.logs}
             progressSummary={app.programSummary}
             onCompleteToday={app.completeProgramToday}
             onPauseProgram={app.pauseProgram}

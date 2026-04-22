@@ -28,6 +28,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Support edit and delete for local logs. (Initial slice complete.)
 - Add weekly snapshots for sleep, energy, confidence, libido, and symptoms. (Initial slice complete.)
 - Add a consolidated review digest so Track can summarize week, 30-day context, and recent cycles in one read. (Initial slice complete.)
+- Reuse the same review digest inside Programs so plan guidance and Track stay aligned. (Initial slice complete.)
 - Add a weekly review layer that turns recent logs and cycle context into one conservative summary. (Initial slice complete.)
 - Add a broader 30-day review so Track can summarize beyond the last week without a separate analytics surface. (Initial slice complete.)
 - Show conservative correlation hints without pretending causality. (Initial paired-log hints slice complete.)
