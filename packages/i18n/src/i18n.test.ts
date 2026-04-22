@@ -70,12 +70,15 @@ describe("Track pattern hint copy", () => {
     expect(getCopy("en").review.filterLabels.week).toBe("7 days");
     expect(getCopy("en").review.recapAction).toBe("Prepare recap");
     expect(getCopy("en").review.formatLabels.plan).toBe("Action plan");
+    expect(getCopy("en").review.formatLabels.packet).toBe("Packet");
     expect(getCopy("en").review.recapPreview("Snapshot")).toBe("Preview: Snapshot");
+    expect(getCopy("en").review.packetBlockTitles.history).toBe("History snapshot");
     expect(getCopy("ru").review.title).toBe("Обзор");
     expect(getCopy("ru").nav.openLabels.Review.length).toBeGreaterThan(0);
     expect(getCopy("ru").review.filterLabels.month).toBe("30 дней");
     expect(getCopy("ru").review.recapAction.length).toBeGreaterThan(0);
     expect(getCopy("ru").review.formatLabels.snapshot).toBe("Кратко");
+    expect(getCopy("ru").review.formatLabels.packet).toBe("Пакет");
     expect(getCopy("ru").review.recapPreview("Кратко")).toContain("Предпросмотр");
   });
 

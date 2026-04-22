@@ -95,10 +95,12 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("A symptom check-in inside the last 30 days keeps this month conservative.")).toBeVisible();
   await expect(page.getByText("Next conservative step")).toBeVisible();
   await expect(page.getByText("2 logs in 30 days - 1 score - 1 symptom check-in - 0 completed cycles")).toBeVisible();
-  await page.getByLabel("Open recap format: Action plan").click();
+  await page.getByLabel("Open recap format: Packet").click();
   await page.getByLabel("Prepare recap").click();
-  await expect(page.getByText("Preview: Action plan")).toBeVisible();
-  await expect(page.getByText(/Do next: Keep recovery-first/i)).toBeVisible();
+  await expect(page.getByText("Preview: Packet")).toBeVisible();
+  await expect(page.getByText("30 days packet")).toBeVisible();
+  await expect(page.getByText("Signals", { exact: true })).toBeVisible();
+  await expect(page.getByText("History snapshot", { exact: true })).toBeVisible();
   await page.getByLabel("Open Track").click();
   await expect(page.getByText("Pattern hints")).toBeVisible();
   await expect(page.getByText("More paired logs needed")).toBeVisible();
@@ -266,10 +268,12 @@ test("completed program shows a conservative wrap-up", async ({ page }) => {
     page.getByText("The recent sequence is holding a mixed pattern rather than clearly improving or worsening."),
   ).toBeVisible();
   await expect(page.getByText("Latest completed cycle: 14-day confidence reset")).toBeVisible();
-  await page.getByLabel("Open recap format: Coach note").click();
+  await page.getByLabel("Open recap format: Packet").click();
   await page.getByLabel("Prepare recap").click();
-  await expect(page.getByText("Preview: Coach note")).toBeVisible();
-  await expect(page.getByText(/Program review reads A mixed but useful finish/i)).toBeVisible();
+  await expect(page.getByText("Preview: Packet")).toBeVisible();
+  await expect(page.getByText("Cycles packet")).toBeVisible();
+  await expect(page.getByText("History snapshot", { exact: true })).toBeVisible();
+  await expect(page.getByText("Latest completed cycle: 14-day confidence reset")).toHaveCount(2);
 });
 
 test("can choose English or Russian from onboarding and settings", async ({ page }) => {

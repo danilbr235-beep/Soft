@@ -7,7 +7,7 @@ import { colors, radii, spacing } from "@pmhc/ui";
 import type { LogEntry, ProgramHistoryEntry } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
-import { buildReviewRecap, type ReviewRecapFormat, type ReviewSection } from "../reviewRecap";
+import { buildReviewRecap, type ReviewRecapFormat, type ReviewRecapResult, type ReviewSection } from "../reviewRecap";
 
 type Props = {
   copy: LanguageCopy;
@@ -18,13 +18,13 @@ type Props = {
 export function ReviewScreen({ copy, logs, programHistory }: Props) {
   const [activeSection, setActiveSection] = useState<ReviewSection>("overview");
   const [activeFormat, setActiveFormat] = useState<ReviewRecapFormat>("snapshot");
-  const [recapPreview, setRecapPreview] = useState<string | null>(null);
+  const [recapPreview, setRecapPreview] = useState<ReviewRecapResult | null>(null);
   const reviewDigest = useMemo(() => buildTrackingReviewDigest(logs, programHistory), [logs, programHistory]);
   const weeklyReview = useMemo(() => buildTrackingWeeklyReview(logs, programHistory), [logs, programHistory]);
   const monthlyReview = useMemo(() => buildTrackingPeriodReview(logs, programHistory, 30), [logs, programHistory]);
   const programReview = useMemo(() => buildProgramReview(programHistory), [programHistory]);
   const sectionOrder: ReviewSection[] = ["overview", "week", "month", "cycles"];
-  const formatOrder: ReviewRecapFormat[] = ["snapshot", "plan", "coach"];
+  const formatOrder: ReviewRecapFormat[] = ["snapshot", "plan", "coach", "packet"];
 
   function selectSection(section: ReviewSection) {
     setActiveSection(section);
@@ -200,7 +200,26 @@ export function ReviewScreen({ copy, logs, programHistory }: Props) {
         {recapPreview ? (
           <View style={styles.recapPreview}>
             <Text style={styles.hintMeta}>{copy.review.recapPreview(copy.review.formatLabels[activeFormat])}</Text>
-            <Text style={styles.recapText}>{recapPreview}</Text>
+            {recapPreview.kind === "packet" ? (
+              <View style={styles.packetList}>
+                <Text style={styles.packetHeader}>{recapPreview.title}</Text>
+                {recapPreview.blocks.map((block, index) => (
+                  <View
+                    key={block.id}
+                    style={[styles.packetBlock, index > 0 ? styles.packetBlockDivider : null]}
+                  >
+                    <Text style={styles.packetBlockTitle}>{block.title}</Text>
+                    {block.lines.map((line) => (
+                      <Text key={`${block.id}-${line}`} style={styles.recapText}>
+                        {line}
+                      </Text>
+                    ))}
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text style={styles.recapText}>{recapPreview.text}</Text>
+            )}
           </View>
         ) : null}
       </Surface>
@@ -314,5 +333,27 @@ const styles = StyleSheet.create({
   recapText: {
     color: colors.text,
     lineHeight: 21,
+  },
+  packetList: {
+    gap: spacing.sm,
+  },
+  packetHeader: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "900",
+  },
+  packetBlock: {
+    gap: spacing.xs,
+  },
+  packetBlockDivider: {
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+    paddingTop: spacing.sm,
+  },
+  packetBlockTitle: {
+    color: colors.steel,
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase",
   },
 });

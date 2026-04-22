@@ -60,7 +60,8 @@ type ProgramReviewTrendCopy = Record<
   string
 >;
 type ReviewSectionCopy = Record<"overview" | "week" | "month" | "cycles", string>;
-type ReviewRecapFormatCopy = Record<"snapshot" | "plan" | "coach", string>;
+type ReviewRecapFormatCopy = Record<"snapshot" | "plan" | "coach" | "packet", string>;
+type ReviewPacketBlockCopy = Record<"summary" | "next" | "signals" | "history", string>;
 
 function russianCycleWord(count: number) {
   const lastTwo = count % 100;
@@ -216,6 +217,11 @@ export type LanguageCopy = {
     recapBody: string;
     recapAction: string;
     recapPreview: (label: string) => string;
+    packetTitle: (label: string) => string;
+    packetBlockTitles: ReviewPacketBlockCopy;
+    packetNoNext: string;
+    packetNoSignals: string;
+    packetNoHistory: string;
     noCycles: string;
     planFocus: (text: string) => string;
     planReason: (text: string) => string;
@@ -783,12 +789,23 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         snapshot: "Snapshot",
         plan: "Action plan",
         coach: "Coach note",
+        packet: "Packet",
       },
       openFormat: (label) => `Open recap format: ${label}`,
       recapTitle: "Private recap",
       recapBody: "Prepare a short local summary for the section you're looking at now.",
       recapAction: "Prepare recap",
       recapPreview: (label) => `Preview: ${label}`,
+      packetTitle: (label) => `${label} packet`,
+      packetBlockTitles: {
+        summary: "Summary",
+        next: "Next step",
+        signals: "Signals",
+        history: "History snapshot",
+      },
+      packetNoNext: "No extra next-step block for this slice.",
+      packetNoSignals: "No additional signal block for this slice yet.",
+      packetNoHistory: "No additional history context for this slice yet.",
       noCycles: "No finished cycles yet. Keep the current cycle light and let a little more history build first.",
       planFocus: (text) => `Focus: ${text}`,
       planReason: (text) => `Why this read: ${text}`,
@@ -1324,12 +1341,23 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         snapshot: "Кратко",
         plan: "План действий",
         coach: "Заметка коуча",
+        packet: "Пакет",
       },
       openFormat: (label) => `Открыть формат сводки: ${label}`,
       recapTitle: "Личная сводка",
       recapBody: "Подготовьте короткий локальный итог по тому разделу, который сейчас открыт.",
       recapAction: "Подготовить сводку",
       recapPreview: (label) => `Предпросмотр: ${label}`,
+      packetTitle: (label) => `Пакет: ${label}`,
+      packetBlockTitles: {
+        summary: "Суть",
+        next: "Следующий шаг",
+        signals: "Сигналы",
+        history: "Снимок истории",
+      },
+      packetNoNext: "Для этого среза отдельный следующий шаг пока не нужен.",
+      packetNoSignals: "Для этого среза пока нет отдельного блока сигналов.",
+      packetNoHistory: "Для этого среза пока нет отдельного исторического контекста.",
       noCycles: "Завершенных циклов пока нет. Лучше спокойно продолжить текущий цикл и дать истории немного накопиться.",
       planFocus: (text) => `Фокус: ${text}`,
       planReason: (text) => `Почему так: ${text}`,

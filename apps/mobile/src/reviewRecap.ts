@@ -3,7 +3,25 @@ import type { ProgramReviewSummary } from "@pmhc/programs";
 import type { TrackingPeriodReviewSummary, TrackingReviewDigest, TrackingWeeklyReviewSummary } from "@pmhc/tracking";
 
 export type ReviewSection = "overview" | "week" | "month" | "cycles";
-export type ReviewRecapFormat = "snapshot" | "plan" | "coach";
+export type ReviewRecapFormat = "snapshot" | "plan" | "coach" | "packet";
+export type ReviewPacketBlockId = "summary" | "next" | "signals" | "history";
+
+export type ReviewPacketBlock = {
+  id: ReviewPacketBlockId;
+  title: string;
+  lines: string[];
+};
+
+export type ReviewRecapResult =
+  | {
+      kind: "text";
+      text: string;
+    }
+  | {
+      kind: "packet";
+      title: string;
+      blocks: ReviewPacketBlock[];
+    };
 
 type ReviewRecapInput = {
   copy: LanguageCopy;
@@ -15,6 +33,15 @@ type ReviewRecapInput = {
   weeklyReview: TrackingWeeklyReviewSummary;
 };
 
+type ReviewRecapParts = {
+  title: string;
+  tone: string | null;
+  reason: string;
+  nextStep: string | null;
+  meta: string | null;
+  context: string | null;
+};
+
 export function buildReviewRecap({
   copy,
   format,
@@ -23,7 +50,7 @@ export function buildReviewRecap({
   reviewDigest,
   section,
   weeklyReview,
-}: ReviewRecapInput) {
+}: ReviewRecapInput): ReviewRecapResult {
   const parts = buildReviewRecapParts({
     copy,
     monthlyReview,
@@ -33,40 +60,51 @@ export function buildReviewRecap({
     weeklyReview,
   });
 
+  if (format === "packet") {
+    return {
+      kind: "packet",
+      title: copy.review.packetTitle(copy.review.filterLabels[section]),
+      blocks: buildReviewPacketBlocks(parts, copy),
+    };
+  }
+
   if (format === "plan") {
-    return [
-      parts.title,
-      parts.tone ? copy.review.planFocus(parts.tone) : null,
-      copy.review.planReason(parts.reason),
-      parts.nextStep ? copy.review.planNext(parts.nextStep) : null,
-      parts.meta ? copy.review.planWatch(parts.meta) : null,
-      parts.context ? copy.review.planWatch(parts.context) : null,
-    ]
-      .filter((line): line is string => line != null)
-      .join("\n");
+    return {
+      kind: "text",
+      text: compactLines([
+        parts.title,
+        parts.tone ? copy.review.planFocus(parts.tone) : null,
+        copy.review.planReason(parts.reason),
+        parts.nextStep ? copy.review.planNext(parts.nextStep) : null,
+        parts.meta ? copy.review.planWatch(parts.meta) : null,
+        parts.context ? copy.review.planWatch(parts.context) : null,
+      ]).join("\n"),
+    };
   }
 
   if (format === "coach") {
-    return [
-      copy.review.coachLead(parts.title, parts.tone),
-      copy.review.coachWhy(parts.reason),
-      parts.nextStep ? copy.review.coachNext(parts.nextStep) : null,
-      parts.context ? copy.review.coachWatch(parts.context) : parts.meta ? copy.review.coachWatch(parts.meta) : null,
-    ]
-      .filter((line): line is string => line != null)
-      .join(" ");
+    return {
+      kind: "text",
+      text: compactLines([
+        copy.review.coachLead(parts.title, parts.tone),
+        copy.review.coachWhy(parts.reason),
+        parts.nextStep ? copy.review.coachNext(parts.nextStep) : null,
+        parts.context ? copy.review.coachWatch(parts.context) : parts.meta ? copy.review.coachWatch(parts.meta) : null,
+      ]).join(" "),
+    };
   }
 
-  return [
-    parts.title,
-    parts.tone,
-    parts.reason,
-    parts.nextStep,
-    parts.meta,
-    parts.context,
-  ]
-    .filter((line): line is string => line != null)
-    .join("\n");
+  return {
+    kind: "text",
+    text: compactLines([
+      parts.title,
+      parts.tone,
+      parts.reason,
+      parts.nextStep,
+      parts.meta,
+      parts.context,
+    ]).join("\n"),
+  };
 }
 
 function buildReviewRecapParts({
@@ -76,7 +114,7 @@ function buildReviewRecapParts({
   reviewDigest,
   section,
   weeklyReview,
-}: Omit<ReviewRecapInput, "format">) {
+}: Omit<ReviewRecapInput, "format">): ReviewRecapParts {
   if (section === "week") {
     return {
       title: copy.track.weeklyReviewTitle,
@@ -89,9 +127,9 @@ function buildReviewRecapParts({
         weeklyReview.symptomLogsInWeek,
       ),
       context: weeklyReview.latestProgramId
-        ? copy.track.weeklyReviewLatestProgram(
+        ? [copy.track.weeklyReviewLatestProgram(
             copy.programs.programTitles[weeklyReview.latestProgramId] ?? weeklyReview.latestProgramId,
-          )
+          )].join("\n")
         : null,
     };
   }
@@ -109,9 +147,9 @@ function buildReviewRecapParts({
         monthlyReview.cycleCountInPeriod,
       ),
       context: monthlyReview.latestProgramId
-        ? copy.track.monthlyReviewLatestProgram(
+        ? [copy.track.monthlyReviewLatestProgram(
             copy.programs.programTitles[monthlyReview.latestProgramId] ?? monthlyReview.latestProgramId,
-          )
+          )].join("\n")
         : null,
     };
   }
@@ -122,7 +160,7 @@ function buildReviewRecapParts({
         title: copy.track.programReviewTitle,
         tone: null,
         reason: copy.review.noCycles,
-        nextStep: null,
+        nextStep: copy.track.reviewDigestNextSteps[reviewDigest.nextStep],
         meta: null,
         context: null,
       };
@@ -132,7 +170,7 @@ function buildReviewRecapParts({
       title: copy.track.programReviewTitle,
       tone: copy.programs.completionStates[programReview.leadingState],
       reason: copy.programs.reviewFocuses[programReview.focus],
-      nextStep: null,
+      nextStep: copy.track.reviewDigestNextSteps[reviewDigest.nextStep],
       meta: copy.programs.reviewTotals(
         programReview.cycleCount,
         programReview.totalCompletedDays,
@@ -142,9 +180,9 @@ function buildReviewRecapParts({
       context: [
         copy.programs.reviewTrendLabels[programReview.trend],
         copy.programs.reviewLatest(
-        copy.programs.programTitles[programReview.latestProgramId] ?? programReview.latestProgramId,
+          copy.programs.programTitles[programReview.latestProgramId] ?? programReview.latestProgramId,
         ),
-      ].join(" "),
+      ].join("\n"),
     };
   }
 
@@ -156,16 +194,56 @@ function buildReviewRecapParts({
     meta: copy.track.reviewDigestConfidenceLabels[reviewDigest.confidence],
     context: [
       copy.track.reviewDigestWindows(
-      copy.track.weeklyReviewTones[reviewDigest.weeklyTone],
-      copy.track.monthlyReviewTones[reviewDigest.monthlyTone],
-    ),
+        copy.track.weeklyReviewTones[reviewDigest.weeklyTone],
+        copy.track.monthlyReviewTones[reviewDigest.monthlyTone],
+      ),
       reviewDigest.latestProgramId
-      ? copy.track.reviewDigestLatestProgram(
-          copy.programs.programTitles[reviewDigest.latestProgramId] ?? reviewDigest.latestProgramId,
-        )
-      : null,
+        ? copy.track.reviewDigestLatestProgram(
+            copy.programs.programTitles[reviewDigest.latestProgramId] ?? reviewDigest.latestProgramId,
+          )
+        : null,
     ]
       .filter((line): line is string => line != null)
-      .join(" "),
+      .join("\n"),
   };
+}
+
+function buildReviewPacketBlocks(parts: ReviewRecapParts, copy: LanguageCopy): ReviewPacketBlock[] {
+  return [
+    {
+      id: "summary",
+      title: copy.review.packetBlockTitles.summary,
+      lines: compactLines([parts.title, parts.tone, parts.reason]),
+    },
+    {
+      id: "next",
+      title: copy.review.packetBlockTitles.next,
+      lines: splitPreviewLines(parts.nextStep, copy.review.packetNoNext),
+    },
+    {
+      id: "signals",
+      title: copy.review.packetBlockTitles.signals,
+      lines: splitPreviewLines(parts.meta, copy.review.packetNoSignals),
+    },
+    {
+      id: "history",
+      title: copy.review.packetBlockTitles.history,
+      lines: splitPreviewLines(parts.context, copy.review.packetNoHistory),
+    },
+  ];
+}
+
+function compactLines(lines: Array<string | null>) {
+  return lines.filter((line): line is string => line != null && line.length > 0);
+}
+
+function splitPreviewLines(value: string | null, fallback: string) {
+  if (!value) {
+    return [fallback];
+  }
+
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
 }
