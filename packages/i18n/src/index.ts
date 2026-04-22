@@ -148,6 +148,14 @@ export type LanguageCopy = {
     weeklyReviewNextSteps: WeeklyReviewNextStepCopy;
     weeklyReviewMeta: (logs: number, scores: number, symptoms: number) => string;
     weeklyReviewLatestProgram: (title: string) => string;
+    monthlyReviewTitle: string;
+    monthlyReviewBody: string;
+    monthlyReviewTones: WeeklyReviewToneCopy;
+    monthlyReviewReasons: WeeklyReviewReasonCopy;
+    monthlyReviewNextStepTitle: string;
+    monthlyReviewNextSteps: WeeklyReviewNextStepCopy;
+    monthlyReviewMeta: (logs: number, scores: number, symptoms: number, cycles: number) => string;
+    monthlyReviewLatestProgram: (title: string) => string;
     patternHintsTitle: string;
     patternHintsBody: string;
     patternHintLabels: PatternHintLabelCopy;
@@ -614,6 +622,31 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       weeklyReviewMeta: (logs, scores, symptoms) =>
         `${logs} ${logs === 1 ? "log" : "logs"} this week - ${scores} ${scores === 1 ? "score" : "scores"} - ${symptoms} symptom check-in${symptoms === 1 ? "" : "s"}`,
       weeklyReviewLatestProgram: (title) => `Latest cycle context: ${title}`,
+      monthlyReviewTitle: "30-day review",
+      monthlyReviewBody: "A broader read across recent logs and recent cycle completions.",
+      monthlyReviewTones: {
+        baseline_building: "Baseline-building month",
+        steady: "Steadier month",
+        recovery: "Recovery-first month",
+      },
+      monthlyReviewReasons: {
+        low_data: "The last 30 days still need more calm score logs before they say much.",
+        signals_steadying: "The last 30 days look steadier than noisy. Keep building consistency rather than chasing volume.",
+        sleep_dip: "Sleep or recovery signals dipped enough in the last 30 days that the next block should stay lighter.",
+        symptom_caution: "A symptom check-in inside the last 30 days keeps this month conservative.",
+        program_stability: "Recent cycle finishes in the last 30 days look steadier, so the next block can stay light but consistent.",
+        program_rebuild: "Recent cycle history in the last 30 days still points to shorter, calmer rebuilds instead of pushing volume.",
+      },
+      monthlyReviewNextStepTitle: "Next conservative step",
+      monthlyReviewNextSteps: {
+        log_two_scores: "Add a few calm score check-ins before drawing bigger conclusions.",
+        keep_consistency: "Keep the same light routine for another week before changing the plan.",
+        protect_recovery: "Keep recovery-first and avoid pushing intensity until the recent signals settle.",
+        repeat_small_loop: "Repeat a shorter, calmer loop before choosing a heavier block.",
+      },
+      monthlyReviewMeta: (logs, scores, symptoms, cycles) =>
+        `${logs} ${logs === 1 ? "log" : "logs"} in 30 days - ${scores} ${scores === 1 ? "score" : "scores"} - ${symptoms} symptom check-in${symptoms === 1 ? "" : "s"} - ${cycles} completed cycle${cycles === 1 ? "" : "s"}`,
+      monthlyReviewLatestProgram: (title) => `Latest 30-day cycle context: ${title}`,
       patternHintsTitle: "Pattern hints",
       patternHintsBody: "Gentle notes from paired logs. Use them as prompts to watch, not proof.",
       patternHintLabels: {
@@ -1065,6 +1098,31 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       weeklyReviewMeta: (logs, scores, symptoms) =>
         `${logs} ${russianLogWord(logs)} за неделю - ${scores} ${scores === 1 ? "оценка" : scores >= 2 && scores <= 4 ? "оценки" : "оценок"} - ${symptoms} ${symptoms === 1 ? "отметка симптомов" : symptoms >= 2 && symptoms <= 4 ? "отметки симптомов" : "отметок симптомов"}`,
       weeklyReviewLatestProgram: (title) => `Контекст последнего цикла: ${title}`,
+      monthlyReviewTitle: "Обзор за 30 дней",
+      monthlyReviewBody: "Более широкий вывод по последним логам и завершениям недавних циклов.",
+      monthlyReviewTones: {
+        baseline_building: "Месяц сборки базовой линии",
+        steady: "Более ровный месяц",
+        recovery: "Месяц в щадящем режиме",
+      },
+      monthlyReviewReasons: {
+        low_data: "За последние 30 дней пока все еще мало спокойных оценок, чтобы делать более уверенный вывод.",
+        signals_steadying: "Последние 30 дней выглядят ровнее, чем шумно. Лучше и дальше строить регулярность, а не наращивать объем.",
+        sleep_dip: "За последние 30 дней сон или восстановление проседали достаточно, чтобы следующий блок держать легче.",
+        symptom_caution: "Отметка симптомов внутри последних 30 дней все еще делает этот месяц более осторожным.",
+        program_stability: "Завершения циклов за последние 30 дней выглядят ровнее, поэтому следующий блок можно оставить легким, но регулярным.",
+        program_rebuild: "История циклов за последние 30 дней все еще подсказывает короткие и спокойные перезапуски вместо попытки нарастить нагрузку.",
+      },
+      monthlyReviewNextStepTitle: "Следующий консервативный шаг",
+      monthlyReviewNextSteps: {
+        log_two_scores: "Добавьте еще несколько спокойных оценок, прежде чем делать более крупные выводы.",
+        keep_consistency: "Сохраните тот же легкий ритм еще на неделю, прежде чем менять план.",
+        protect_recovery: "Оставьте акцент на восстановлении и не поднимайте интенсивность, пока недавние сигналы не успокоятся.",
+        repeat_small_loop: "Повторите более короткий и спокойный цикл, прежде чем брать блок тяжелее.",
+      },
+      monthlyReviewMeta: (logs, scores, symptoms, cycles) =>
+        `${logs} ${russianLogWord(logs)} за 30 дней - ${scores} ${scores === 1 ? "оценка" : scores >= 2 && scores <= 4 ? "оценки" : "оценок"} - ${symptoms} ${symptoms === 1 ? "отметка симптомов" : symptoms >= 2 && symptoms <= 4 ? "отметки симптомов" : "отметок симптомов"} - ${cycles} ${russianCycleWord(cycles)}`,
+      monthlyReviewLatestProgram: (title) => `Контекст цикла за последние 30 дней: ${title}`,
       patternHintsTitle: "Подсказки по паттернам",
       patternHintsBody: "Мягкие заметки по парным логам. Это повод наблюдать, а не доказательство.",
       patternHintLabels: {

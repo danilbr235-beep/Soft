@@ -6,6 +6,7 @@ import { createSymptomCheckinValue } from "@pmhc/safety";
 import {
   buildTrackingExport,
   buildTrackingPatternHints,
+  buildTrackingPeriodReview,
   buildTrackingSnapshot,
   buildTrackingWeeklyReview,
   buildWeeklySnapshotCards,
@@ -54,6 +55,7 @@ export function TrackScreen({
   const snapshot = buildTrackingSnapshot(logs);
   const weeklyCards = buildWeeklySnapshotCards(logs);
   const weeklyReview = useMemo(() => buildTrackingWeeklyReview(logs, programHistory), [logs, programHistory]);
+  const monthlyReview = useMemo(() => buildTrackingPeriodReview(logs, programHistory, 30), [logs, programHistory]);
   const patternHints = buildTrackingPatternHints(logs);
   const filteredLogs = useMemo(() => filterTrackingLogs(logs, selectedFilter), [logs, selectedFilter]);
   const programReview = useMemo(() => buildProgramReview(programHistory), [programHistory]);
@@ -112,28 +114,43 @@ export function TrackScreen({
           ))}
         </View>
       </Surface>
-      <Surface>
-        <Text style={styles.title}>{copy.track.weeklyReviewTitle}</Text>
-        <Text style={styles.body}>{copy.track.weeklyReviewBody}</Text>
-        <Text style={styles.hintTitle}>{copy.track.weeklyReviewTones[weeklyReview.tone]}</Text>
-        <Text style={styles.body}>{copy.track.weeklyReviewReasons[weeklyReview.reason]}</Text>
-        <Text style={styles.signalDetail}>{copy.track.weeklyReviewNextStepTitle}</Text>
-        <Text style={styles.body}>{copy.track.weeklyReviewNextSteps[weeklyReview.nextStep]}</Text>
-        <Text style={styles.hintMeta}>
-          {copy.track.weeklyReviewMeta(
-            weeklyReview.logsInWeek,
-            weeklyReview.scoreLogsInWeek,
-            weeklyReview.symptomLogsInWeek,
-          )}
-        </Text>
-        {weeklyReview.latestProgramId ? (
-          <Text style={styles.hintMeta}>
-            {copy.track.weeklyReviewLatestProgram(
+      <ReviewCard
+        body={copy.track.weeklyReviewBody}
+        latestProgram={weeklyReview.latestProgramId
+          ? copy.track.weeklyReviewLatestProgram(
               copy.programs.programTitles[weeklyReview.latestProgramId] ?? weeklyReview.latestProgramId,
-            )}
-          </Text>
-        ) : null}
-      </Surface>
+            )
+          : null}
+        meta={copy.track.weeklyReviewMeta(
+          weeklyReview.logsInWeek,
+          weeklyReview.scoreLogsInWeek,
+          weeklyReview.symptomLogsInWeek,
+        )}
+        nextStep={copy.track.weeklyReviewNextSteps[weeklyReview.nextStep]}
+        nextStepTitle={copy.track.weeklyReviewNextStepTitle}
+        reason={copy.track.weeklyReviewReasons[weeklyReview.reason]}
+        title={copy.track.weeklyReviewTitle}
+        tone={copy.track.weeklyReviewTones[weeklyReview.tone]}
+      />
+      <ReviewCard
+        body={copy.track.monthlyReviewBody}
+        latestProgram={monthlyReview.latestProgramId
+          ? copy.track.monthlyReviewLatestProgram(
+              copy.programs.programTitles[monthlyReview.latestProgramId] ?? monthlyReview.latestProgramId,
+            )
+          : null}
+        meta={copy.track.monthlyReviewMeta(
+          monthlyReview.logsInPeriod,
+          monthlyReview.scoreLogsInPeriod,
+          monthlyReview.symptomLogsInPeriod,
+          monthlyReview.cycleCountInPeriod,
+        )}
+        nextStep={copy.track.monthlyReviewNextSteps[monthlyReview.nextStep]}
+        nextStepTitle={copy.track.monthlyReviewNextStepTitle}
+        reason={copy.track.monthlyReviewReasons[monthlyReview.reason]}
+        title={copy.track.monthlyReviewTitle}
+        tone={copy.track.monthlyReviewTones[monthlyReview.tone]}
+      />
       <Surface>
         <Text style={styles.title}>{copy.track.patternHintsTitle}</Text>
         <Text style={styles.body}>{copy.track.patternHintsBody}</Text>
@@ -274,6 +291,39 @@ export function TrackScreen({
         ) : null}
       </Surface>
     </Screen>
+  );
+}
+
+function ReviewCard({
+  body,
+  latestProgram,
+  meta,
+  nextStep,
+  nextStepTitle,
+  reason,
+  title,
+  tone,
+}: {
+  body: string;
+  latestProgram: string | null;
+  meta: string;
+  nextStep: string;
+  nextStepTitle: string;
+  reason: string;
+  title: string;
+  tone: string;
+}) {
+  return (
+    <Surface>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.body}>{body}</Text>
+      <Text style={styles.hintTitle}>{tone}</Text>
+      <Text style={styles.body}>{reason}</Text>
+      <Text style={styles.signalDetail}>{nextStepTitle}</Text>
+      <Text style={styles.body}>{nextStep}</Text>
+      <Text style={styles.hintMeta}>{meta}</Text>
+      {latestProgram ? <Text style={styles.hintMeta}>{latestProgram}</Text> : null}
+    </Surface>
   );
 }
 

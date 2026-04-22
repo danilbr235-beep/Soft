@@ -49,4 +49,11 @@ describe("Track pattern hint copy", () => {
     expect(getCopy("ru").track.weeklyReviewTitle.length).toBeGreaterThan(0);
     expect(getCopy("ru").track.weeklyReviewNextStepTitle.length).toBeGreaterThan(0);
   });
+
+  it("includes monthly review copy in both languages", () => {
+    expect(getCopy("en").track.monthlyReviewTitle).toBe("30-day review");
+    expect(getCopy("en").track.monthlyReviewNextStepTitle).toBe("Next conservative step");
+    expect(getCopy("ru").track.monthlyReviewTitle.length).toBeGreaterThan(0);
+    expect(getCopy("ru").track.monthlyReviewNextStepTitle.length).toBeGreaterThan(0);
+  });
 });
