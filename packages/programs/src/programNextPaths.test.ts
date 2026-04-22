@@ -41,11 +41,13 @@ describe("program next paths", () => {
         programId: "pelvic-floor-starter",
         priority: "primary",
         reason: "body_consistency",
+        guidedByDigest: false,
       },
       {
         programId: "sleep-environment-reset",
         priority: "secondary",
         reason: "sleep_support",
+        guidedByDigest: false,
       },
     ]);
   });
@@ -67,11 +69,13 @@ describe("program next paths", () => {
         programId: "clarity-baseline-7",
         priority: "primary",
         reason: "baseline_rebuild",
+        guidedByDigest: false,
       },
       {
         programId: "sleep-environment-reset",
         priority: "secondary",
         reason: "sleep_support",
+        guidedByDigest: false,
       },
     ]);
   });
@@ -95,11 +99,43 @@ describe("program next paths", () => {
         programId: "sleep-environment-reset",
         priority: "primary",
         reason: "sleep_support",
+        guidedByDigest: false,
       },
       {
         programId: "clarity-baseline-7",
         priority: "secondary",
         reason: "baseline_rebuild",
+        guidedByDigest: false,
+      },
+    ]);
+  });
+
+  it("lets a recovery digest reorder the next path recommendations", () => {
+    expect(
+      buildProgramNextPaths({
+        activeProgram: confidenceProgram,
+        completionState: "mixed_finish",
+        digestNextStep: "protect_recovery",
+        digestTone: "recovery",
+        progressSummary: {
+          ...completedSummary,
+          completedDays: 9,
+          restDays: 2,
+          skippedDays: 3,
+        },
+      }),
+    ).toEqual([
+      {
+        programId: "sleep-environment-reset",
+        priority: "primary",
+        reason: "sleep_support",
+        guidedByDigest: true,
+      },
+      {
+        programId: "conservative-recovery",
+        priority: "secondary",
+        reason: "recovery_guardrail",
+        guidedByDigest: true,
       },
     ]);
   });

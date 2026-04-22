@@ -249,6 +249,7 @@ export type LanguageCopy = {
     nextPathIntro: ProgramCompletionStateCopy;
     nextPathPriorityLabels: ProgramNextPathPriorityCopy;
     nextPathReasons: ProgramNextPathReasonCopy;
+    digestMatchedPath: (tone: string) => string;
     startProgram: string;
     startRecommendedProgram: (title: string) => string;
     historyTitle: string;
@@ -282,6 +283,7 @@ export type LanguageCopy = {
     adjustmentReason: (reason: string) => string;
     adjustmentAvoid: (text: string) => string;
     adjustmentTarget: (count: number) => string;
+    guidedByDigest: (tone: string) => string;
     adjustmentNextStepTitle: string;
     adjustmentNextSteps: ProgramAdjustmentNextStepCopy;
     completionTitle: string;
@@ -820,6 +822,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         confidence_layer: "A light confidence loop keeps structure without jumping intensity.",
         recovery_guardrail: "Recovery mode protects comfort while the signal stays cautious.",
       },
+      digestMatchedPath: (tone) => `Best match for the current review digest: ${tone}.`,
       startProgram: "Start this program",
       startRecommendedProgram: (title) => `Start ${title}`,
       historyTitle: "Recent cycles",
@@ -902,6 +905,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       adjustmentAvoid: (text) => `Avoid today: ${text}`,
       adjustmentTarget: (count) =>
         count <= 0 ? "No more tasks needed today." : count === 1 ? "Aim for at most one more task today." : `Aim for up to ${count} more tasks, then stop.`,
+      guidedByDigest: (tone) => `Guided by review digest: ${tone}`,
       adjustmentNextStepTitle: "Next conservative step",
       adjustmentNextSteps: {
         take_rest_day: "Use the rest-day button and let the program stay light today.",
@@ -1325,6 +1329,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         confidence_layer: "Спокойный цикл на уверенность добавит структуры, не разгоняя интенсивность.",
         recovery_guardrail: "Режим восстановления помогает сохранить комфорт, пока сигналы остаются осторожными.",
       },
+      digestMatchedPath: (tone) => `Лучше всего подходит под текущий сводный обзор: ${tone}.`,
       startProgram: "Запустить программу",
       startRecommendedProgram: (title) => `Запустить программу: ${title}`,
       historyTitle: "Недавние циклы",
@@ -1411,6 +1416,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
           : count === 1
             ? "Если продолжать, то максимум одна небольшая задача."
             : `Если продолжать, остановись после ${count} задач.`,
+      guidedByDigest: (tone) => `С учетом сводного обзора: ${tone}`,
       adjustmentNextStepTitle: "Следующий осторожный шаг",
       adjustmentNextSteps: {
         take_rest_day: "Нажми на день полегче и не добавляй сегодня новых задач.",

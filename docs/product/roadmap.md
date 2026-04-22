@@ -49,6 +49,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Preserve finished cycles in local history after each switch so later reviews have real program transitions. (Initial local history slice complete.)
 - Add a compact review of recent cycles so Programs can summarize pattern direction before a fuller Review surface exists. (Initial cycle-review slice complete.)
 - Add a simple recent-direction trend over the last cycles and keep that review logic reusable outside Programs. (Initial trend/reuse slice complete.)
+- Let the shared review digest steer Programs adjustments and next-path recommendations. (Initial slice complete.)
 
 ## P1 Learn Hub
 

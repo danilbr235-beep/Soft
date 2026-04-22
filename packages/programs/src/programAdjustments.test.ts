@@ -113,6 +113,70 @@ describe("program adjustment summary", () => {
     });
   });
 
+  it("lets the digest push the plan back into recovery mode", () => {
+    expect(
+      buildProgramAdjustmentSummary({
+        alerts: [],
+        currentPriority: {
+          ...baselinePriority,
+          domain: "confidence",
+          title: "Confidence feels mixed",
+          confidence: "medium",
+        },
+        dayPlan: {
+          ...basePlan,
+          phase: "practice",
+        },
+        digestNextStep: "protect_recovery",
+        digestTone: "recovery",
+        progressSummary: {
+          ...baseSummary,
+          completedDays: 2,
+          remainingDays: 12,
+          resolvedDays: 2,
+        },
+        todayMode: "Standard",
+      }),
+    ).toMatchObject({
+      kind: "recovery",
+      nextStep: "take_rest_day",
+      remainingTaskTarget: 0,
+      digestToneUsed: "recovery",
+    });
+  });
+
+  it("lets the digest push a standard day back into baseline-building", () => {
+    expect(
+      buildProgramAdjustmentSummary({
+        alerts: [],
+        currentPriority: {
+          ...baselinePriority,
+          domain: "confidence",
+          title: "Confidence feels mixed",
+          confidence: "medium",
+        },
+        dayPlan: {
+          ...basePlan,
+          phase: "practice",
+        },
+        digestNextStep: "repeat_small_loop",
+        digestTone: "baseline_building",
+        progressSummary: {
+          ...baseSummary,
+          completedDays: 2,
+          remainingDays: 12,
+          resolvedDays: 2,
+        },
+        todayMode: "Standard",
+      }),
+    ).toMatchObject({
+      kind: "baseline",
+      nextStep: "start_with_check_in",
+      remainingTaskTarget: 1,
+      digestToneUsed: "baseline_building",
+    });
+  });
+
   it("switches to a closeout adjustment on the final scheduled day", () => {
     expect(
       buildProgramAdjustmentSummary({

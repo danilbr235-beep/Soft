@@ -7,6 +7,8 @@ export type ProgramAdjustmentNextStep =
   | "start_with_check_in"
   | "close_day_gently"
   | "review_boundary";
+export type ProgramDigestTone = "baseline_building" | "steady" | "recovery";
+export type ProgramDigestNextStep = "log_two_scores" | "keep_consistency" | "protect_recovery" | "repeat_small_loop";
 
 export type ProgramAdjustmentSummary = {
   kind: ProgramAdjustmentKind;
@@ -14,18 +16,21 @@ export type ProgramAdjustmentSummary = {
   reasonTitle: string;
   avoidToday: string | null;
   remainingTaskTarget: number;
+  digestToneUsed: ProgramDigestTone | null;
 };
 
 type BuildProgramAdjustmentArgs = {
   alerts: Alert[];
   currentPriority: CurrentPriority;
   dayPlan: ProgramDayPlan;
+  digestNextStep?: ProgramDigestNextStep | null;
+  digestTone?: ProgramDigestTone | null;
   progressSummary: ProgramProgressSummary;
   todayMode: TodayMode;
 };
 
 export function buildProgramAdjustmentSummary(args: BuildProgramAdjustmentArgs): ProgramAdjustmentSummary {
-  const { alerts, currentPriority, dayPlan, progressSummary, todayMode } = args;
+  const { alerts, currentPriority, dayPlan, digestNextStep = null, digestTone = null, progressSummary, todayMode } = args;
   const highestAlert = getHighestPriorityAlert(alerts);
   const remainingTasks = dayPlan.rested ? 0 : Math.max(dayPlan.tasks.length - dayPlan.completedTaskIds.length, 0);
 
@@ -36,6 +41,7 @@ export function buildProgramAdjustmentSummary(args: BuildProgramAdjustmentArgs):
       reasonTitle: highestAlert.title,
       avoidToday: currentPriority.avoidToday ?? highestAlert.message,
       remainingTaskTarget: 0,
+      digestToneUsed: null,
     };
   }
 
@@ -46,6 +52,35 @@ export function buildProgramAdjustmentSummary(args: BuildProgramAdjustmentArgs):
       reasonTitle: currentPriority.title,
       avoidToday: currentPriority.avoidToday ?? null,
       remainingTaskTarget: Math.min(remainingTasks, 1),
+      digestToneUsed: null,
+    };
+  }
+
+  if (digestTone === "recovery" || digestNextStep === "protect_recovery") {
+    const nextStep = remainingTasks > 1 ? "take_rest_day" : remainingTasks > 0 ? "keep_one_task" : "review_boundary";
+
+    return {
+      kind: "recovery",
+      nextStep,
+      reasonTitle: highestAlert?.title ?? currentPriority.title,
+      avoidToday: currentPriority.avoidToday ?? null,
+      remainingTaskTarget: nextStep === "take_rest_day" ? 0 : Math.min(remainingTasks, 1),
+      digestToneUsed: "recovery",
+    };
+  }
+
+  if (
+    digestTone === "baseline_building" ||
+    digestNextStep === "log_two_scores" ||
+    digestNextStep === "repeat_small_loop"
+  ) {
+    return {
+      kind: "baseline",
+      nextStep: hasOpenCheckInTask(dayPlan) ? "start_with_check_in" : remainingTasks > 0 ? "keep_one_task" : "close_day_gently",
+      reasonTitle: currentPriority.title,
+      avoidToday: currentPriority.avoidToday ?? null,
+      remainingTaskTarget: Math.min(remainingTasks, 1),
+      digestToneUsed: "baseline_building",
     };
   }
 
@@ -56,6 +91,7 @@ export function buildProgramAdjustmentSummary(args: BuildProgramAdjustmentArgs):
       reasonTitle: currentPriority.title,
       avoidToday: currentPriority.avoidToday ?? null,
       remainingTaskTarget: Math.min(remainingTasks, 1),
+      digestToneUsed: digestTone === "steady" ? "steady" : null,
     };
   }
 
@@ -71,6 +107,7 @@ export function buildProgramAdjustmentSummary(args: BuildProgramAdjustmentArgs):
       reasonTitle: highestAlert?.title ?? currentPriority.title,
       avoidToday: currentPriority.avoidToday ?? null,
       remainingTaskTarget: Math.min(remainingTasks, 1),
+      digestToneUsed: digestTone === "steady" ? "steady" : null,
     };
   }
 
@@ -80,6 +117,7 @@ export function buildProgramAdjustmentSummary(args: BuildProgramAdjustmentArgs):
     reasonTitle: currentPriority.title,
     avoidToday: currentPriority.avoidToday ?? null,
     remainingTaskTarget: Math.min(remainingTasks, 2),
+    digestToneUsed: digestTone === "steady" ? "steady" : null,
   };
 }
 

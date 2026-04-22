@@ -69,7 +69,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Baseline snapshot")).toBeVisible();
   await expect(page.getByText("2 today - 2 last 7 days")).toBeVisible();
   await expect(page.getByText("Average 7/10 - latest 7/10")).toBeVisible();
-  await expect(page.getByText("Review digest")).toBeVisible();
+  await expect(page.getByText("Review digest", { exact: true })).toBeVisible();
   await expect(page.getByText("Recovery-first read")).toBeVisible();
   await expect(page.getByText("Digest confidence")).toBeVisible();
   await expect(page.getByText("High confidence")).toBeVisible();
@@ -125,10 +125,11 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Day 1 of 14")).toBeVisible();
   await expect(page.getByText("Adjustment for today")).toBeVisible();
   await expect(page.getByText("Start with the check-in task and wait for the next signal before adding more.")).toBeVisible();
-  await expect(page.getByText("Review digest")).toBeVisible();
-  await expect(page.getByText("Baseline-building read")).toBeVisible();
+  await expect(page.getByText("Review digest", { exact: true })).toBeVisible();
+  await expect(page.getByText("Baseline-building read", { exact: true })).toBeVisible();
   await expect(page.getByText("Digest confidence")).toBeVisible();
   await expect(page.getByText("Low confidence")).toBeVisible();
+  await expect(page.getByText("Guided by review digest: Baseline-building read")).toBeVisible();
   await page.getByLabel("Pause program").click();
   await expect(page.getByText("Program paused for now")).toBeVisible();
   await page.getByLabel("Resume program").click();
@@ -224,6 +225,7 @@ test("completed program shows a conservative wrap-up", async ({ page }) => {
   await expect(page.getByText("7-day clarity baseline")).toBeVisible();
   await expect(page.getByText("Sleep and environment reset")).toBeVisible();
   await expect(page.getByText("A short baseline loop can rebuild signal without pressure.")).toBeVisible();
+  await expect(page.getByText("Best match for the current review digest: Baseline-building read.")).toHaveCount(1);
   await expect(page.getByText("100% complete")).toBeVisible();
   await expect(page.getByLabel("Complete program day")).toHaveCount(0);
 
@@ -238,13 +240,13 @@ test("completed program shows a conservative wrap-up", async ({ page }) => {
   await expect(page.getByText("Recent cycles", { exact: true })).toBeVisible();
   await expect(page.getByText("Continued with: 7-day clarity baseline")).toBeVisible();
   await expect(page.getByText("A mixed but useful finish").first()).toBeVisible();
-  await expect(page.getByText("Review digest")).toBeVisible();
-  await expect(page.getByText("Baseline-building read")).toBeVisible();
+  await expect(page.getByText("Review digest", { exact: true })).toBeVisible();
+  await expect(page.getByText("Baseline-building read", { exact: true })).toBeVisible();
   await expect(page.getByText("Medium confidence")).toBeVisible();
   await expect(page.getByText("Recent cycle context: 14-day confidence reset")).toBeVisible();
 
   await page.getByLabel("Open Track").click();
-  await expect(page.getByText("Review digest")).toBeVisible();
+  await expect(page.getByText("Review digest", { exact: true })).toBeVisible();
   await expect(page.getByText("Baseline-building read")).toBeVisible();
   await expect(page.getByText("Medium confidence")).toBeVisible();
   await expect(page.getByText("Recent cycle context: 14-day confidence reset")).toBeVisible();

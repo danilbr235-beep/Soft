@@ -1,4 +1,5 @@
 import type { Program, ProgramCompletionState, ProgramProgressSummary } from "@pmhc/types";
+import type { ProgramDigestNextStep, ProgramDigestTone } from "./programAdjustments";
 
 const knownProgramIds = [
   "confidence-reset-14",
@@ -21,11 +22,14 @@ export type ProgramNextPathRecommendation = {
   programId: ProgramNextPathId;
   priority: ProgramNextPathPriority;
   reason: ProgramNextPathReason;
+  guidedByDigest: boolean;
 };
 
 type BuildProgramNextPathsArgs = {
   activeProgram: Program;
   completionState: ProgramCompletionState;
+  digestNextStep?: ProgramDigestNextStep | null;
+  digestTone?: ProgramDigestTone | null;
   progressSummary: ProgramProgressSummary;
 };
 
@@ -56,9 +60,10 @@ const reasonByProgramId: Record<ProgramNextPathId, ProgramNextPathReason> = {
 export function buildProgramNextPaths(
   args: BuildProgramNextPathsArgs,
 ): ProgramNextPathRecommendation[] {
-  const { activeProgram, completionState, progressSummary } = args;
+  const { activeProgram, completionState, digestNextStep = null, digestTone = null, progressSummary } = args;
+  const digestPreferredIds = getDigestPreferredProgramIds(digestTone, digestNextStep);
   const orderedIds = finalizeRecommendations(
-    getPreferredProgramIds(activeProgram.id, completionState, progressSummary),
+    [...digestPreferredIds, ...getPreferredProgramIds(activeProgram.id, completionState, progressSummary)],
     activeProgram.id,
   ).slice(0, 2);
 
@@ -66,6 +71,7 @@ export function buildProgramNextPaths(
     programId,
     priority: index === 0 ? "primary" : "secondary",
     reason: reasonByProgramId[programId],
+    guidedByDigest: digestPreferredIds.includes(programId),
   }));
 }
 
@@ -102,6 +108,25 @@ function finalizeRecommendations(
   }
 
   return nextIds;
+}
+
+function getDigestPreferredProgramIds(
+  digestTone: ProgramDigestTone | null,
+  digestNextStep: ProgramDigestNextStep | null,
+): ProgramNextPathId[] {
+  if (digestTone === "recovery" || digestNextStep === "protect_recovery") {
+    return ["sleep-environment-reset", "conservative-recovery"];
+  }
+
+  if (
+    digestTone === "baseline_building" ||
+    digestNextStep === "log_two_scores" ||
+    digestNextStep === "repeat_small_loop"
+  ) {
+    return ["clarity-baseline-7", "sleep-environment-reset"];
+  }
+
+  return [];
 }
 
 function normalizeProgramId(programId: string): ProgramNextPathId {

@@ -69,6 +69,7 @@ export function ProgramsScreen({
 
     return buildProgramDetailSummary(activeProgram, dayPlan, progressSummary);
   }, [activeProgram, dayPlan, progressSummary]);
+  const reviewDigest = useMemo(() => buildTrackingReviewDigest(logs, history), [logs, history]);
   const adjustmentSummary = useMemo(() => {
     if (!dayPlan || !progressSummary) {
       return null;
@@ -78,10 +79,12 @@ export function ProgramsScreen({
       alerts,
       currentPriority,
       dayPlan,
+      digestNextStep: reviewDigest.nextStep,
+      digestTone: reviewDigest.tone,
       progressSummary,
       todayMode,
     });
-  }, [alerts, currentPriority, dayPlan, progressSummary, todayMode]);
+  }, [alerts, currentPriority, dayPlan, progressSummary, reviewDigest.nextStep, reviewDigest.tone, todayMode]);
   const completionSummary = useMemo(() => {
     if (!progressSummary) {
       return null;
@@ -101,11 +104,12 @@ export function ProgramsScreen({
     return buildProgramNextPaths({
       activeProgram,
       completionState: completionSummary.state,
+      digestNextStep: reviewDigest.nextStep,
+      digestTone: reviewDigest.tone,
       progressSummary,
     });
-  }, [activeProgram, completionSummary, progressSummary]);
+  }, [activeProgram, completionSummary, progressSummary, reviewDigest.nextStep, reviewDigest.tone]);
   const reviewSummary = useMemo(() => buildProgramReview(history), [history]);
-  const reviewDigest = useMemo(() => buildTrackingReviewDigest(logs, history), [logs, history]);
   const programFinished = completionSummary != null;
   const disableProgramActions = !activeProgram || isPaused || programFinished;
   const disableTaskActions = isPaused || programFinished;
@@ -227,6 +231,11 @@ export function ProgramsScreen({
             <Text style={styles.metaText}>{copy.programs.adjustmentAvoid(adjustmentSummary.avoidToday)}</Text>
           ) : null}
           <Text style={styles.metaText}>{copy.programs.adjustmentTarget(adjustmentSummary.remainingTaskTarget)}</Text>
+          {adjustmentSummary.digestToneUsed ? (
+            <Text style={styles.metaText}>
+              {copy.programs.guidedByDigest(copy.track.reviewDigestTones[adjustmentSummary.digestToneUsed])}
+            </Text>
+          ) : null}
         </View>
         <View style={styles.detailSummaryList}>
           <Text style={styles.detailLabel}>{copy.programs.adjustmentNextStepTitle}</Text>
@@ -280,6 +289,11 @@ export function ProgramsScreen({
                 <Text style={styles.detailLabel}>{copy.programs.nextPathPriorityLabels[candidate.priority]}</Text>
                 <Text style={styles.taskTitle}>{copy.programs.programTitles[candidate.programId]}</Text>
                 <Text style={styles.body}>{copy.programs.nextPathReasons[candidate.reason]}</Text>
+                {candidate.guidedByDigest && candidate.priority === "primary" ? (
+                  <Text style={styles.metaText}>
+                    {copy.programs.digestMatchedPath(copy.track.reviewDigestTones[reviewDigest.tone])}
+                  </Text>
+                ) : null}
                 <Pressable
                   accessibilityLabel={copy.programs.startRecommendedProgram(copy.programs.programTitles[candidate.programId])}
                   accessibilityRole="button"

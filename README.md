@@ -33,6 +33,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Reuses finished-cycle review logic in Track and adds a simple recent-direction trend over the last cycles.
 - Adds a Track review digest that combines week, 30-day, and recent cycle context into one summary.
 - Reuses the same review digest inside Programs so plan decisions and Track summaries point to one shared conservative read.
+- Lets the shared review digest steer Programs adjustments and recommended next paths instead of staying read-only.
 - Adds a Track weekly review card that merges recent logs and recent cycle context into one weekly summary.
 - Adds a Track 30-day review card for a broader monthly-style summary without leaving the Track surface.
 - Adds a local demo PIN flow for the privacy vault while keeping production secure storage out of MVP scope.
