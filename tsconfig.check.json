@@ -11,6 +11,7 @@
     "apps/mobile/src/**/*.ts",
     "apps/mobile/src/**/*.tsx",
     "packages/client/src/**/*.ts",
+    "packages/evidence/src/**/*.ts",
     "packages/i18n/src/**/*.ts",
     "packages/learning/src/**/*.ts",
     "packages/onboarding/src/**/*.ts",

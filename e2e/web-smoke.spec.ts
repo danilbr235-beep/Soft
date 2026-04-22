@@ -160,6 +160,8 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
 
   await page.getByLabel("Open Learn").click();
   await expect(page.getByText("Recommended for today")).toBeVisible();
+  await expect(page.getByText("Clinical backbone")).toBeVisible();
+  await expect(page.getByText("American Urological Association")).toBeVisible();
   await page.getByLabel("Open Build a baseline without overchecking").first().click();
   await page.getByLabel("Save Build a baseline without overchecking").click();
   await expect(page.getByLabel("Completed Build a baseline without overchecking")).toBeVisible();

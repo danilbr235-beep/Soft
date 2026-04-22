@@ -247,14 +247,20 @@ export type LanguageCopy = {
     title: string;
     subtitle: string;
     recommended: string;
+    trustedSourcesTitle: string;
+    trustedSourcesBody: string;
     allContent: string;
     categories: string;
     categoryLabels: LearnCategoryCopy;
     openDetail: (title: string) => string;
     filterCategory: (label: string) => string;
     backToLibrary: string;
+    openSource: (title: string) => string;
+    reviewedAt: (date: string) => string;
     detailMeta: (duration: string, source: string) => string;
     recommendedReason: LearnRecommendationReasonCopy;
+    evidenceReason: Record<"digest" | "priority" | "program" | "safety" | "foundation", string>;
+    evidenceKinds: Record<"guideline" | "standards" | "society", string>;
     noCategoryItems: string;
     save: string;
     saved: string;
@@ -849,6 +855,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       title: "Learn",
       subtitle: "Curated material tied to the current state, not a random link library.",
       recommended: "Recommended for today",
+      trustedSourcesTitle: "Clinical backbone",
+      trustedSourcesBody: "Official references that this app can build on as topic-specific evidence gets deeper.",
       allContent: "All content",
       categories: "Categories",
       categoryLabels: {
@@ -866,6 +874,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       openDetail: (title) => `Open ${title}`,
       filterCategory: (label) => `Filter Learn content: ${label}`,
       backToLibrary: "Back to library",
+      openSource: (title) => `Open source ${title}`,
+      reviewedAt: (date) => `Reviewed ${date}`,
       detailMeta: (duration, source) => `${duration} - ${source}`,
       recommendedReason: {
         digest: "Because it fits your current review digest",
@@ -873,6 +883,18 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         program: "Because it supports your active program",
         safety: "A conservative safety read for today",
         starter: "A useful starter read for low-data days",
+      },
+      evidenceReason: {
+        digest: "Fits the broader weekly read",
+        priority: "Matches today's main focus",
+        program: "Supports the current program direction",
+        safety: "Useful for keeping the plan conservative",
+        foundation: "Core professional reference for this topic",
+      },
+      evidenceKinds: {
+        guideline: "Guideline",
+        standards: "Standards",
+        society: "Society",
       },
       noCategoryItems: "No reads in this category yet.",
       save: "Save",
@@ -1419,6 +1441,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       title: "База",
       subtitle: "Короткие материалы по текущему состоянию, без случайной ленты ссылок.",
       recommended: "Подходит на сегодня",
+      trustedSourcesTitle: "Проверенные источники",
+      trustedSourcesBody: "Официальные профессиональные источники, на которые приложение сможет опираться по мере углубления тем.",
       allContent: "Все материалы",
       categories: "Темы",
       categoryLabels: {
@@ -1436,6 +1460,8 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       openDetail: (title) => `Открыть: ${title}`,
       filterCategory: (label) => `Фильтр базы: ${label}`,
       backToLibrary: "Вернуться к базе",
+      openSource: (title) => `Открыть источник: ${title}`,
+      reviewedAt: (date) => `Проверено: ${date}`,
       detailMeta: (duration, source) => `${duration} - ${source}`,
       recommendedReason: {
         digest: "Это лучше всего подходит под текущий сводный обзор",
@@ -1443,6 +1469,18 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         program: "Это поддерживает текущую программу",
         safety: "Спокойный материал, чтобы не повышать нагрузку лишний раз",
         starter: "Хороший старт, пока данных еще мало",
+      },
+      evidenceReason: {
+        digest: "Подходит под более широкий обзор последних сигналов",
+        priority: "Совпадает с главным фокусом на сегодня",
+        program: "Поддерживает направление текущей программы",
+        safety: "Помогает держать план осторожным",
+        foundation: "Базовый профессиональный источник по этой теме",
+      },
+      evidenceKinds: {
+        guideline: "Рекомендации",
+        standards: "Стандарты",
+        society: "Профсообщество",
       },
       noCategoryItems: "В этой теме пока нет материалов.",
       save: "Сохранить",

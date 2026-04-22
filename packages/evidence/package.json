@@ -1,0 +1,11 @@
+{
+  "name": "@pmhc/evidence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@pmhc/learning": "0.1.0",
+    "@pmhc/types": "0.1.0"
+  }
+}

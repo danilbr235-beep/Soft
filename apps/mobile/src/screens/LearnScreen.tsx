@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { recommendEvidenceSources, type EvidenceRecommendation } from "@pmhc/evidence";
 import type { LanguageCopy } from "@pmhc/i18n";
 import {
   type ContentRecommendationDigestNextStep,
@@ -72,6 +73,16 @@ export function LearnScreen({
         reviewDigestTone,
       }),
     [activeProgramCategory, content, priorityDomain, reviewDigestNextStep, reviewDigestTone],
+  );
+  const trustedSources = useMemo(
+    () =>
+      recommendEvidenceSources({
+        activeProgramCategory,
+        priorityDomain,
+        reviewDigestNextStep,
+        reviewDigestTone,
+      }),
+    [activeProgramCategory, priorityDomain, reviewDigestNextStep, reviewDigestTone],
   );
   const recommendationReasonById = useMemo(
     () => new Map(recommendations.map((recommendation) => [recommendation.item.id, recommendation.reason])),
@@ -162,6 +173,7 @@ export function LearnScreen({
             {renderActions(selectedItem, title)}
           </View>
         </Surface>
+        <TrustedSourcesBlock copy={copy} language={language} sources={trustedSources} />
       </Screen>
     );
   }
@@ -194,6 +206,8 @@ export function LearnScreen({
           })}
         </View>
       </Surface>
+
+      <TrustedSourcesBlock copy={copy} language={language} sources={trustedSources} />
 
       <View style={{ gap: spacing.sm }}>
         <Text style={styles.sectionTitle}>{copy.learn.categories}</Text>
@@ -300,6 +314,65 @@ function tagLabel(tag: string, copy: LanguageCopy) {
 
 function trustLabel(level: ContentItem["trustLevel"]) {
   return level.replace(/_/g, " ");
+}
+
+function TrustedSourcesBlock({
+  copy,
+  language,
+  sources,
+}: {
+  copy: LanguageCopy;
+  language: AppLanguage;
+  sources: EvidenceRecommendation[];
+}) {
+  return (
+    <Surface>
+      <View style={{ gap: spacing.md }}>
+        <View style={{ gap: spacing.xs }}>
+          <Text style={styles.sectionTitle}>{copy.learn.trustedSourcesTitle}</Text>
+          <Text style={styles.summary}>{copy.learn.trustedSourcesBody}</Text>
+        </View>
+
+        {sources.map(({ reason, source }) => (
+          <View key={source.id} style={styles.sourceCard}>
+            <View style={styles.itemHeader}>
+              <Text style={styles.eyebrow}>{source.organization}</Text>
+              <Text style={styles.reasonPill}>{copy.learn.evidenceKinds[source.kind]}</Text>
+            </View>
+            <Text style={styles.cardTitle}>{source.title}</Text>
+            <Text style={styles.summary}>{language === "ru" ? source.translatedSummaryRu : source.summary}</Text>
+            <View style={styles.metaGrid}>
+              <Text style={styles.metaPill}>{copy.learn.evidenceReason[reason]}</Text>
+              <Text style={styles.metaPill}>{copy.learn.reviewedAt(formatReviewedAt(source.reviewedAt, language))}</Text>
+            </View>
+            <Pressable
+              accessibilityLabel={copy.learn.openSource(source.title)}
+              accessibilityRole="link"
+              onPress={() => {
+                void Linking.openURL(source.url);
+              }}
+              style={styles.sourceButton}
+            >
+              <Text style={styles.openText}>{copy.learn.openSource(source.title)}</Text>
+            </Pressable>
+          </View>
+        ))}
+      </View>
+    </Surface>
+  );
+}
+
+function formatReviewedAt(date: string, language: AppLanguage) {
+  const parsed = new Date(date);
+
+  if (Number.isNaN(parsed.valueOf())) {
+    return date;
+  }
+
+  return new Intl.DateTimeFormat(language === "ru" ? "ru-RU" : "en-US", {
+    month: "short",
+    year: "numeric",
+  }).format(parsed);
 }
 
 const styles = StyleSheet.create({
@@ -433,6 +506,22 @@ const styles = StyleSheet.create({
   summary: {
     color: colors.muted,
     lineHeight: 21,
+  },
+  sourceButton: {
+    alignSelf: "flex-start",
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    minHeight: 40,
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+  },
+  sourceCard: {
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.md,
   },
   tag: {
     backgroundColor: colors.panelSoft,
