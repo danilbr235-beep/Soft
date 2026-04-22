@@ -17,6 +17,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Supports English/Russian localization for the app shell, Today rules, Coach explanations, quick logs, and core content.
 - Summarizes local Track history into a baseline snapshot with recent counts, score averages, latest values, filters, edit/delete actions, and JSON export preview.
 - Adds weekly Track snapshot cards for sleep, energy, confidence, libido, and symptoms.
+- Adds a weekly Track review that combines recent logs with recent program-cycle context into one conservative read.
 - Adds conservative Track pattern hints from paired recent logs without causal claims.
 - Adds varied Programs day plans with task-level local checklist progress, rest days, and progress summaries.
 - Adds a Programs detail view with phase, pace, progress summary, and the active checklist.
@@ -28,6 +29,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Keeps a local history of finished program cycles after the user switches into the next one.
 - Summarizes recent finished cycles into a compact Programs review with a conservative read of the pattern.
 - Reuses finished-cycle review logic in Track and adds a simple recent-direction trend over the last cycles.
+- Adds a Track weekly review card that merges recent logs and recent cycle context into one weekly summary.
 - Adds a local demo PIN flow for the privacy vault while keeping production secure storage out of MVP scope.
 - Auto-locks the privacy vault after a short inactivity window in the local demo.
 - Shows a startup loading state and recovery screen instead of leaving users on a blank page.
@@ -101,3 +103,4 @@ The app now supports:
 24. Programs skip and pause/resume flow with preserved local progress.
 25. Programs completion wrap-up with steady/mixed/recovery endings, a conservative next step, dynamic next-path recommendations, one-tap program switching, local cycle history, and a compact cycle review.
 26. Track program review card with recent cycle totals, leading outcome, and a simple trend label shared with Programs.
+27. Track weekly review card with one conservative weekly read across recent logs and recent cycle context.

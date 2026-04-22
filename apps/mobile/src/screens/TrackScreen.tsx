@@ -7,6 +7,7 @@ import {
   buildTrackingExport,
   buildTrackingPatternHints,
   buildTrackingSnapshot,
+  buildTrackingWeeklyReview,
   buildWeeklySnapshotCards,
   filterTrackingLogs,
 } from "@pmhc/tracking";
@@ -52,6 +53,7 @@ export function TrackScreen({
   }));
   const snapshot = buildTrackingSnapshot(logs);
   const weeklyCards = buildWeeklySnapshotCards(logs);
+  const weeklyReview = useMemo(() => buildTrackingWeeklyReview(logs, programHistory), [logs, programHistory]);
   const patternHints = buildTrackingPatternHints(logs);
   const filteredLogs = useMemo(() => filterTrackingLogs(logs, selectedFilter), [logs, selectedFilter]);
   const programReview = useMemo(() => buildProgramReview(programHistory), [programHistory]);
@@ -109,6 +111,28 @@ export function TrackScreen({
             </View>
           ))}
         </View>
+      </Surface>
+      <Surface>
+        <Text style={styles.title}>{copy.track.weeklyReviewTitle}</Text>
+        <Text style={styles.body}>{copy.track.weeklyReviewBody}</Text>
+        <Text style={styles.hintTitle}>{copy.track.weeklyReviewTones[weeklyReview.tone]}</Text>
+        <Text style={styles.body}>{copy.track.weeklyReviewReasons[weeklyReview.reason]}</Text>
+        <Text style={styles.signalDetail}>{copy.track.weeklyReviewNextStepTitle}</Text>
+        <Text style={styles.body}>{copy.track.weeklyReviewNextSteps[weeklyReview.nextStep]}</Text>
+        <Text style={styles.hintMeta}>
+          {copy.track.weeklyReviewMeta(
+            weeklyReview.logsInWeek,
+            weeklyReview.scoreLogsInWeek,
+            weeklyReview.symptomLogsInWeek,
+          )}
+        </Text>
+        {weeklyReview.latestProgramId ? (
+          <Text style={styles.hintMeta}>
+            {copy.track.weeklyReviewLatestProgram(
+              copy.programs.programTitles[weeklyReview.latestProgramId] ?? weeklyReview.latestProgramId,
+            )}
+          </Text>
+        ) : null}
       </Surface>
       <Surface>
         <Text style={styles.title}>{copy.track.patternHintsTitle}</Text>

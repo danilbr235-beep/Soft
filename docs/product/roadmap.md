@@ -27,6 +27,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Add a log history view with filters by signal type. (Initial slice complete.)
 - Support edit and delete for local logs. (Initial slice complete.)
 - Add weekly snapshots for sleep, energy, confidence, libido, and symptoms. (Initial slice complete.)
+- Add a weekly review layer that turns recent logs and cycle context into one conservative summary. (Initial slice complete.)
 - Show conservative correlation hints without pretending causality. (Initial paired-log hints slice complete.)
 - Surface recent finished-program review inside Track so cycle context is visible next to daily logs. (Initial reusable review slice complete.)
 - Add CSV/JSON export for local data. (JSON preview complete.)

@@ -73,6 +73,11 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("7/10 avg")).toBeVisible();
   await expect(page.getByText("1 check-in")).toBeVisible();
   await expect(page.getByText("Caution signal", { exact: true })).toBeVisible();
+  await expect(page.getByText("Weekly review")).toBeVisible();
+  await expect(page.getByText("Recovery-first week")).toBeVisible();
+  await expect(page.getByText("A symptom check-in still makes this week conservative.")).toBeVisible();
+  await expect(page.getByText("Next gentle step")).toBeVisible();
+  await expect(page.getByText("2 logs this week - 1 score - 1 symptom check-in")).toBeVisible();
   await expect(page.getByText("Pattern hints")).toBeVisible();
   await expect(page.getByText("More paired logs needed")).toBeVisible();
   await expect(page.getByText("Need more paired logs before this section can say anything useful.")).toBeVisible();
@@ -221,6 +226,9 @@ test("completed program shows a conservative wrap-up", async ({ page }) => {
   await expect(page.getByText("A mixed but useful finish").first()).toBeVisible();
 
   await page.getByLabel("Open Track").click();
+  await expect(page.getByText("Weekly review")).toBeVisible();
+  await expect(page.getByText("Baseline-building week")).toBeVisible();
+  await expect(page.getByText("Latest cycle context: 14-day confidence reset")).toBeVisible();
   await expect(page.getByText("Program review")).toBeVisible();
   await expect(page.getByText("A compact read of recent finished cycles, separate from daily logs.")).toBeVisible();
   await expect(page.getByText("Recent direction")).toBeVisible();

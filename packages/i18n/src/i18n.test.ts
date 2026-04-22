@@ -42,4 +42,11 @@ describe("Track pattern hint copy", () => {
 
     expect(text).not.toMatch(/\b(cause|caused|diagnose|treat|guarantee|proves?)\b/i);
   });
+
+  it("includes weekly review copy in both languages", () => {
+    expect(getCopy("en").track.weeklyReviewTitle).toBe("Weekly review");
+    expect(getCopy("en").track.weeklyReviewNextStepTitle).toBe("Next gentle step");
+    expect(getCopy("ru").track.weeklyReviewTitle.length).toBeGreaterThan(0);
+    expect(getCopy("ru").track.weeklyReviewNextStepTitle.length).toBeGreaterThan(0);
+  });
 });

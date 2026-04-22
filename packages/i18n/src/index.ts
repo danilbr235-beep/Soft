@@ -17,6 +17,15 @@ type TodayStatusCopy = {
   privacy: Record<"vaultOn" | "discreet" | "standard", string>;
 };
 type WeeklySnapshotStatusCopy = Record<"no_data" | "low_data" | "steady" | "changed" | "caution", string>;
+type WeeklyReviewToneCopy = Record<"baseline_building" | "steady" | "recovery", string>;
+type WeeklyReviewReasonCopy = Record<
+  "low_data" | "signals_steadying" | "sleep_dip" | "symptom_caution" | "program_stability" | "program_rebuild",
+  string
+>;
+type WeeklyReviewNextStepCopy = Record<
+  "log_two_scores" | "keep_consistency" | "protect_recovery" | "repeat_small_loop",
+  string
+>;
 type PatternHintLabelCopy = Record<"sleep_energy" | "sleep_confidence" | "confidence_libido" | "low_data", string>;
 type PatternDirectionCopy = Record<"together" | "opposite" | "unknown", string>;
 type PatternConfidenceCopy = Record<"low" | "medium", string>;
@@ -131,6 +140,14 @@ export type LanguageCopy = {
     weeklySymptomValue: (count: number) => string;
     weeklySymptomMeta: (status: string) => string;
     weeklyStatusLabels: WeeklySnapshotStatusCopy;
+    weeklyReviewTitle: string;
+    weeklyReviewBody: string;
+    weeklyReviewTones: WeeklyReviewToneCopy;
+    weeklyReviewReasons: WeeklyReviewReasonCopy;
+    weeklyReviewNextStepTitle: string;
+    weeklyReviewNextSteps: WeeklyReviewNextStepCopy;
+    weeklyReviewMeta: (logs: number, scores: number, symptoms: number) => string;
+    weeklyReviewLatestProgram: (title: string) => string;
     patternHintsTitle: string;
     patternHintsBody: string;
     patternHintLabels: PatternHintLabelCopy;
@@ -572,6 +589,31 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         changed: "Changed",
         caution: "Caution signal",
       },
+      weeklyReviewTitle: "Weekly review",
+      weeklyReviewBody: "One conservative read across recent logs and the latest cycle context.",
+      weeklyReviewTones: {
+        baseline_building: "Baseline-building week",
+        steady: "Steadier week",
+        recovery: "Recovery-first week",
+      },
+      weeklyReviewReasons: {
+        low_data: "There is still very little signal this week. A couple of calm score logs will make the next review more useful.",
+        signals_steadying: "Recent logs look steadier than noisy. Keep the week small and repeatable rather than chasing more intensity.",
+        sleep_dip: "Sleep or recovery signals dipped enough that this week should stay lighter.",
+        symptom_caution: "A symptom check-in still makes this week conservative.",
+        program_stability: "Recent program finishes look steadier, so the next block can stay light but consistent.",
+        program_rebuild: "Recent cycle context still points to shorter, calmer rebuilds instead of pushing volume.",
+      },
+      weeklyReviewNextStepTitle: "Next gentle step",
+      weeklyReviewNextSteps: {
+        log_two_scores: "Add two calm score check-ins before drawing conclusions.",
+        keep_consistency: "Keep the same light routine for a few more days before changing the plan.",
+        protect_recovery: "Keep recovery-first and avoid pushing intensity until the signals settle.",
+        repeat_small_loop: "Repeat a shorter, calmer loop before choosing a heavier block.",
+      },
+      weeklyReviewMeta: (logs, scores, symptoms) =>
+        `${logs} ${logs === 1 ? "log" : "logs"} this week - ${scores} ${scores === 1 ? "score" : "scores"} - ${symptoms} symptom check-in${symptoms === 1 ? "" : "s"}`,
+      weeklyReviewLatestProgram: (title) => `Latest cycle context: ${title}`,
       patternHintsTitle: "Pattern hints",
       patternHintsBody: "Gentle notes from paired logs. Use them as prompts to watch, not proof.",
       patternHintLabels: {
@@ -998,6 +1040,31 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         changed: "Есть изменение",
         caution: "Осторожный сигнал",
       },
+      weeklyReviewTitle: "Недельный обзор",
+      weeklyReviewBody: "Один аккуратный вывод по последним логам и контексту недавнего цикла.",
+      weeklyReviewTones: {
+        baseline_building: "Неделя сборки базовой линии",
+        steady: "Более ровная неделя",
+        recovery: "Неделя в щадящем режиме",
+      },
+      weeklyReviewReasons: {
+        low_data: "На этой неделе сигнала пока мало. Еще пара спокойных оценок сделает следующий обзор полезнее.",
+        signals_steadying: "Последние логи выглядят ровнее. Лучше сохранить неделю небольшой и повторяемой, а не добавлять нагрузку.",
+        sleep_dip: "Сон или восстановление просели достаточно, чтобы держать эту неделю легче.",
+        symptom_caution: "Из-за отметки симптомов эту неделю все еще лучше вести осторожно.",
+        program_stability: "Недавние завершения программы выглядят ровнее, поэтому следующий блок можно оставить легким, но регулярным.",
+        program_rebuild: "Контекст последних циклов все еще подсказывает короткие и спокойные перезапуски вместо попытки нарастить нагрузку.",
+      },
+      weeklyReviewNextStepTitle: "Следующий мягкий шаг",
+      weeklyReviewNextSteps: {
+        log_two_scores: "Добавьте две спокойные оценки, прежде чем делать выводы.",
+        keep_consistency: "Сохраните тот же легкий ритм еще на несколько дней, прежде чем менять план.",
+        protect_recovery: "Оставьте неделю в щадящем режиме и не поднимайте интенсивность, пока сигналы не успокоятся.",
+        repeat_small_loop: "Повторите более короткий и спокойный цикл, прежде чем брать блок тяжелее.",
+      },
+      weeklyReviewMeta: (logs, scores, symptoms) =>
+        `${logs} ${russianLogWord(logs)} за неделю - ${scores} ${scores === 1 ? "оценка" : scores >= 2 && scores <= 4 ? "оценки" : "оценок"} - ${symptoms} ${symptoms === 1 ? "отметка симптомов" : symptoms >= 2 && symptoms <= 4 ? "отметки симптомов" : "отметок симптомов"}`,
+      weeklyReviewLatestProgram: (title) => `Контекст последнего цикла: ${title}`,
       patternHintsTitle: "Подсказки по паттернам",
       patternHintsBody: "Мягкие заметки по парным логам. Это повод наблюдать, а не доказательство.",
       patternHintLabels: {
