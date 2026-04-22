@@ -63,4 +63,9 @@ describe("Track pattern hint copy", () => {
     expect(getCopy("ru").track.reviewDigestTitle.length).toBeGreaterThan(0);
     expect(getCopy("ru").track.reviewDigestConfidenceTitle.length).toBeGreaterThan(0);
   });
+
+  it("includes Learn digest recommendation copy in both languages", () => {
+    expect(getCopy("en").learn.recommendedReason.digest).toBe("Because it fits your current review digest");
+    expect(getCopy("ru").learn.recommendedReason.digest.length).toBeGreaterThan(0);
+  });
 });

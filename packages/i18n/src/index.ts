@@ -9,7 +9,7 @@ type LearnCategoryCopy = Record<
   "all" | "baseline" | "recovery" | "sleep" | "pelvic_floor" | "confidence" | "tracking" | "safety" | "privacy" | "general",
   string
 >;
-type LearnRecommendationReasonCopy = Record<"priority" | "program" | "safety" | "starter", string>;
+type LearnRecommendationReasonCopy = Record<"digest" | "priority" | "program" | "safety" | "starter", string>;
 type TodayStatusCopy = {
   labels: Record<"mode" | "sync" | "privacy" | "program", string>;
   modes: Record<TodayMode, string>;
@@ -765,6 +765,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       backToLibrary: "Back to library",
       detailMeta: (duration, source) => `${duration} - ${source}`,
       recommendedReason: {
+        digest: "Because it fits your current review digest",
         priority: "Because it matches today's priority",
         program: "Because it supports your active program",
         safety: "A conservative safety read for today",
@@ -1272,6 +1273,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       backToLibrary: "Вернуться к базе",
       detailMeta: (duration, source) => `${duration} - ${source}`,
       recommendedReason: {
+        digest: "Это лучше всего подходит под текущий сводный обзор",
         priority: "Это совпадает с главным фокусом на сегодня",
         program: "Это поддерживает текущую программу",
         safety: "Спокойный материал, чтобы не повышать нагрузку лишний раз",

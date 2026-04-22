@@ -11,7 +11,9 @@ export type ContentCategory =
   | "privacy"
   | "general";
 
-export type ContentRecommendationReason = "priority" | "program" | "safety" | "starter";
+export type ContentRecommendationReason = "digest" | "priority" | "program" | "safety" | "starter";
+export type ContentRecommendationDigestTone = "baseline_building" | "steady" | "recovery";
+export type ContentRecommendationDigestNextStep = "log_two_scores" | "keep_consistency" | "protect_recovery" | "repeat_small_loop";
 
 export type ContentCategoryGroup = {
   category: ContentCategory;
@@ -21,6 +23,8 @@ export type ContentCategoryGroup = {
 export type ContentRecommendationContext = {
   priorityDomain: PriorityDomain;
   activeProgramCategory: ProgramCategory | null;
+  reviewDigestTone?: ContentRecommendationDigestTone | null;
+  reviewDigestNextStep?: ContentRecommendationDigestNextStep | null;
 };
 
 export type ContentRecommendation = {
@@ -66,11 +70,12 @@ export function recommendContentForToday(
 ): ContentRecommendation[] {
   const priorityTags = tagsForPriority(context.priorityDomain);
   const programTags = tagsForProgram(context.activeProgramCategory);
+  const digestTags = tagsForDigest(context.reviewDigestTone ?? null, context.reviewDigestNextStep ?? null);
 
   return items
     .filter((item) => !item.completed)
     .map((item, index) => {
-      const reason = recommendationReasonFor(item, priorityTags, programTags);
+      const reason = recommendationReasonFor(item, priorityTags, programTags, digestTags);
 
       return {
         item,
@@ -88,7 +93,12 @@ function recommendationReasonFor(
   item: ContentItem,
   priorityTags: string[],
   programTags: string[],
+  digestTags: string[],
 ): ContentRecommendationReason {
+  if (matchesAnyTag(item, digestTags)) {
+    return "digest";
+  }
+
   if (matchesAnyTag(item, priorityTags)) {
     return "priority";
   }
@@ -106,6 +116,7 @@ function recommendationReasonFor(
 
 function scoreReason(reason: ContentRecommendationReason) {
   return {
+    digest: 45,
     priority: 40,
     program: 30,
     safety: 10,
@@ -143,4 +154,27 @@ function tagsForProgram(category: ProgramCategory | null): string[] {
     pump: ["safety", "pelvic_floor"],
     appearance: ["confidence"],
   }[category];
+}
+
+function tagsForDigest(
+  tone: ContentRecommendationDigestTone | null,
+  nextStep: ContentRecommendationDigestNextStep | null,
+): string[] {
+  if (tone === "recovery" || nextStep === "protect_recovery") {
+    return ["recovery", "sleep", "safety"];
+  }
+
+  if (
+    tone === "baseline_building" ||
+    nextStep === "log_two_scores" ||
+    nextStep === "repeat_small_loop"
+  ) {
+    return ["baseline", "tracking", "confidence"];
+  }
+
+  if (tone === "steady" || nextStep === "keep_consistency") {
+    return ["confidence", "tracking", "baseline"];
+  }
+
+  return [];
 }

@@ -79,10 +79,12 @@ describe("content recommendations", () => {
     const recommendations = recommendContentForToday(content, {
       activeProgramCategory: "confidence",
       priorityDomain: "confidence",
+      reviewDigestTone: "baseline_building",
+      reviewDigestNextStep: "log_two_scores",
     });
 
     expect(recommendations.map((item) => item.item.id)).toEqual(["baseline", "sleep", "pelvic"]);
-    expect(recommendations[0].reason).toBe("priority");
+    expect(recommendations[0].reason).toBe("digest");
     expect(recommendations.some((item) => item.item.id === "done")).toBe(false);
   });
 
@@ -96,5 +98,20 @@ describe("content recommendations", () => {
       item: { id: "sleep" },
       reason: "priority",
     });
+  });
+
+  it("lets a recovery digest lift recovery content above unrelated program reads", () => {
+    const recommendations = recommendContentForToday(content, {
+      activeProgramCategory: "confidence",
+      priorityDomain: "confidence",
+      reviewDigestTone: "recovery",
+      reviewDigestNextStep: "protect_recovery",
+    });
+
+    expect(recommendations[0]).toMatchObject({
+      item: { id: "sleep" },
+      reason: "digest",
+    });
+    expect(recommendations[1]?.item.id).toBe("pelvic");
   });
 });

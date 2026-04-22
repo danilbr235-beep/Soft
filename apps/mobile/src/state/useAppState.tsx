@@ -607,6 +607,7 @@ export function useAppState() {
     today,
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,
+    reviewDigest,
     hasPrivacyPin: hasPrivacyPin(privacyLock),
     programDayPlan,
     programPaused,

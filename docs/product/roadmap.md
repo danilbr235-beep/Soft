@@ -59,6 +59,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Support saved, completed, and recommended content states. (Initial slice complete.)
 - Localize core Learn content into natural Russian, not literal translation.
 - Tie featured content to Today state and active program. (Initial deterministic recommendation slice complete.)
+- Let Learn recommendations follow the shared review digest alongside Today priority and active program. (Initial slice complete.)
 - Keep trust level and source metadata visible.
 
 ## P1 Coach

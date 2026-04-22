@@ -116,7 +116,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Open Learn").click();
   await expect(page.getByText("Recommended for today")).toBeVisible();
   await page.getByLabel("Open Build a baseline without overchecking").first().click();
-  await expect(page.getByText("Because it matches today's priority")).toBeVisible();
+  await expect(page.getByText("Because it fits your current review digest")).toBeVisible();
   await page.getByLabel("Save Build a baseline without overchecking").click();
   await expect(page.getByLabel("Unsave Build a baseline without overchecking")).toBeVisible();
   await page.getByLabel("Mark complete Build a baseline without overchecking").click();

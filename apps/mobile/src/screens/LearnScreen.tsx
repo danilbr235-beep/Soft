@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
 import {
+  type ContentRecommendationDigestNextStep,
+  type ContentRecommendationDigestTone,
   contentCategoryFor,
   groupContentByCategory,
   recommendContentForToday,
@@ -22,6 +24,8 @@ type Props = {
   onToggleSaved: (itemId: string) => void;
   onMarkCompleted: (itemId: string) => void;
   priorityDomain: PriorityDomain;
+  reviewDigestNextStep: ContentRecommendationDigestNextStep;
+  reviewDigestTone: ContentRecommendationDigestTone;
 };
 
 const defaultFilters: LearnFilter[] = [
@@ -43,6 +47,8 @@ export function LearnScreen({
   onMarkCompleted,
   onToggleSaved,
   priorityDomain,
+  reviewDigestNextStep,
+  reviewDigestTone,
 }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<LearnFilter>("all");
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
@@ -52,8 +58,10 @@ export function LearnScreen({
       recommendContentForToday(content, {
         activeProgramCategory,
         priorityDomain,
+        reviewDigestNextStep,
+        reviewDigestTone,
       }),
-    [activeProgramCategory, content, priorityDomain],
+    [activeProgramCategory, content, priorityDomain, reviewDigestNextStep, reviewDigestTone],
   );
   const recommendationReasonById = useMemo(
     () => new Map(recommendations.map((recommendation) => [recommendation.item.id, recommendation.reason])),

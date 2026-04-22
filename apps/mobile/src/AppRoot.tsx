@@ -97,6 +97,8 @@ function AppRootContent() {
             onMarkCompleted={app.completeContent}
             onToggleSaved={app.toggleSavedContent}
             priorityDomain={app.today.currentPriority.domain}
+            reviewDigestNextStep={app.reviewDigest.nextStep}
+            reviewDigestTone={app.reviewDigest.tone}
           />
         ) : null}
         {app.activeTab === "Programs" ? (
