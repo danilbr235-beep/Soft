@@ -13,6 +13,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Lets the shared review digest steer Today priority CTA and daily action-card emphasis.
 - Includes a curated Learn hub with Today-aware recommendations, categories, detail pages, starter Programs, Coach quick explanations, and Settings/Privacy surfaces.
 - Lets Learn recommendations follow the shared review digest, not only the current Today priority.
+- Lets Coach quick answers use the shared review digest so "why" and "what next" stay aligned with the broader read.
 - Provides a mock API contract for `GET /today`, `POST /logs`, `GET /programs`, `GET /content/featured`, and `POST /coach/explain-priority`.
 - Keeps quick-log writes local-first with a sync queue and a demo sync-clear flow.
 - Turns onboarding answers into a persisted profile, baseline, privacy defaults, and starter program.

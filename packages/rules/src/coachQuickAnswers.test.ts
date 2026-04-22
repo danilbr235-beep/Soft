@@ -54,6 +54,40 @@ describe("buildCoachQuickAnswers", () => {
     expect(alertAnswer?.nextStep).toMatch(/Keep the plan light/i);
   });
 
+  it("uses the review digest to sharpen the next step and confidence framing", () => {
+    const answers = buildCoachQuickAnswers(
+      { ...today, alerts: [] },
+      "en",
+      {
+        tone: "baseline_building",
+        confidence: "low",
+        nextStep: "log_two_scores",
+      },
+    );
+    const priorityAnswer = answers.find((answer) => answer.id === "priority");
+    const dataAnswer = answers.find((answer) => answer.id === "data");
+    const nextStepAnswer = answers.find((answer) => answer.id === "next_step");
+
+    expect(priorityAnswer?.body).toContain("broader review still points to a baseline-building day");
+    expect(dataAnswer?.body).toContain("broader review confidence is still low");
+    expect(nextStepAnswer?.nextStep).toBe("Start with two calm scores before deciding whether today needs anything more.");
+  });
+
+  it("uses the review digest to keep a no-alert day conservative when recovery still leads", () => {
+    const alertAnswer = buildCoachQuickAnswers(
+      { ...today, alerts: [] },
+      "en",
+      {
+        tone: "recovery",
+        confidence: "medium",
+        nextStep: "protect_recovery",
+      },
+    ).find((answer) => answer.id === "alert");
+
+    expect(alertAnswer?.body).toContain("broader review still points to a recovery-first day");
+    expect(alertAnswer?.nextStep).toBe("Keep today to one recovery-first action and one check-in.");
+  });
+
   it("keeps answers away from diagnosis, cure, guarantee, or shame language", () => {
     const unsafeWords = /\b(cure|guarantee|failure|broken|diagnose you|treatment plan)\b/i;
     const fullText = buildCoachQuickAnswers(today)

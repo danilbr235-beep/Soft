@@ -123,7 +123,9 @@ function AppRootContent() {
             todayMode={app.today.todayMode}
           />
         ) : null}
-        {app.activeTab === "Coach" ? <CoachScreen copy={copy} language={app.language} today={app.today} /> : null}
+        {app.activeTab === "Coach" ? (
+          <CoachScreen copy={copy} language={app.language} reviewDigest={app.reviewDigest} today={app.today} />
+        ) : null}
         {app.activeTab === "Settings" ? (
           <SettingsScreen
             copy={copy}

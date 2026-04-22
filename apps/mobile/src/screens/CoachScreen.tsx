@@ -4,14 +4,24 @@ import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import { buildCoachQuickAnswers, explainPriority } from "@pmhc/rules";
 import type { AppLanguage, TodayPayload } from "@pmhc/types";
-import type { CoachQuestionId } from "@pmhc/rules";
+import type { CoachQuestionId, CoachReviewDigest } from "@pmhc/rules";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 
-export function CoachScreen({ copy, language, today }: { copy: LanguageCopy; language: AppLanguage; today: TodayPayload }) {
+export function CoachScreen({
+  copy,
+  language,
+  reviewDigest,
+  today,
+}: {
+  copy: LanguageCopy;
+  language: AppLanguage;
+  reviewDigest: CoachReviewDigest;
+  today: TodayPayload;
+}) {
   const [selectedId, setSelectedId] = useState<CoachQuestionId>("priority");
   const explanation = useMemo(() => explainPriority(today.currentPriority, language), [language, today.currentPriority]);
-  const answers = useMemo(() => buildCoachQuickAnswers(today, language), [language, today]);
+  const answers = useMemo(() => buildCoachQuickAnswers(today, language, reviewDigest), [language, reviewDigest, today]);
   const selectedAnswer = answers.find((answer) => answer.id === selectedId) ?? answers[0];
 
   return (

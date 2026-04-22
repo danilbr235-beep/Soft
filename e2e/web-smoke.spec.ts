@@ -168,7 +168,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Open coach question: What does this alert mean?").click();
   await expect(page.getByText("No active alerts right now")).toBeVisible();
   await page.getByLabel("Open coach question: What should I do next?").click();
-  await expect(page.getByText("Start with the smallest useful action")).toBeVisible();
+  await expect(page.getByText("Start with two calm scores before deciding whether today needs anything more.")).toBeVisible();
   await expect(page.getByText(/educational tracking support/i)).toBeVisible();
 
   await page.getByLabel("Open Settings").click();

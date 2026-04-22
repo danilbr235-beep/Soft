@@ -69,6 +69,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Say clearly when there is not enough data. (Initial slice complete.)
 - Prefer conservative next steps over intensity. (Initial slice complete.)
 - Add tests that block diagnostic or shame-oriented language. (Initial slice complete.)
+- Let Coach quick answers use the shared review digest so explanation and next-step guidance stay aligned with the broader read. (Initial slice complete.)
 - Prepare the interface for future AI/RAG without depending on it.
 
 ## P1 Privacy
