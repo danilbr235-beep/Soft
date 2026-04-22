@@ -103,4 +103,11 @@ describe("Track pattern hint copy", () => {
     expect(getCopy("ru").review.exportPacketAction.length).toBeGreaterThan(0);
     expect(getCopy("ru").review.exportStatuses.copied.length).toBeGreaterThan(0);
   });
+
+  it("includes readable Coach copy in both languages", () => {
+    expect(getCopy("en").coach.boundaryBody).toContain("educational tracking support");
+    expect(getCopy("ru").coach.title).toBe("Коуч");
+    expect(getCopy("ru").coach.boundaryBody).toContain("образовательная поддержка");
+    expect(getCopy("ru").coach.openQuestion("Почему")).toContain("коучу");
+  });
 });

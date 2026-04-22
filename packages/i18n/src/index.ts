@@ -350,6 +350,7 @@ export type LanguageCopy = {
     certainty: string;
     keepLight: string;
     boundary: string;
+    boundaryBody: string;
     quickQuestions: string;
     openQuestion: (title: string) => string;
     nextStep: string;
@@ -1052,6 +1053,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       certainty: "How certain is this?",
       keepLight: "Keep light today",
       boundary: "Boundary",
+      boundaryBody: "This is educational tracking support. It does not diagnose, replace urgent care, or promise a medical outcome.",
       quickQuestions: "Quick questions",
       openQuestion: (title) => `Open coach question: ${title}`,
       nextStep: "Next step",
@@ -1620,14 +1622,15 @@ const copies: Record<AppLanguage, LanguageCopy> = {
     },
     coach: {
       title: "Коуч",
-      subtitle: "Объяснения на правилах: спокойно, честно, без диагнозов и лишней уверенности.",
-      whyPriority: "Почему этот фокус?",
+      subtitle: "Спокойные объяснения на правилах: без диагнозов, обещаний и лишней уверенности.",
+      whyPriority: "Почему такой фокус?",
       certainty: "Насколько этому можно доверять?",
       keepLight: "Сегодня мягче",
       boundary: "Граница",
+      boundaryBody: "Это образовательная поддержка для наблюдения за собой. Она не ставит диагнозы, не заменяет врача и не обещает медицинский результат.",
       quickQuestions: "Быстрые вопросы",
-      openQuestion: (title) => `Открыть вопрос коуча: ${title}`,
-      nextStep: "Мягкий следующий шаг",
+      openQuestion: (title) => `Открыть вопрос коучу: ${title}`,
+      nextStep: "Следующий мягкий шаг",
     },
     settings: {
       title: "Настройки",

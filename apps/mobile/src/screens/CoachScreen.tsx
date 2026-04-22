@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
-import { buildCoachQuickAnswers, explainPriority } from "@pmhc/rules";
+import { buildCoachQuickAnswers } from "@pmhc/rules";
 import type { AppLanguage, TodayPayload } from "@pmhc/types";
 import type { CoachQuestionId, CoachReviewDigest } from "@pmhc/rules";
 import { Screen } from "../components/Screen";
@@ -20,7 +20,6 @@ export function CoachScreen({
   today: TodayPayload;
 }) {
   const [selectedId, setSelectedId] = useState<CoachQuestionId>("priority");
-  const explanation = useMemo(() => explainPriority(today.currentPriority, language), [language, today.currentPriority]);
   const answers = useMemo(() => buildCoachQuickAnswers(today, language, reviewDigest), [language, reviewDigest, today]);
   const selectedAnswer = answers.find((answer) => answer.id === selectedId) ?? answers[0];
 
@@ -59,7 +58,7 @@ export function CoachScreen({
       </Surface>
       <Surface>
         <Text style={styles.answerTitle}>{copy.coach.boundary}</Text>
-        <Text style={styles.answerBody}>{explanation.safetyNote}</Text>
+        <Text style={styles.answerBody}>{copy.coach.boundaryBody}</Text>
       </Surface>
     </Screen>
   );

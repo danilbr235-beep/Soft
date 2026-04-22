@@ -324,6 +324,10 @@ test("can choose English or Russian from onboarding and settings", async ({ page
   await page.getByLabel("Use Russian").click();
   await expect(page.getByText("Настройки").first()).toBeVisible();
   await expect(page.getByText("Сегодня").first()).toBeVisible();
+  await page.getByLabel("Открыть Коуча").click();
+  await expect(page.getByText("Коуч").first()).toBeVisible();
+  await expect(page.getByText("Быстрые вопросы")).toBeVisible();
+  await expect(page.getByText("Следующий мягкий шаг")).toBeVisible();
 });
 
 test("pro mode can record pump use and receives conservative guidance", async ({ page }) => {

@@ -96,4 +96,31 @@ describe("buildCoachQuickAnswers", () => {
 
     expect(fullText).not.toMatch(unsafeWords);
   });
+
+  it("returns readable Russian copy instead of mojibake", () => {
+    const answers = buildCoachQuickAnswers(
+      {
+        ...today,
+        currentPriority: {
+          ...today.currentPriority,
+          title: "Собери базовую линию",
+          whyItMatters: "Пока недостаточно данных для сильных выводов.",
+          recommendedAction: "Отметь несколько спокойных сигналов.",
+        },
+        alerts: [],
+      },
+      "ru",
+      {
+        tone: "baseline_building",
+        confidence: "low",
+        nextStep: "log_two_scores",
+      },
+    );
+
+    expect(answers[0]?.title).toBe("Почему такой фокус?");
+    expect(answers[0]?.body).toContain("Общий обзор все еще ведет день");
+    expect(answers[1]?.body).toContain("Сейчас активных предупреждений нет");
+    expect(answers[2]?.body).toContain("Данных по тренду пока мало");
+    expect(answers[3]?.nextStep).toBe("Сначала отметь две спокойные оценки, а уже потом решай, нужен ли сегодня еще один шаг.");
+  });
 });
