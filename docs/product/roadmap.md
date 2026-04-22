@@ -42,6 +42,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Recommend one or two next paths after completion based on the cycle outcome. (Initial dynamic next-path slice complete.)
 - Let users start the recommended next path directly from the wrap-up. (Initial one-tap switch slice complete.)
 - Preserve finished cycles in local history after each switch so later reviews have real program transitions. (Initial local history slice complete.)
+- Add a compact review of recent cycles so Programs can summarize pattern direction before a fuller Review surface exists. (Initial cycle-review slice complete.)
 
 ## P1 Learn Hub
 

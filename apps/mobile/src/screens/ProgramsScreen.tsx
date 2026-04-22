@@ -5,6 +5,7 @@ import {
   buildProgramCompletionSummary,
   buildProgramDetailSummary,
   buildProgramNextPaths,
+  buildProgramReview,
   type ProgramNextPathId,
 } from "@pmhc/programs";
 import type { LanguageCopy } from "@pmhc/i18n";
@@ -100,6 +101,7 @@ export function ProgramsScreen({
       progressSummary,
     });
   }, [activeProgram, completionSummary, progressSummary]);
+  const reviewSummary = useMemo(() => buildProgramReview(history), [history]);
   const programFinished = completionSummary != null;
   const disableProgramActions = !activeProgram || isPaused || programFinished;
   const disableTaskActions = isPaused || programFinished;
@@ -326,6 +328,36 @@ export function ProgramsScreen({
     );
   }
 
+  function renderReviewCard() {
+    if (!reviewSummary) {
+      return null;
+    }
+
+    return (
+      <Surface>
+        <Text style={styles.sectionTitle}>{copy.programs.reviewTitle}</Text>
+        <Text style={styles.body}>{copy.programs.reviewBody}</Text>
+        <Text style={styles.taskTitle}>{copy.programs.completionStates[reviewSummary.leadingState]}</Text>
+        <Text style={styles.body}>{copy.programs.reviewFocuses[reviewSummary.focus]}</Text>
+        <View style={styles.detailSummaryList}>
+          <Text style={styles.metaText}>
+            {copy.programs.reviewTotals(
+              reviewSummary.cycleCount,
+              reviewSummary.totalCompletedDays,
+              reviewSummary.totalRestDays,
+              reviewSummary.totalSkippedDays,
+            )}
+          </Text>
+          <Text style={styles.metaText}>
+            {copy.programs.reviewLatest(
+              copy.programs.programTitles[reviewSummary.latestProgramId] ?? reviewSummary.latestProgramId,
+            )}
+          </Text>
+        </View>
+      </Surface>
+    );
+  }
+
   if (showDetail && activeProgram && dayPlan && progressSummary && detailSummary) {
     return (
       <Screen title={copy.programs.title} subtitle={copy.programs.subtitle}>
@@ -465,6 +497,7 @@ export function ProgramsScreen({
         </Surface>
       ) : null}
       {renderNextPathsCard()}
+      {renderReviewCard()}
       {renderHistoryCard()}
     </Screen>
   );

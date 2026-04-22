@@ -37,6 +37,29 @@ type ProgramNextPathReasonCopy = Record<
   "baseline_rebuild" | "sleep_support" | "body_consistency" | "confidence_layer" | "recovery_guardrail",
   string
 >;
+type ProgramReviewFocusCopy = Record<
+  "build_on_stability" | "rebuild_with_short_cycles" | "protect_recovery",
+  string
+>;
+
+function russianCycleWord(count: number) {
+  const lastTwo = count % 100;
+  const last = count % 10;
+
+  if (lastTwo >= 11 && lastTwo <= 14) {
+    return "циклов";
+  }
+
+  if (last === 1) {
+    return "цикл";
+  }
+
+  if (last >= 2 && last <= 4) {
+    return "цикла";
+  }
+
+  return "циклов";
+}
 
 export type LanguageCopy = {
   common: {
@@ -185,6 +208,11 @@ export type LanguageCopy = {
     historyTitle: string;
     historyBody: string;
     historyContinuedWith: (title: string) => string;
+    reviewTitle: string;
+    reviewBody: string;
+    reviewFocuses: ProgramReviewFocusCopy;
+    reviewTotals: (cycles: number, completed: number, rest: number, skipped: number) => string;
+    reviewLatest: (title: string) => string;
     dayPlanTitle: string;
     pausedTitle: string;
     pausedBody: string;
@@ -668,6 +696,16 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       historyTitle: "Recent cycles",
       historyBody: "Finished programs stay here after you move into the next cycle.",
       historyContinuedWith: (title) => `Continued with: ${title}`,
+      reviewTitle: "Cycle review",
+      reviewBody: "A quick read across your recent finished programs.",
+      reviewFocuses: {
+        build_on_stability: "Recent cycles look steadier. The next block can build on consistency without chasing volume.",
+        rebuild_with_short_cycles: "Recent cycles suggest shorter, calmer rebuilds are still the better fit than pushing intensity.",
+        protect_recovery: "Recent history still leans toward recovery-first guardrails before adding anything more demanding.",
+      },
+      reviewTotals: (cycles, completed, rest, skipped) =>
+        `${cycles} cycle${cycles === 1 ? "" : "s"} tracked - ${completed} completed, ${rest} rest, ${skipped} skipped.`,
+      reviewLatest: (title) => `Latest completed cycle: ${title}`,
       dayPlanTitle: "Today's plan",
       pausedTitle: "Program paused for now",
       pausedBody: "The current day is kept in place. Resume when you want to continue without losing context.",
@@ -1076,6 +1114,16 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       historyTitle: "Недавние циклы",
       historyBody: "Завершенные программы остаются здесь после перехода в следующий цикл.",
       historyContinuedWith: (title) => `Дальше перешел в: ${title}`,
+      reviewTitle: "Обзор циклов",
+      reviewBody: "Короткий вывод по последним завершенным программам.",
+      reviewFocuses: {
+        build_on_stability: "Последние циклы выглядят ровнее. Следующий этап можно строить на регулярности, не повышая нагрузку слишком быстро.",
+        rebuild_with_short_cycles: "Последние циклы подсказывают, что пока лучше работают короткие и спокойные перезапуски, а не попытка давить интенсивностью.",
+        protect_recovery: "Последняя история все еще смещена в сторону восстановления, поэтому и следующий шаг лучше держать в более щадящем режиме.",
+      },
+      reviewTotals: (cycles, completed, rest, skipped) =>
+        `${cycles} ${russianCycleWord(cycles)} в истории - сделано ${completed}, дней полегче ${rest}, пропущено ${skipped}.`,
+      reviewLatest: (title) => `Последний завершенный цикл: ${title}`,
       dayPlanTitle: "План на сегодня",
       pausedTitle: "Программа пока на паузе",
       pausedBody: "Текущий день сохранен на месте. Можно спокойно вернуться к нему позже без потери контекста.",
