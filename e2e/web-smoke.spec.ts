@@ -50,6 +50,8 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Up to date")).toBeVisible();
   await expect(page.getByText("Vault on")).toBeVisible();
   await expect(page.getByText("Build your baseline")).toBeVisible();
+  await expect(page.getByText("Start with two calm scores before anything more ambitious.")).toBeVisible();
+  await expect(page.getByText("Two-score reset")).toBeVisible();
   await page.getByText("Ask Coach why").click();
   await expect(page.getByText("How certain is this?")).toBeVisible();
   await page.getByLabel("Open Today").click();
@@ -64,6 +66,8 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Save Symptoms Pain").click();
   await expect(page.getByText("Symptom review recommended")).toBeVisible();
   await expect(page.getByText("Keep today conservative")).toBeVisible();
+  await expect(page.getByText("Log symptoms and keep the rest of today to one recovery-first action.")).toBeVisible();
+  await expect(page.getByText("Recovery reset")).toBeVisible();
 
   await page.getByLabel("Open Track").click();
   await expect(page.getByText("Baseline snapshot")).toBeVisible();

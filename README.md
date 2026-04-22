@@ -10,6 +10,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Renders a Today screen from deterministic mock/rules data.
 - Supports fast quick-log entry points for high-signal daily tracking.
 - Shows a compact Today status row for mode, sync, privacy, and active program state.
+- Lets the shared review digest steer Today priority CTA and daily action-card emphasis.
 - Includes a curated Learn hub with Today-aware recommendations, categories, detail pages, starter Programs, Coach quick explanations, and Settings/Privacy surfaces.
 - Provides a mock API contract for `GET /today`, `POST /logs`, `GET /programs`, `GET /content/featured`, and `POST /coach/explain-priority`.
 - Keeps quick-log writes local-first with a sync queue and a demo sync-clear flow.

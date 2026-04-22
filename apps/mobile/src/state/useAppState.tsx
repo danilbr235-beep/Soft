@@ -32,9 +32,9 @@ import {
   skipCurrentProgramDay,
   toggleCurrentProgramTask,
 } from "@pmhc/programs";
-import { buildTodayPayload } from "@pmhc/rules";
+import { applyReviewDigestToToday, buildTodayPayload } from "@pmhc/rules";
 import { createQueuedQuickLogJob, markSyncSucceeded, nextPendingJobs } from "@pmhc/sync";
-import { deleteTrackingLog, updateTrackingLogValue } from "@pmhc/tracking";
+import { buildTrackingReviewDigest, deleteTrackingLog, updateTrackingLogValue } from "@pmhc/tracking";
 import type {
   ContentItem,
   ContentProgress,
@@ -148,6 +148,7 @@ export function useAppState() {
     () => mergeContentProgress(starterContent, contentProgress),
     [contentProgress],
   );
+  const reviewDigest = useMemo(() => buildTrackingReviewDigest(logs, programHistory), [logs, programHistory]);
 
   useEffect(() => {
     let mounted = true;
@@ -213,19 +214,26 @@ export function useAppState() {
   const today = useMemo<TodayPayload>(() => {
     const currentOnboarding = onboarding ?? fallbackOnboarding;
     const activeProgram = applyProgramProgress(currentOnboarding.recommendedProgram, programProgress);
-    const payload = buildTodayPayload({
+    const payload = applyReviewDigestToToday(
+      buildTodayPayload({
         ...starterInput,
         profile: currentOnboarding.profile,
         activeProgram,
         latestLogs: logs,
         contentItems: content,
-      });
+      }),
+      {
+        tone: reviewDigest.tone,
+        nextStep: reviewDigest.nextStep,
+        language: currentOnboarding.profile.language,
+      },
+    );
 
     return {
       ...payload,
       syncStatus: nextPendingJobs(syncQueue).length > 0 ? "pending" : "synced",
     };
-  }, [content, logs, onboarding, programProgress, syncQueue]);
+  }, [content, logs, onboarding, programProgress, reviewDigest.nextStep, reviewDigest.tone, syncQueue]);
 
   const programDayPlan = useMemo<ProgramDayPlan | null>(() => {
     return today.activeProgram ? buildProgramDayPlan(today.activeProgram, programProgress) : null;

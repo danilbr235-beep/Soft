@@ -38,6 +38,7 @@ export function TodayScreen({ copy, onAskCoach, onLog, privacyLock, today }: Pro
             <Text style={styles.actionKind}>{copy.today.actionKinds[card.kind]}</Text>
             <Text style={styles.actionTitle}>{card.title}</Text>
             <Text style={styles.actionBody}>{card.description}</Text>
+            <Text style={styles.actionCta}>{card.cta}</Text>
           </Surface>
         ))}
       </View>
@@ -87,5 +88,11 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 14,
     lineHeight: 20,
+  },
+  actionCta: {
+    color: colors.moss,
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
   },
 });
