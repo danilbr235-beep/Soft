@@ -7,6 +7,7 @@ import {
   buildTrackingExport,
   buildTrackingPatternHints,
   buildTrackingPeriodReview,
+  buildTrackingReviewDigest,
   buildTrackingSnapshot,
   buildTrackingWeeklyReview,
   buildWeeklySnapshotCards,
@@ -54,6 +55,7 @@ export function TrackScreen({
   }));
   const snapshot = buildTrackingSnapshot(logs);
   const weeklyCards = buildWeeklySnapshotCards(logs);
+  const reviewDigest = useMemo(() => buildTrackingReviewDigest(logs, programHistory), [logs, programHistory]);
   const weeklyReview = useMemo(() => buildTrackingWeeklyReview(logs, programHistory), [logs, programHistory]);
   const monthlyReview = useMemo(() => buildTrackingPeriodReview(logs, programHistory, 30), [logs, programHistory]);
   const patternHints = buildTrackingPatternHints(logs);
@@ -74,6 +76,29 @@ export function TrackScreen({
   return (
     <Screen title={copy.track.title} subtitle={copy.track.subtitle}>
       <QuickLogRow accessibilityPrefix={copy.today.quickLog} logs={manualLogs} onLog={onLog} />
+      <Surface>
+        <Text style={styles.title}>{copy.track.reviewDigestTitle}</Text>
+        <Text style={styles.body}>{copy.track.reviewDigestBody}</Text>
+        <Text style={styles.hintTitle}>{copy.track.reviewDigestTones[reviewDigest.tone]}</Text>
+        <Text style={styles.body}>{copy.track.reviewDigestReasons[reviewDigest.reason]}</Text>
+        <Text style={styles.signalDetail}>{copy.track.reviewDigestConfidenceTitle}</Text>
+        <Text style={styles.body}>{copy.track.reviewDigestConfidenceLabels[reviewDigest.confidence]}</Text>
+        <Text style={styles.signalDetail}>{copy.track.reviewDigestNextStepTitle}</Text>
+        <Text style={styles.body}>{copy.track.reviewDigestNextSteps[reviewDigest.nextStep]}</Text>
+        <Text style={styles.hintMeta}>
+          {copy.track.reviewDigestWindows(
+            copy.track.weeklyReviewTones[reviewDigest.weeklyTone],
+            copy.track.monthlyReviewTones[reviewDigest.monthlyTone],
+          )}
+        </Text>
+        {reviewDigest.latestProgramId ? (
+          <Text style={styles.hintMeta}>
+            {copy.track.reviewDigestLatestProgram(
+              copy.programs.programTitles[reviewDigest.latestProgramId] ?? reviewDigest.latestProgramId,
+            )}
+          </Text>
+        ) : null}
+      </Surface>
       <Surface>
         <Text style={styles.title}>{copy.track.snapshotTitle}</Text>
         <Text style={styles.body}>{copy.track.snapshotCounts(snapshot.logsToday, snapshot.logsThisWeek)}</Text>

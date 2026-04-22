@@ -34,3 +34,9 @@ export type {
   TrackingPeriodReviewSummary,
   TrackingPeriodReviewTone,
 } from "./trackingPeriodReview";
+export { buildTrackingReviewDigest } from "./trackingReviewDigest";
+export type {
+  TrackingReviewDigest,
+  TrackingReviewDigestConfidence,
+  TrackingReviewDigestReason,
+} from "./trackingReviewDigest";

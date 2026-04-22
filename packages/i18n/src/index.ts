@@ -26,6 +26,11 @@ type WeeklyReviewNextStepCopy = Record<
   "log_two_scores" | "keep_consistency" | "protect_recovery" | "repeat_small_loop",
   string
 >;
+type ReviewDigestReasonCopy = Record<
+  "collect_more_signal" | "protect_recovery_now" | "stability_is_holding" | "short_rebuild_still_fits" | "recent_signals_mixed",
+  string
+>;
+type ReviewDigestConfidenceCopy = Record<"low" | "medium" | "high", string>;
 type PatternHintLabelCopy = Record<"sleep_energy" | "sleep_confidence" | "confidence_libido" | "low_data", string>;
 type PatternDirectionCopy = Record<"together" | "opposite" | "unknown", string>;
 type PatternConfidenceCopy = Record<"low" | "medium", string>;
@@ -133,6 +138,16 @@ export type LanguageCopy = {
     noTrendYet: string;
     scoreDetail: (average: number, latest: number) => string;
     noScoreData: string;
+    reviewDigestTitle: string;
+    reviewDigestBody: string;
+    reviewDigestTones: WeeklyReviewToneCopy;
+    reviewDigestReasons: ReviewDigestReasonCopy;
+    reviewDigestConfidenceTitle: string;
+    reviewDigestConfidenceLabels: ReviewDigestConfidenceCopy;
+    reviewDigestNextStepTitle: string;
+    reviewDigestNextSteps: WeeklyReviewNextStepCopy;
+    reviewDigestWindows: (week: string, month: string) => string;
+    reviewDigestLatestProgram: (title: string) => string;
     weeklySnapshotTitle: string;
     weeklySnapshotBody: string;
     weeklyAverage: (average: number) => string;
@@ -584,6 +599,35 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       noTrendYet: "No trend yet. A few calm logs will make this useful.",
       scoreDetail: (average, latest) => `Average ${average}/10 - latest ${latest}/10`,
       noScoreData: "No data yet",
+      reviewDigestTitle: "Review digest",
+      reviewDigestBody: "One combined read across the week, the last 30 days, and recent cycle history.",
+      reviewDigestTones: {
+        baseline_building: "Baseline-building read",
+        steady: "Steady read",
+        recovery: "Recovery-first read",
+      },
+      reviewDigestReasons: {
+        collect_more_signal: "Recent signal is still thin. Keep the next step small and add a bit more data before changing the plan.",
+        protect_recovery_now: "Recent reads lean cautious enough that the next block should stay recovery-first.",
+        stability_is_holding: "Week, month, and recent cycle context look steady enough to keep building consistency.",
+        short_rebuild_still_fits: "Recent cycle context still fits a shorter, calmer rebuild better than a heavier push.",
+        recent_signals_mixed: "Recent reads do not fully align yet, so a smaller baseline loop still fits better than intensity.",
+      },
+      reviewDigestConfidenceTitle: "Digest confidence",
+      reviewDigestConfidenceLabels: {
+        low: "Low confidence",
+        medium: "Medium confidence",
+        high: "High confidence",
+      },
+      reviewDigestNextStepTitle: "Digest next step",
+      reviewDigestNextSteps: {
+        log_two_scores: "Add two calm score check-ins before changing the plan.",
+        keep_consistency: "Keep the same light routine for a few more days before changing the plan.",
+        protect_recovery: "Keep recovery-first and avoid pushing intensity until the signals settle.",
+        repeat_small_loop: "Repeat a shorter, calmer loop before choosing a heavier block.",
+      },
+      reviewDigestWindows: (week, month) => `Week: ${week} - 30 days: ${month}`,
+      reviewDigestLatestProgram: (title) => `Recent cycle context: ${title}`,
       weeklySnapshotTitle: "Weekly snapshot",
       weeklySnapshotBody: "A cautious seven-day view. It shows signals, not causes.",
       weeklyAverage: (average) => `${average}/10 avg`,
@@ -1060,6 +1104,35 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       noTrendYet: "Тренда пока нет. Несколько спокойных записей уже дадут больше ясности.",
       scoreDetail: (average, latest) => `среднее ${average}/10 - последнее ${latest}/10`,
       noScoreData: "Пока нет данных",
+      reviewDigestTitle: "Сводный обзор",
+      reviewDigestBody: "Один общий вывод по неделе, последним 30 дням и недавней истории циклов.",
+      reviewDigestTones: {
+        baseline_building: "Вывод в пользу базовой линии",
+        steady: "Более ровный вывод",
+        recovery: "Вывод в пользу щадящего режима",
+      },
+      reviewDigestReasons: {
+        collect_more_signal: "Сигнала пока маловато. Лучше оставить следующий шаг небольшим и сначала добавить еще немного данных.",
+        protect_recovery_now: "Последние обзоры достаточно осторожные, чтобы и следующий блок держать в более щадящем режиме.",
+        stability_is_holding: "Неделя, 30 дней и недавние циклы выглядят достаточно ровно, чтобы дальше строить регулярность.",
+        short_rebuild_still_fits: "Контекст недавних циклов все еще лучше поддерживает короткий и спокойный перезапуск, чем более тяжелый заход.",
+        recent_signals_mixed: "Последние обзоры пока не складываются в одну ровную картину, поэтому небольшой базовый цикл сейчас подходит лучше интенсивности.",
+      },
+      reviewDigestConfidenceTitle: "Уверенность в обзоре",
+      reviewDigestConfidenceLabels: {
+        low: "Низкая",
+        medium: "Средняя",
+        high: "Высокая",
+      },
+      reviewDigestNextStepTitle: "Следующий шаг по обзору",
+      reviewDigestNextSteps: {
+        log_two_scores: "Добавьте две спокойные оценки, прежде чем менять план.",
+        keep_consistency: "Сохраните тот же легкий ритм еще на несколько дней, прежде чем менять план.",
+        protect_recovery: "Оставьте акцент на восстановлении и не поднимайте интенсивность, пока сигналы не успокоятся.",
+        repeat_small_loop: "Повторите более короткий и спокойный цикл, прежде чем брать блок тяжелее.",
+      },
+      reviewDigestWindows: (week, month) => `Неделя: ${week} - 30 дней: ${month}`,
+      reviewDigestLatestProgram: (title) => `Контекст недавнего цикла: ${title}`,
       weeklySnapshotTitle: "Неделя в сигналах",
       weeklySnapshotBody: "Осторожный взгляд за 7 дней: здесь видны сигналы, а не причины.",
       weeklyAverage: (average) => `${average}/10 в среднем`,
