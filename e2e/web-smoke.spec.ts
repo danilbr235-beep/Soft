@@ -83,16 +83,21 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Digest confidence")).toBeVisible();
   await expect(page.getByText("High confidence")).toBeVisible();
   await expect(page.getByText("Recent reads lean cautious enough that the next block should stay recovery-first.")).toBeVisible();
+  await page.getByLabel("Open Review section: 7 days").click();
   await expect(page.getByText("Weekly review")).toBeVisible();
   await expect(page.getByText("Recovery-first week", { exact: true })).toBeVisible();
   await expect(page.getByText("A symptom check-in still makes this week conservative.")).toBeVisible();
   await expect(page.getByText("Next gentle step")).toBeVisible();
   await expect(page.getByText("2 logs this week - 1 score - 1 symptom check-in")).toBeVisible();
+  await page.getByLabel("Open Review section: 30 days").click();
   await expect(page.getByText("30-day review")).toBeVisible();
   await expect(page.getByText("Recovery-first month", { exact: true })).toBeVisible();
   await expect(page.getByText("A symptom check-in inside the last 30 days keeps this month conservative.")).toBeVisible();
   await expect(page.getByText("Next conservative step")).toBeVisible();
   await expect(page.getByText("2 logs in 30 days - 1 score - 1 symptom check-in - 0 completed cycles")).toBeVisible();
+  await page.getByLabel("Prepare recap").click();
+  await expect(page.getByText("Recap preview")).toBeVisible();
+  await expect(page.getByText("30-day review")).toHaveCount(2);
   await page.getByLabel("Open Track").click();
   await expect(page.getByText("Pattern hints")).toBeVisible();
   await expect(page.getByText("More paired logs needed")).toBeVisible();
@@ -244,12 +249,15 @@ test("completed program shows a conservative wrap-up", async ({ page }) => {
   await expect(page.getByText("Baseline-building read")).toBeVisible();
   await expect(page.getByText("Medium confidence")).toBeVisible();
   await expect(page.getByText("Recent cycle context: 14-day confidence reset")).toBeVisible();
+  await page.getByLabel("Open Review section: 7 days").click();
   await expect(page.getByText("Weekly review")).toBeVisible();
   await expect(page.getByText("Baseline-building week", { exact: true })).toBeVisible();
   await expect(page.getByText("Latest cycle context: 14-day confidence reset")).toBeVisible();
+  await page.getByLabel("Open Review section: 30 days").click();
   await expect(page.getByText("30-day review")).toBeVisible();
   await expect(page.getByText("Baseline-building month", { exact: true })).toBeVisible();
   await expect(page.getByText("Latest 30-day cycle context: 14-day confidence reset")).toBeVisible();
+  await page.getByLabel("Open Review section: Cycles").click();
   await expect(page.getByText("Program review")).toBeVisible();
   await expect(page.getByText("A compact read of recent finished cycles, separate from daily logs.")).toBeVisible();
   await expect(page.getByText("Recent direction")).toBeVisible();
@@ -257,6 +265,8 @@ test("completed program shows a conservative wrap-up", async ({ page }) => {
     page.getByText("The recent sequence is holding a mixed pattern rather than clearly improving or worsening."),
   ).toBeVisible();
   await expect(page.getByText("Latest completed cycle: 14-day confidence reset")).toBeVisible();
+  await page.getByLabel("Prepare recap").click();
+  await expect(page.getByText("Recap preview")).toBeVisible();
 });
 
 test("can choose English or Russian from onboarding and settings", async ({ page }) => {

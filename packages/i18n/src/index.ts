@@ -59,6 +59,7 @@ type ProgramReviewTrendCopy = Record<
   "toward_stability" | "holding_pattern" | "toward_recovery",
   string
 >;
+type ReviewSectionCopy = Record<"overview" | "week" | "month" | "cycles", string>;
 
 function russianCycleWord(count: number) {
   const lastTwo = count % 100;
@@ -205,6 +206,13 @@ export type LanguageCopy = {
   review: {
     title: string;
     subtitle: string;
+    filterLabels: ReviewSectionCopy;
+    openFilter: (label: string) => string;
+    recapTitle: string;
+    recapBody: string;
+    recapAction: string;
+    recapPreview: string;
+    noCycles: string;
   };
   learn: {
     title: string;
@@ -751,6 +759,18 @@ const copies: Record<AppLanguage, LanguageCopy> = {
     review: {
       title: "Review",
       subtitle: "Weekly, 30-day, and recent cycle reads in one place.",
+      filterLabels: {
+        overview: "Overview",
+        week: "7 days",
+        month: "30 days",
+        cycles: "Cycles",
+      },
+      openFilter: (label) => `Open Review section: ${label}`,
+      recapTitle: "Private recap",
+      recapBody: "Prepare a short local summary for the section you're looking at now.",
+      recapAction: "Prepare recap",
+      recapPreview: "Recap preview",
+      noCycles: "No finished cycles yet. Keep the current cycle light and let a little more history build first.",
     },
     learn: {
       title: "Learn",
@@ -1265,6 +1285,18 @@ const copies: Record<AppLanguage, LanguageCopy> = {
     review: {
       title: "Обзор",
       subtitle: "Неделя, 30 дней и последние завершенные циклы в одном спокойном сводном экране.",
+      filterLabels: {
+        overview: "Сводка",
+        week: "7 дней",
+        month: "30 дней",
+        cycles: "Циклы",
+      },
+      openFilter: (label) => `Открыть раздел обзора: ${label}`,
+      recapTitle: "Личная сводка",
+      recapBody: "Подготовьте короткий локальный итог по тому разделу, который сейчас открыт.",
+      recapAction: "Подготовить сводку",
+      recapPreview: "Предпросмотр сводки",
+      noCycles: "Завершенных циклов пока нет. Лучше спокойно продолжить текущий цикл и дать истории немного накопиться.",
     },
     learn: {
       title: "База",

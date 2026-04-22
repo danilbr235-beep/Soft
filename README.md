@@ -21,8 +21,10 @@ This repository replaces the previous goals-manager prototype with a production-
 - Summarizes local Track history into a baseline snapshot with recent counts, score averages, latest values, filters, edit/delete actions, and JSON export preview.
 - Adds weekly Track snapshot cards for sleep, energy, confidence, libido, and symptoms.
 - Adds a dedicated Review surface with a consolidated digest that merges week, 30-day, and recent cycle context into one conservative read.
+- Adds Review section switching so digest, weekly, 30-day, and cycle reads are separated into focused slices instead of one long scroll.
 - Adds a weekly Review read that combines recent logs with recent program-cycle context into one conservative summary.
 - Adds a 30-day Review read that gives a broader period view across recent logs and completed cycles.
+- Adds a private Review recap preview that prepares a short local summary for the current Review section.
 - Adds conservative Track pattern hints from paired recent logs without causal claims.
 - Adds varied Programs day plans with task-level local checklist progress, rest days, and progress summaries.
 - Adds a Programs detail view with phase, pace, progress summary, and the active checklist.
@@ -115,3 +117,4 @@ The app now supports:
 27. Review weekly summary with one conservative weekly read across recent logs and recent cycle context.
 28. Review 30-day summary with a broader period read across recent logs and recent cycle completions.
 29. Review digest with one consolidated read across week, 30-day review, and recent cycle context.
+30. Review section switching plus a local recap preview for the currently selected review slice.

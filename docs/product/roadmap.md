@@ -42,6 +42,8 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Add a dedicated Review surface for digest, weekly review, 30-day review, and recent cycle context. (Initial slice complete.)
 - Keep the shared digest reusable so Today, Learn, Programs, Coach, and Review stay aligned. (Initial slice complete.)
 - Show recent finished-program review with a simple direction trend. (Initial slice complete.)
+- Add section switching so Review can focus on one slice at a time without becoming a long mixed feed. (Initial slice complete.)
+- Add a private recap/export-ready preview for the currently selected Review slice. (Initial local preview slice complete.)
 - Keep Review read-only and conservative, without pretending diagnosis or causality.
 
 ## P1 Programs
