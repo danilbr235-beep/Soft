@@ -9,7 +9,7 @@ import {
 } from "@pmhc/programs";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { Alert, CurrentPriority, Program, ProgramDayPlan, ProgramProgressSummary, TodayMode } from "@pmhc/types";
+import type { Alert, CurrentPriority, Program, ProgramDayPlan, ProgramHistoryEntry, ProgramProgressSummary, TodayMode } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 
@@ -20,6 +20,7 @@ type Props = {
   completionPercent: number;
   currentPriority: CurrentPriority;
   dayPlan: ProgramDayPlan | null;
+  history: ProgramHistoryEntry[];
   isPaused: boolean;
   progressSummary: ProgramProgressSummary | null;
   onCompleteToday: () => void;
@@ -39,6 +40,7 @@ export function ProgramsScreen({
   completionPercent,
   currentPriority,
   dayPlan,
+  history,
   isPaused,
   progressSummary,
   onCompleteToday,
@@ -294,6 +296,36 @@ export function ProgramsScreen({
     );
   }
 
+  function renderHistoryCard() {
+    if (history.length === 0) {
+      return null;
+    }
+
+    return (
+      <Surface>
+        <Text style={styles.sectionTitle}>{copy.programs.historyTitle}</Text>
+        <Text style={styles.body}>{copy.programs.historyBody}</Text>
+        <View style={styles.candidateList}>
+          {history.map((entry) => (
+            <View key={entry.id} style={styles.candidateRow}>
+              <Text style={styles.taskTitle}>{copy.programs.programTitles[entry.programId] ?? entry.programId}</Text>
+              <Text style={styles.body}>{copy.programs.completionStates[entry.completionState]}</Text>
+              <Text style={styles.metaText}>
+                {copy.programs.completionReview(entry.completedDays, entry.restDays, entry.skippedDays)}
+              </Text>
+              <Text style={styles.metaText}>{copy.programs.completionReason(entry.reasonTitle)}</Text>
+              {entry.nextProgramId ? (
+                <Text style={styles.metaText}>
+                  {copy.programs.historyContinuedWith(copy.programs.programTitles[entry.nextProgramId] ?? entry.nextProgramId)}
+                </Text>
+              ) : null}
+            </View>
+          ))}
+        </View>
+      </Surface>
+    );
+  }
+
   if (showDetail && activeProgram && dayPlan && progressSummary && detailSummary) {
     return (
       <Screen title={copy.programs.title} subtitle={copy.programs.subtitle}>
@@ -433,6 +465,7 @@ export function ProgramsScreen({
         </Surface>
       ) : null}
       {renderNextPathsCard()}
+      {renderHistoryCard()}
     </Screen>
   );
 }

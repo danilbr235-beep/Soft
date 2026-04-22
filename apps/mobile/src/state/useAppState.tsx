@@ -17,9 +17,12 @@ import {
 } from "@pmhc/privacy";
 import {
   applyProgramProgress,
+  appendProgramHistory,
   buildProgramDayPlan,
+  buildProgramCompletionSummary,
   buildProgramProgressSummary,
   completeCurrentProgramDay,
+  createProgramHistoryEntry,
   createProgramProgress,
   isProgramPaused,
   markCurrentProgramRestDay,
@@ -40,6 +43,7 @@ import type {
   AppLanguage,
   PrivacyLockState,
   ProgramDayPlan,
+  ProgramHistoryEntry,
   ProgramProgress,
   ProgramProgressSummary,
   QuickLogDefinition,
@@ -61,6 +65,7 @@ const [
   contentProgressKey,
   privacyLockKey,
   programProgressKey,
+  programHistoryKey,
 ] = appStorageKeys;
 
 const onboardingRepository = createJsonRepository<OnboardingResult | null>(
@@ -88,6 +93,12 @@ const programProgressRepository = createJsonRepository<ProgramProgress | null>(
   programProgressKey,
   null,
   isNullableProgramProgress,
+);
+const programHistoryRepository = createJsonRepository<ProgramHistoryEntry[]>(
+  AsyncStorage,
+  programHistoryKey,
+  [],
+  isProgramHistoryArray,
 );
 
 const fallbackOnboarding = createOnboardingResult({
@@ -130,6 +141,7 @@ export function useAppState() {
   const [contentProgress, setContentProgress] = useState<ContentProgress[]>([]);
   const [privacyLock, setPrivacyLock] = useState<PrivacyLockState>(fallbackPrivacyLock);
   const [programProgress, setProgramProgress] = useState<ProgramProgress | null>(null);
+  const [programHistory, setProgramHistory] = useState<ProgramHistoryEntry[]>([]);
   const [selectedQuickLog, setSelectedQuickLog] = useState<QuickLogDefinition | null>(null);
   const [isReady, setIsReady] = useState(false);
   const content: ContentItem[] = useMemo(
@@ -142,7 +154,7 @@ export function useAppState() {
 
     async function load() {
       try {
-        const [savedOnboarding, savedLogs, savedQueue, savedContentProgress, savedPrivacyLock, savedProgramProgress] =
+        const [savedOnboarding, savedLogs, savedQueue, savedContentProgress, savedPrivacyLock, savedProgramProgress, savedProgramHistory] =
           await Promise.all([
             onboardingRepository.load(),
             logsRepository.load(),
@@ -150,6 +162,7 @@ export function useAppState() {
             contentProgressRepository.load(),
             privacyLockRepository.load(),
             programProgressRepository.load(),
+            programHistoryRepository.load(),
           ]);
 
         if (!mounted) {
@@ -169,6 +182,7 @@ export function useAppState() {
               : fallbackPrivacyLock,
         );
         setProgramProgress(savedProgramProgress);
+        setProgramHistory(savedProgramHistory);
       } catch {
         if (!mounted) {
           return;
@@ -181,6 +195,7 @@ export function useAppState() {
         setContentProgress([]);
         setPrivacyLock(fallbackPrivacyLock);
         setProgramProgress(null);
+        setProgramHistory([]);
       } finally {
         if (mounted) {
           setIsReady(true);
@@ -312,6 +327,11 @@ export function useAppState() {
     await programProgressRepository.save(nextProgress);
   }, []);
 
+  const persistProgramHistory = useCallback(async (nextHistory: ProgramHistoryEntry[]) => {
+    setProgramHistory(nextHistory);
+    await programHistoryRepository.save(nextHistory);
+  }, []);
+
   const saveQuickLog = useCallback(
     async (definition: QuickLogDefinition, value: unknown) => {
       const nextLog: LogEntry = {
@@ -344,9 +364,10 @@ export function useAppState() {
         onboardingRepository.save(result),
         persistPrivacyLock(nextPrivacyLock),
         persistProgramProgress(nextProgramProgress),
+        persistProgramHistory([]),
       ]);
     },
-    [persistPrivacyLock, persistProgramProgress],
+    [persistPrivacyLock, persistProgramHistory, persistProgramProgress],
   );
 
   const changeLanguage = useCallback(
@@ -384,6 +405,7 @@ export function useAppState() {
     setContentProgress([]);
     setPrivacyLock(fallbackPrivacyLock);
     setProgramProgress(null);
+    setProgramHistory([]);
     await Promise.all([
       onboardingRepository.clear(),
       logsRepository.clear(),
@@ -391,6 +413,7 @@ export function useAppState() {
       contentProgressRepository.clear(),
       privacyLockRepository.clear(),
       programProgressRepository.clear(),
+      programHistoryRepository.clear(),
     ]);
   }, []);
 
@@ -528,6 +551,26 @@ export function useAppState() {
       }
 
       const now = new Date().toISOString();
+      const completionSummary = programSummary
+        ? buildProgramCompletionSummary({
+            alerts: today.alerts,
+            currentPriority: today.currentPriority,
+            progressSummary: programSummary,
+          })
+        : null;
+      const nextHistory = today.activeProgram && programSummary && completionSummary
+        ? appendProgramHistory(
+            programHistory,
+            createProgramHistoryEntry({
+              activeProgram: today.activeProgram,
+              completionState: completionSummary.state,
+              completedAt: now,
+              nextProgramId: nextProgram.id,
+              progressSummary: programSummary,
+              reasonTitle: completionSummary.reasonTitle,
+            }),
+          )
+        : programHistory;
       const nextOnboarding: OnboardingResult = {
         ...onboarding,
         recommendedProgram: nextProgram,
@@ -536,10 +579,11 @@ export function useAppState() {
       setOnboarding(nextOnboarding);
       await Promise.all([
         onboardingRepository.save(nextOnboarding),
+        persistProgramHistory(nextHistory),
         persistProgramProgress(createProgramProgress(nextProgram, now)),
       ]);
     },
-    [onboarding, persistProgramProgress],
+    [onboarding, persistProgramHistory, persistProgramProgress, programHistory, programSummary, today.activeProgram, today.alerts, today.currentPriority],
   );
 
   return {
@@ -558,6 +602,7 @@ export function useAppState() {
     hasPrivacyPin: hasPrivacyPin(privacyLock),
     programDayPlan,
     programPaused,
+    programHistory,
     programSummary,
     programCompletionPercent: today.activeProgram ? programCompletionPercent(today.activeProgram, programProgress) : 0,
     completeOnboarding,
@@ -682,6 +727,25 @@ function isNullableProgramProgress(value: unknown): value is ProgramProgress | n
       (typeof value.lastCompletedAt === "string" || value.lastCompletedAt === null) &&
       (typeof value.pausedAt === "string" || value.pausedAt === null || value.pausedAt === undefined) &&
       typeof value.updatedAt === "string")
+  );
+}
+
+function isProgramHistoryArray(value: unknown): value is ProgramHistoryEntry[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (entry) =>
+        isRecord(entry) &&
+        typeof entry.id === "string" &&
+        typeof entry.programId === "string" &&
+        typeof entry.completionState === "string" &&
+        typeof entry.reasonTitle === "string" &&
+        typeof entry.completedDays === "number" &&
+        typeof entry.restDays === "number" &&
+        typeof entry.skippedDays === "number" &&
+        typeof entry.completedAt === "string" &&
+        (typeof entry.nextProgramId === "string" || entry.nextProgramId === null),
+    )
   );
 }
 

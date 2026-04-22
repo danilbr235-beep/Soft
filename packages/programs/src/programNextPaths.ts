@@ -1,5 +1,4 @@
-import type { Program, ProgramProgressSummary } from "@pmhc/types";
-import type { ProgramCompletionState } from "./programCompletionSummary";
+import type { Program, ProgramCompletionState, ProgramProgressSummary } from "@pmhc/types";
 
 const knownProgramIds = [
   "confidence-reset-14",

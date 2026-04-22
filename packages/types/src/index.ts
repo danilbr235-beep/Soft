@@ -169,6 +169,20 @@ export type ProgramProgressSummary = {
   paused: boolean;
 };
 
+export type ProgramCompletionState = "steady_finish" | "mixed_finish" | "recovery_finish";
+
+export type ProgramHistoryEntry = {
+  id: string;
+  programId: string;
+  completionState: ProgramCompletionState;
+  reasonTitle: string;
+  completedDays: number;
+  restDays: number;
+  skippedDays: number;
+  completedAt: string;
+  nextProgramId: string | null;
+};
+
 export type LogEntry = {
   id: string;
   type: QuickLogType;

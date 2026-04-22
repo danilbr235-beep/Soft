@@ -182,6 +182,9 @@ export type LanguageCopy = {
     nextPathReasons: ProgramNextPathReasonCopy;
     startProgram: string;
     startRecommendedProgram: (title: string) => string;
+    historyTitle: string;
+    historyBody: string;
+    historyContinuedWith: (title: string) => string;
     dayPlanTitle: string;
     pausedTitle: string;
     pausedBody: string;
@@ -662,6 +665,9 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       },
       startProgram: "Start this program",
       startRecommendedProgram: (title) => `Start ${title}`,
+      historyTitle: "Recent cycles",
+      historyBody: "Finished programs stay here after you move into the next cycle.",
+      historyContinuedWith: (title) => `Continued with: ${title}`,
       dayPlanTitle: "Today's plan",
       pausedTitle: "Program paused for now",
       pausedBody: "The current day is kept in place. Resume when you want to continue without losing context.",
@@ -1067,6 +1073,9 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       },
       startProgram: "Запустить программу",
       startRecommendedProgram: (title) => `Запустить программу: ${title}`,
+      historyTitle: "Недавние циклы",
+      historyBody: "Завершенные программы остаются здесь после перехода в следующий цикл.",
+      historyContinuedWith: (title) => `Дальше перешел в: ${title}`,
       dayPlanTitle: "План на сегодня",
       pausedTitle: "Программа пока на паузе",
       pausedBody: "Текущий день сохранен на месте. Можно спокойно вернуться к нему позже без потери контекста.",

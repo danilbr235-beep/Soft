@@ -106,6 +106,7 @@ function AppRootContent() {
             completionPercent={app.programCompletionPercent}
             currentPriority={app.today.currentPriority}
             dayPlan={app.programDayPlan}
+            history={app.programHistory}
             isPaused={app.programPaused}
             progressSummary={app.programSummary}
             onCompleteToday={app.completeProgramToday}

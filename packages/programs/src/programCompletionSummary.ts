@@ -1,6 +1,5 @@
-import type { Alert, AlertSeverity, CurrentPriority, ProgramProgressSummary } from "@pmhc/types";
+import type { Alert, AlertSeverity, CurrentPriority, ProgramCompletionState, ProgramProgressSummary } from "@pmhc/types";
 
-export type ProgramCompletionState = "steady_finish" | "mixed_finish" | "recovery_finish";
 export type ProgramCompletionNextStep = "choose_next_light" | "rebuild_baseline" | "keep_recovery_light";
 
 export type ProgramCompletionSummary = {
