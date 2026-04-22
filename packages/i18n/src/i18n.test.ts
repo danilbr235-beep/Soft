@@ -64,6 +64,13 @@ describe("Track pattern hint copy", () => {
     expect(getCopy("ru").track.reviewDigestConfidenceTitle.length).toBeGreaterThan(0);
   });
 
+  it("includes dedicated Review surface copy in both languages", () => {
+    expect(getCopy("en").review.title).toBe("Review");
+    expect(getCopy("en").nav.openLabels.Review).toBe("Open Review");
+    expect(getCopy("ru").review.title).toBe("Обзор");
+    expect(getCopy("ru").nav.openLabels.Review.length).toBeGreaterThan(0);
+  });
+
   it("includes Learn digest recommendation copy in both languages", () => {
     expect(getCopy("en").learn.recommendedReason.digest).toBe("Because it fits your current review digest");
     expect(getCopy("ru").learn.recommendedReason.digest.length).toBeGreaterThan(0);

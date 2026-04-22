@@ -33,9 +33,16 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Add a weekly review layer that turns recent logs and cycle context into one conservative summary. (Initial slice complete.)
 - Add a broader 30-day review so Track can summarize beyond the last week without a separate analytics surface. (Initial slice complete.)
 - Show conservative correlation hints without pretending causality. (Initial paired-log hints slice complete.)
-- Surface recent finished-program review inside Track so cycle context is visible next to daily logs. (Initial reusable review slice complete.)
 - Add CSV/JSON export for local data. (JSON preview complete.)
 - Keep quick logs low-friction and one-handed on mobile.
+- Keep Track focused on quick logs, sync, export, and pattern hints once a dedicated Review surface exists. (Initial split complete.)
+
+## P1 Review
+
+- Add a dedicated Review surface for digest, weekly review, 30-day review, and recent cycle context. (Initial slice complete.)
+- Keep the shared digest reusable so Today, Learn, Programs, Coach, and Review stay aligned. (Initial slice complete.)
+- Show recent finished-program review with a simple direction trend. (Initial slice complete.)
+- Keep Review read-only and conservative, without pretending diagnosis or causality.
 
 ## P1 Programs
 

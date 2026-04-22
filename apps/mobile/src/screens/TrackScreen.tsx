@@ -1,21 +1,17 @@
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
-import { buildProgramReview } from "@pmhc/programs";
 import { createSymptomCheckinValue } from "@pmhc/safety";
 import {
   buildTrackingExport,
   buildTrackingPatternHints,
-  buildTrackingPeriodReview,
-  buildTrackingReviewDigest,
   buildTrackingSnapshot,
-  buildTrackingWeeklyReview,
   buildWeeklySnapshotCards,
   filterTrackingLogs,
 } from "@pmhc/tracking";
 import type { TrackingLogFilter, TrackingPatternHint, TrackingWeeklySnapshotCard } from "@pmhc/tracking";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { LogEntry, ProgramHistoryEntry, QuickLogDefinition } from "@pmhc/types";
+import type { LogEntry, QuickLogDefinition } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 import { QuickLogRow } from "../components/TodayComponents";
@@ -36,7 +32,6 @@ export function TrackScreen({
   onSync,
   onUpdateLog,
   pendingSyncCount,
-  programHistory,
 }: {
   logs: LogEntry[];
   copy: LanguageCopy;
@@ -45,7 +40,6 @@ export function TrackScreen({
   onSync: () => void;
   onUpdateLog: (logId: string, value: unknown) => void;
   pendingSyncCount: number;
-  programHistory: ProgramHistoryEntry[];
 }) {
   const [selectedFilter, setSelectedFilter] = useState<TrackingLogFilter>("all");
   const [exportText, setExportText] = useState<string | null>(null);
@@ -55,12 +49,8 @@ export function TrackScreen({
   }));
   const snapshot = buildTrackingSnapshot(logs);
   const weeklyCards = buildWeeklySnapshotCards(logs);
-  const reviewDigest = useMemo(() => buildTrackingReviewDigest(logs, programHistory), [logs, programHistory]);
-  const weeklyReview = useMemo(() => buildTrackingWeeklyReview(logs, programHistory), [logs, programHistory]);
-  const monthlyReview = useMemo(() => buildTrackingPeriodReview(logs, programHistory, 30), [logs, programHistory]);
   const patternHints = buildTrackingPatternHints(logs);
   const filteredLogs = useMemo(() => filterTrackingLogs(logs, selectedFilter), [logs, selectedFilter]);
-  const programReview = useMemo(() => buildProgramReview(programHistory), [programHistory]);
   const filterOptions: TrackingLogFilter[] = ["all", "scores", "symptoms", "routines"];
 
   function prepareExport() {
@@ -76,29 +66,6 @@ export function TrackScreen({
   return (
     <Screen title={copy.track.title} subtitle={copy.track.subtitle}>
       <QuickLogRow accessibilityPrefix={copy.today.quickLog} logs={manualLogs} onLog={onLog} />
-      <Surface>
-        <Text style={styles.title}>{copy.track.reviewDigestTitle}</Text>
-        <Text style={styles.body}>{copy.track.reviewDigestBody}</Text>
-        <Text style={styles.hintTitle}>{copy.track.reviewDigestTones[reviewDigest.tone]}</Text>
-        <Text style={styles.body}>{copy.track.reviewDigestReasons[reviewDigest.reason]}</Text>
-        <Text style={styles.signalDetail}>{copy.track.reviewDigestConfidenceTitle}</Text>
-        <Text style={styles.body}>{copy.track.reviewDigestConfidenceLabels[reviewDigest.confidence]}</Text>
-        <Text style={styles.signalDetail}>{copy.track.reviewDigestNextStepTitle}</Text>
-        <Text style={styles.body}>{copy.track.reviewDigestNextSteps[reviewDigest.nextStep]}</Text>
-        <Text style={styles.hintMeta}>
-          {copy.track.reviewDigestWindows(
-            copy.track.weeklyReviewTones[reviewDigest.weeklyTone],
-            copy.track.monthlyReviewTones[reviewDigest.monthlyTone],
-          )}
-        </Text>
-        {reviewDigest.latestProgramId ? (
-          <Text style={styles.hintMeta}>
-            {copy.track.reviewDigestLatestProgram(
-              copy.programs.programTitles[reviewDigest.latestProgramId] ?? reviewDigest.latestProgramId,
-            )}
-          </Text>
-        ) : null}
-      </Surface>
       <Surface>
         <Text style={styles.title}>{copy.track.snapshotTitle}</Text>
         <Text style={styles.body}>{copy.track.snapshotCounts(snapshot.logsToday, snapshot.logsThisWeek)}</Text>
@@ -139,43 +106,6 @@ export function TrackScreen({
           ))}
         </View>
       </Surface>
-      <ReviewCard
-        body={copy.track.weeklyReviewBody}
-        latestProgram={weeklyReview.latestProgramId
-          ? copy.track.weeklyReviewLatestProgram(
-              copy.programs.programTitles[weeklyReview.latestProgramId] ?? weeklyReview.latestProgramId,
-            )
-          : null}
-        meta={copy.track.weeklyReviewMeta(
-          weeklyReview.logsInWeek,
-          weeklyReview.scoreLogsInWeek,
-          weeklyReview.symptomLogsInWeek,
-        )}
-        nextStep={copy.track.weeklyReviewNextSteps[weeklyReview.nextStep]}
-        nextStepTitle={copy.track.weeklyReviewNextStepTitle}
-        reason={copy.track.weeklyReviewReasons[weeklyReview.reason]}
-        title={copy.track.weeklyReviewTitle}
-        tone={copy.track.weeklyReviewTones[weeklyReview.tone]}
-      />
-      <ReviewCard
-        body={copy.track.monthlyReviewBody}
-        latestProgram={monthlyReview.latestProgramId
-          ? copy.track.monthlyReviewLatestProgram(
-              copy.programs.programTitles[monthlyReview.latestProgramId] ?? monthlyReview.latestProgramId,
-            )
-          : null}
-        meta={copy.track.monthlyReviewMeta(
-          monthlyReview.logsInPeriod,
-          monthlyReview.scoreLogsInPeriod,
-          monthlyReview.symptomLogsInPeriod,
-          monthlyReview.cycleCountInPeriod,
-        )}
-        nextStep={copy.track.monthlyReviewNextSteps[monthlyReview.nextStep]}
-        nextStepTitle={copy.track.monthlyReviewNextStepTitle}
-        reason={copy.track.monthlyReviewReasons[monthlyReview.reason]}
-        title={copy.track.monthlyReviewTitle}
-        tone={copy.track.monthlyReviewTones[monthlyReview.tone]}
-      />
       <Surface>
         <Text style={styles.title}>{copy.track.patternHintsTitle}</Text>
         <Text style={styles.body}>{copy.track.patternHintsBody}</Text>
@@ -192,29 +122,6 @@ export function TrackScreen({
           </View>
         ))}
       </Surface>
-      {programReview ? (
-        <Surface>
-          <Text style={styles.title}>{copy.track.programReviewTitle}</Text>
-          <Text style={styles.body}>{copy.track.programReviewBody}</Text>
-          <Text style={styles.hintTitle}>{copy.programs.completionStates[programReview.leadingState]}</Text>
-          <Text style={styles.body}>{copy.programs.reviewFocuses[programReview.focus]}</Text>
-          <Text style={styles.signalDetail}>{copy.programs.reviewTrendTitle}</Text>
-          <Text style={styles.body}>{copy.programs.reviewTrendLabels[programReview.trend]}</Text>
-          <Text style={styles.hintMeta}>
-            {copy.programs.reviewTotals(
-              programReview.cycleCount,
-              programReview.totalCompletedDays,
-              programReview.totalRestDays,
-              programReview.totalSkippedDays,
-            )}
-          </Text>
-          <Text style={styles.hintMeta}>
-            {copy.programs.reviewLatest(
-              copy.programs.programTitles[programReview.latestProgramId] ?? programReview.latestProgramId,
-            )}
-          </Text>
-        </Surface>
-      ) : null}
       <Surface>
         <Text style={styles.title}>{copy.track.syncQueue}</Text>
         <Text style={styles.body}>
@@ -316,39 +223,6 @@ export function TrackScreen({
         ) : null}
       </Surface>
     </Screen>
-  );
-}
-
-function ReviewCard({
-  body,
-  latestProgram,
-  meta,
-  nextStep,
-  nextStepTitle,
-  reason,
-  title,
-  tone,
-}: {
-  body: string;
-  latestProgram: string | null;
-  meta: string;
-  nextStep: string;
-  nextStepTitle: string;
-  reason: string;
-  title: string;
-  tone: string;
-}) {
-  return (
-    <Surface>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.body}>{body}</Text>
-      <Text style={styles.hintTitle}>{tone}</Text>
-      <Text style={styles.body}>{reason}</Text>
-      <Text style={styles.signalDetail}>{nextStepTitle}</Text>
-      <Text style={styles.body}>{nextStep}</Text>
-      <Text style={styles.hintMeta}>{meta}</Text>
-      {latestProgram ? <Text style={styles.hintMeta}>{latestProgram}</Text> : null}
-    </Surface>
   );
 }
 

@@ -5,7 +5,6 @@ import {
   buildProgramCompletionSummary,
   buildProgramDetailSummary,
   buildProgramNextPaths,
-  buildProgramReview,
   type ProgramNextPathId,
 } from "@pmhc/programs";
 import type { LanguageCopy } from "@pmhc/i18n";
@@ -101,15 +100,14 @@ export function ProgramsScreen({
       return [];
     }
 
-    return buildProgramNextPaths({
-      activeProgram,
-      completionState: completionSummary.state,
-      digestNextStep: reviewDigest.nextStep,
-      digestTone: reviewDigest.tone,
-      progressSummary,
-    });
-  }, [activeProgram, completionSummary, progressSummary, reviewDigest.nextStep, reviewDigest.tone]);
-  const reviewSummary = useMemo(() => buildProgramReview(history), [history]);
+      return buildProgramNextPaths({
+        activeProgram,
+        completionState: completionSummary.state,
+        digestNextStep: reviewDigest.nextStep,
+        digestTone: reviewDigest.tone,
+        progressSummary,
+      });
+    }, [activeProgram, completionSummary, progressSummary, reviewDigest.nextStep, reviewDigest.tone]);
   const programFinished = completionSummary != null;
   const disableProgramActions = !activeProgram || isPaused || programFinished;
   const disableTaskActions = isPaused || programFinished;
@@ -346,72 +344,6 @@ export function ProgramsScreen({
     );
   }
 
-  function renderReviewCard() {
-    if (!reviewSummary) {
-      return null;
-    }
-
-    return (
-      <Surface>
-        <Text style={styles.sectionTitle}>{copy.programs.reviewTitle}</Text>
-        <Text style={styles.body}>{copy.programs.reviewBody}</Text>
-        <Text style={styles.taskTitle}>{copy.programs.completionStates[reviewSummary.leadingState]}</Text>
-        <Text style={styles.body}>{copy.programs.reviewFocuses[reviewSummary.focus]}</Text>
-        <View style={styles.detailSummaryList}>
-          <Text style={styles.detailLabel}>{copy.programs.reviewTrendTitle}</Text>
-          <Text style={styles.body}>{copy.programs.reviewTrendLabels[reviewSummary.trend]}</Text>
-          <Text style={styles.metaText}>
-            {copy.programs.reviewTotals(
-              reviewSummary.cycleCount,
-              reviewSummary.totalCompletedDays,
-              reviewSummary.totalRestDays,
-              reviewSummary.totalSkippedDays,
-            )}
-          </Text>
-          <Text style={styles.metaText}>
-            {copy.programs.reviewLatest(
-              copy.programs.programTitles[reviewSummary.latestProgramId] ?? reviewSummary.latestProgramId,
-            )}
-          </Text>
-        </View>
-      </Surface>
-    );
-  }
-
-  function renderDigestCard() {
-    if (logs.length === 0 && history.length === 0) {
-      return null;
-    }
-
-    return (
-      <Surface>
-        <Text style={styles.sectionTitle}>{copy.track.reviewDigestTitle}</Text>
-        <Text style={styles.body}>{copy.track.reviewDigestBody}</Text>
-        <Text style={styles.taskTitle}>{copy.track.reviewDigestTones[reviewDigest.tone]}</Text>
-        <Text style={styles.body}>{copy.track.reviewDigestReasons[reviewDigest.reason]}</Text>
-        <View style={styles.detailSummaryList}>
-          <Text style={styles.detailLabel}>{copy.track.reviewDigestConfidenceTitle}</Text>
-          <Text style={styles.body}>{copy.track.reviewDigestConfidenceLabels[reviewDigest.confidence]}</Text>
-          <Text style={styles.detailLabel}>{copy.track.reviewDigestNextStepTitle}</Text>
-          <Text style={styles.body}>{copy.track.reviewDigestNextSteps[reviewDigest.nextStep]}</Text>
-          <Text style={styles.metaText}>
-            {copy.track.reviewDigestWindows(
-              copy.track.weeklyReviewTones[reviewDigest.weeklyTone],
-              copy.track.monthlyReviewTones[reviewDigest.monthlyTone],
-            )}
-          </Text>
-          {reviewDigest.latestProgramId ? (
-            <Text style={styles.metaText}>
-              {copy.track.reviewDigestLatestProgram(
-                copy.programs.programTitles[reviewDigest.latestProgramId] ?? reviewDigest.latestProgramId,
-              )}
-            </Text>
-          ) : null}
-        </View>
-      </Surface>
-    );
-  }
-
   if (showDetail && activeProgram && dayPlan && progressSummary && detailSummary) {
     return (
       <Screen title={copy.programs.title} subtitle={copy.programs.subtitle}>
@@ -523,7 +455,6 @@ export function ProgramsScreen({
         {renderActionButtons()}
       </Surface>
       {renderAdjustmentCard()}
-      {renderDigestCard()}
       {dayPlan && detailSummary ? (
         <Surface>
           <View style={styles.planHeader}>
@@ -552,7 +483,6 @@ export function ProgramsScreen({
         </Surface>
       ) : null}
       {renderNextPathsCard()}
-      {renderReviewCard()}
       {renderHistoryCard()}
     </Screen>
   );

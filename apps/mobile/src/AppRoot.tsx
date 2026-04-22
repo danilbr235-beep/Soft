@@ -7,6 +7,7 @@ import { OnboardingScreen } from "./screens/OnboardingScreen";
 import { LoadingScreen } from "./screens/LoadingScreen";
 import { TodayScreen } from "./screens/TodayScreen";
 import { TrackScreen } from "./screens/TrackScreen";
+import { ReviewScreen } from "./screens/ReviewScreen";
 import { LearnScreen } from "./screens/LearnScreen";
 import { ProgramsScreen } from "./screens/ProgramsScreen";
 import { CoachScreen } from "./screens/CoachScreen";
@@ -85,8 +86,10 @@ function AppRootContent() {
             onUpdateLog={app.updateLogValue}
             onLog={app.openQuickLog}
             onSync={app.syncQueuedWrites}
-            programHistory={app.programHistory}
           />
+        ) : null}
+        {app.activeTab === "Review" ? (
+          <ReviewScreen copy={copy} logs={app.logs} programHistory={app.programHistory} />
         ) : null}
         {app.activeTab === "Learn" ? (
           <LearnScreen

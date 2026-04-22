@@ -56,7 +56,7 @@ import { starterContent } from "../data/starterContent";
 import { appStorageKeys } from "../storage/appStorageKeys";
 import { createJsonRepository } from "../storage/localStore";
 
-export type AppTab = "Today" | "Track" | "Learn" | "Programs" | "Coach" | "Settings";
+export type AppTab = "Today" | "Track" | "Review" | "Learn" | "Programs" | "Coach" | "Settings";
 
 const [
   onboardingKey,

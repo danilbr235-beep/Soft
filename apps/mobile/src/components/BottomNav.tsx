@@ -3,7 +3,7 @@ import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { AppTab } from "../state/useAppState";
 
-const tabs: AppTab[] = ["Today", "Track", "Learn", "Programs", "Coach", "Settings"];
+const tabs: AppTab[] = ["Today", "Track", "Review", "Learn", "Programs", "Coach", "Settings"];
 
 type Props = {
   activeTab: AppTab;
@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
+    minWidth: 0,
     minHeight: 44,
     alignItems: "center",
     justifyContent: "center",
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
   },
   label: {
     color: colors.muted,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
   },
   activeLabel: {

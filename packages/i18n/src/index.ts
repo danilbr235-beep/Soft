@@ -1,7 +1,7 @@
 import type { AppLanguage, QuickLogType, TodayMode } from "@pmhc/types";
 import type { ProgramDayPhase } from "@pmhc/types";
 
-export type LocalizedTab = "Today" | "Track" | "Learn" | "Programs" | "Coach" | "Settings";
+export type LocalizedTab = "Today" | "Track" | "Review" | "Learn" | "Programs" | "Coach" | "Settings";
 
 type ActionKindCopy = Record<"Learn" | "Check-in" | "Practice" | "Reflect", string>;
 type TrackFilterCopy = Record<"all" | "scores" | "symptoms" | "routines", string>;
@@ -201,6 +201,10 @@ export type LanguageCopy = {
     exportAction: string;
     exportReady: (count: number) => string;
     allClear: string;
+  };
+  review: {
+    title: string;
+    subtitle: string;
   };
   learn: {
     title: string;
@@ -540,6 +544,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       labels: {
         Today: "Today",
         Track: "Track",
+        Review: "Review",
         Learn: "Learn",
         Programs: "Programs",
         Coach: "Coach",
@@ -548,6 +553,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       openLabels: {
         Today: "Open Today",
         Track: "Open Track",
+        Review: "Open Review",
         Learn: "Open Learn",
         Programs: "Open Programs",
         Coach: "Open Coach",
@@ -741,6 +747,10 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       exportAction: "Prepare JSON export",
       exportReady: (count) => `Export ready: ${count} log${count === 1 ? "" : "s"}`,
       allClear: "All clear",
+    },
+    review: {
+      title: "Review",
+      subtitle: "Weekly, 30-day, and recent cycle reads in one place.",
     },
     learn: {
       title: "Learn",
@@ -1048,6 +1058,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       labels: {
         Today: "Сегодня",
         Track: "Трек",
+        Review: "Обзор",
         Learn: "База",
         Programs: "План",
         Coach: "Коуч",
@@ -1056,6 +1067,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       openLabels: {
         Today: "Открыть Сегодня",
         Track: "Открыть Трек",
+        Review: "Открыть обзор",
         Learn: "Открыть Базу",
         Programs: "Открыть План",
         Coach: "Открыть Коуча",
@@ -1249,6 +1261,10 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       exportAction: "Подготовить JSON",
       exportReady: (count) => `Готово к экспорту: ${count} ${russianLogWord(count)}`,
       allClear: "Все спокойно",
+    },
+    review: {
+      title: "Обзор",
+      subtitle: "Неделя, 30 дней и последние завершенные циклы в одном спокойном сводном экране.",
     },
     learn: {
       title: "База",
