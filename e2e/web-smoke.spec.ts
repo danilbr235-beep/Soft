@@ -98,9 +98,18 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Open recap format: Packet").click();
   await page.getByLabel("Prepare recap").click();
   await expect(page.getByText("Preview: Packet")).toBeVisible();
-  await expect(page.getByText("30 days packet")).toBeVisible();
-  await expect(page.getByText("Signals", { exact: true })).toBeVisible();
-  await expect(page.getByText("History snapshot", { exact: true })).toBeVisible();
+  await expect(page.getByText("30 days packet")).toHaveCount(2);
+  await expect(page.getByText("Signals", { exact: true })).toHaveCount(2);
+  await expect(page.getByText("History snapshot", { exact: true })).toHaveCount(2);
+  await expect(page.getByText("Recent packets")).toBeVisible();
+  await expect(page.getByText("Prepared packet recaps stay local on this device until you clear app data.")).toBeVisible();
+  await page.reload();
+  if ((await page.getByLabel("Unlock demo vault").count()) > 0) {
+    await page.getByLabel("Unlock demo vault").click();
+  }
+  await page.getByLabel("Open Review").click();
+  await expect(page.getByText("Recent packets")).toBeVisible();
+  await expect(page.getByText("30 days packet")).toHaveCount(1);
   await page.getByLabel("Open Track").click();
   await expect(page.getByText("Pattern hints")).toBeVisible();
   await expect(page.getByText("More paired logs needed")).toBeVisible();
@@ -271,9 +280,10 @@ test("completed program shows a conservative wrap-up", async ({ page }) => {
   await page.getByLabel("Open recap format: Packet").click();
   await page.getByLabel("Prepare recap").click();
   await expect(page.getByText("Preview: Packet")).toBeVisible();
-  await expect(page.getByText("Cycles packet")).toBeVisible();
-  await expect(page.getByText("History snapshot", { exact: true })).toBeVisible();
-  await expect(page.getByText("Latest completed cycle: 14-day confidence reset")).toHaveCount(2);
+  await expect(page.getByText("Cycles packet")).toHaveCount(2);
+  await expect(page.getByText("History snapshot", { exact: true })).toHaveCount(2);
+  await expect(page.getByText("Latest completed cycle: 14-day confidence reset")).toHaveCount(3);
+  await expect(page.getByText("Recent packets")).toBeVisible();
 });
 
 test("can choose English or Russian from onboarding and settings", async ({ page }) => {

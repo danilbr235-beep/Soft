@@ -4,18 +4,22 @@ import { buildProgramReview } from "@pmhc/programs";
 import { buildTrackingPeriodReview, buildTrackingReviewDigest, buildTrackingWeeklyReview } from "@pmhc/tracking";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { LogEntry, ProgramHistoryEntry } from "@pmhc/types";
+import type { AppLanguage, LogEntry, ProgramHistoryEntry } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
+import type { ReviewPacketHistoryEntry } from "../reviewPacketHistory";
 import { buildReviewRecap, type ReviewRecapFormat, type ReviewRecapResult, type ReviewSection } from "../reviewRecap";
 
 type Props = {
   copy: LanguageCopy;
+  language: AppLanguage;
   logs: LogEntry[];
+  onSavePacket: (section: ReviewSection, packet: Extract<ReviewRecapResult, { kind: "packet" }>) => Promise<void> | void;
   programHistory: ProgramHistoryEntry[];
+  reviewPackets: ReviewPacketHistoryEntry[];
 };
 
-export function ReviewScreen({ copy, logs, programHistory }: Props) {
+export function ReviewScreen({ copy, language, logs, onSavePacket, programHistory, reviewPackets }: Props) {
   const [activeSection, setActiveSection] = useState<ReviewSection>("overview");
   const [activeFormat, setActiveFormat] = useState<ReviewRecapFormat>("snapshot");
   const [recapPreview, setRecapPreview] = useState<ReviewRecapResult | null>(null);
@@ -32,17 +36,21 @@ export function ReviewScreen({ copy, logs, programHistory }: Props) {
   }
 
   function prepareRecap() {
-    setRecapPreview(
-      buildReviewRecap({
-        copy,
-        format: activeFormat,
-        monthlyReview,
-        programReview,
-        reviewDigest,
-        section: activeSection,
-        weeklyReview,
-      }),
-    );
+    const nextPreview = buildReviewRecap({
+      copy,
+      format: activeFormat,
+      monthlyReview,
+      programReview,
+      reviewDigest,
+      section: activeSection,
+      weeklyReview,
+    });
+
+    setRecapPreview(nextPreview);
+
+    if (nextPreview.kind === "packet") {
+      void onSavePacket(activeSection, nextPreview);
+    }
   }
 
   function selectFormat(format: ReviewRecapFormat) {
@@ -201,27 +209,33 @@ export function ReviewScreen({ copy, logs, programHistory }: Props) {
           <View style={styles.recapPreview}>
             <Text style={styles.hintMeta}>{copy.review.recapPreview(copy.review.formatLabels[activeFormat])}</Text>
             {recapPreview.kind === "packet" ? (
-              <View style={styles.packetList}>
-                <Text style={styles.packetHeader}>{recapPreview.title}</Text>
-                {recapPreview.blocks.map((block, index) => (
-                  <View
-                    key={block.id}
-                    style={[styles.packetBlock, index > 0 ? styles.packetBlockDivider : null]}
-                  >
-                    <Text style={styles.packetBlockTitle}>{block.title}</Text>
-                    {block.lines.map((line) => (
-                      <Text key={`${block.id}-${line}`} style={styles.recapText}>
-                        {line}
-                      </Text>
-                    ))}
-                  </View>
-                ))}
-              </View>
+              <PacketBlocksView blocks={recapPreview.blocks} title={recapPreview.title} />
             ) : (
               <Text style={styles.recapText}>{recapPreview.text}</Text>
             )}
           </View>
         ) : null}
+      </Surface>
+      <Surface>
+        <Text style={styles.title}>{copy.review.archiveTitle}</Text>
+        <Text style={styles.body}>{copy.review.archiveBody}</Text>
+        {reviewPackets.length > 0 ? (
+          <View style={styles.packetList}>
+            {reviewPackets.map((packet, index) => (
+              <View key={packet.id} style={[styles.archiveEntry, index > 0 ? styles.archiveEntryDivider : null]}>
+                <Text style={styles.hintMeta}>
+                  {copy.review.archiveSavedAt(
+                    copy.review.filterLabels[packet.section],
+                    formatPacketSavedAt(packet.createdAt, language),
+                  )}
+                </Text>
+                <PacketBlocksView blocks={packet.blocks} title={packet.title} />
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.body}>{copy.review.archiveEmpty}</Text>
+        )}
       </Surface>
     </Screen>
   );
@@ -258,6 +272,45 @@ function PeriodReviewCard({
       {latestProgram ? <Text style={styles.hintMeta}>{latestProgram}</Text> : null}
     </Surface>
   );
+}
+
+function PacketBlocksView({
+  blocks,
+  title,
+}: {
+  blocks: ReviewPacketHistoryEntry["blocks"];
+  title: string;
+}) {
+  return (
+    <View style={styles.packetList}>
+      <Text style={styles.packetHeader}>{title}</Text>
+      {blocks.map((block, index) => (
+        <View key={block.id} style={[styles.packetBlock, index > 0 ? styles.packetBlockDivider : null]}>
+          <Text style={styles.packetBlockTitle}>{block.title}</Text>
+          {block.lines.map((line) => (
+            <Text key={`${block.id}-${line}`} style={styles.recapText}>
+              {line}
+            </Text>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function formatPacketSavedAt(createdAt: string, language: AppLanguage) {
+  const date = new Date(createdAt);
+
+  if (Number.isNaN(date.getTime())) {
+    return createdAt;
+  }
+
+  return new Intl.DateTimeFormat(language === "ru" ? "ru-RU" : "en-US", {
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    month: "short",
+  }).format(date);
 }
 
 const styles = StyleSheet.create({
@@ -336,6 +389,14 @@ const styles = StyleSheet.create({
   },
   packetList: {
     gap: spacing.sm,
+  },
+  archiveEntry: {
+    gap: spacing.sm,
+  },
+  archiveEntryDivider: {
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+    paddingTop: spacing.md,
   },
   packetHeader: {
     color: colors.text,

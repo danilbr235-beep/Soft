@@ -6,6 +6,7 @@ export const appStorageKeys = [
   "pmhc:privacy-lock",
   "pmhc:program-progress",
   "pmhc:program-history",
+  "pmhc:review-packets",
 ] as const;
 
 export const debugStorageKeys = ["pmhc:debug-force-error"] as const;

@@ -217,6 +217,10 @@ export type LanguageCopy = {
     recapBody: string;
     recapAction: string;
     recapPreview: (label: string) => string;
+    archiveTitle: string;
+    archiveBody: string;
+    archiveEmpty: string;
+    archiveSavedAt: (section: string, savedAt: string) => string;
     packetTitle: (label: string) => string;
     packetBlockTitles: ReviewPacketBlockCopy;
     packetNoNext: string;
@@ -796,6 +800,10 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       recapBody: "Prepare a short local summary for the section you're looking at now.",
       recapAction: "Prepare recap",
       recapPreview: (label) => `Preview: ${label}`,
+      archiveTitle: "Recent packets",
+      archiveBody: "Prepared packet recaps stay local on this device until you clear app data.",
+      archiveEmpty: "No saved packets yet. Prepare one from any review section first.",
+      archiveSavedAt: (section, savedAt) => `${section} - saved ${savedAt}`,
       packetTitle: (label) => `${label} packet`,
       packetBlockTitles: {
         summary: "Summary",
@@ -1348,6 +1356,10 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       recapBody: "Подготовьте короткий локальный итог по тому разделу, который сейчас открыт.",
       recapAction: "Подготовить сводку",
       recapPreview: (label) => `Предпросмотр: ${label}`,
+      archiveTitle: "Недавние пакеты",
+      archiveBody: "Подготовленные пакетные сводки хранятся только локально на этом устройстве, пока вы не очистите данные приложения.",
+      archiveEmpty: "Сохраненных пакетов пока нет. Сначала подготовьте пакет в одном из разделов обзора.",
+      archiveSavedAt: (section, savedAt) => `${section} - сохранено ${savedAt}`,
       packetTitle: (label) => `Пакет: ${label}`,
       packetBlockTitles: {
         summary: "Суть",

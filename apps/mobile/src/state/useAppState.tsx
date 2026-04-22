@@ -53,6 +53,13 @@ import type {
 } from "@pmhc/types";
 import { QuickLogSheet } from "../components/QuickLogSheet";
 import { starterContent } from "../data/starterContent";
+import { type ReviewSection } from "../reviewRecap";
+import {
+  appendReviewPacketHistory,
+  createReviewPacketHistoryEntry,
+  isReviewPacketHistoryArray,
+  type ReviewPacketHistoryEntry,
+} from "../reviewPacketHistory";
 import { appStorageKeys } from "../storage/appStorageKeys";
 import { createJsonRepository } from "../storage/localStore";
 
@@ -66,6 +73,7 @@ const [
   privacyLockKey,
   programProgressKey,
   programHistoryKey,
+  reviewPacketHistoryKey,
 ] = appStorageKeys;
 
 const onboardingRepository = createJsonRepository<OnboardingResult | null>(
@@ -99,6 +107,12 @@ const programHistoryRepository = createJsonRepository<ProgramHistoryEntry[]>(
   programHistoryKey,
   [],
   isProgramHistoryArray,
+);
+const reviewPacketHistoryRepository = createJsonRepository<ReviewPacketHistoryEntry[]>(
+  AsyncStorage,
+  reviewPacketHistoryKey,
+  [],
+  isReviewPacketHistoryArray,
 );
 
 const fallbackOnboarding = createOnboardingResult({
@@ -142,6 +156,7 @@ export function useAppState() {
   const [privacyLock, setPrivacyLock] = useState<PrivacyLockState>(fallbackPrivacyLock);
   const [programProgress, setProgramProgress] = useState<ProgramProgress | null>(null);
   const [programHistory, setProgramHistory] = useState<ProgramHistoryEntry[]>([]);
+  const [reviewPackets, setReviewPackets] = useState<ReviewPacketHistoryEntry[]>([]);
   const [selectedQuickLog, setSelectedQuickLog] = useState<QuickLogDefinition | null>(null);
   const [isReady, setIsReady] = useState(false);
   const content: ContentItem[] = useMemo(
@@ -155,7 +170,16 @@ export function useAppState() {
 
     async function load() {
       try {
-        const [savedOnboarding, savedLogs, savedQueue, savedContentProgress, savedPrivacyLock, savedProgramProgress, savedProgramHistory] =
+        const [
+          savedOnboarding,
+          savedLogs,
+          savedQueue,
+          savedContentProgress,
+          savedPrivacyLock,
+          savedProgramProgress,
+          savedProgramHistory,
+          savedReviewPackets,
+        ] =
           await Promise.all([
             onboardingRepository.load(),
             logsRepository.load(),
@@ -164,6 +188,7 @@ export function useAppState() {
             privacyLockRepository.load(),
             programProgressRepository.load(),
             programHistoryRepository.load(),
+            reviewPacketHistoryRepository.load(),
           ]);
 
         if (!mounted) {
@@ -184,6 +209,7 @@ export function useAppState() {
         );
         setProgramProgress(savedProgramProgress);
         setProgramHistory(savedProgramHistory);
+        setReviewPackets(savedReviewPackets);
       } catch {
         if (!mounted) {
           return;
@@ -197,6 +223,7 @@ export function useAppState() {
         setPrivacyLock(fallbackPrivacyLock);
         setProgramProgress(null);
         setProgramHistory([]);
+        setReviewPackets([]);
       } finally {
         if (mounted) {
           setIsReady(true);
@@ -340,6 +367,11 @@ export function useAppState() {
     await programHistoryRepository.save(nextHistory);
   }, []);
 
+  const persistReviewPackets = useCallback(async (nextHistory: ReviewPacketHistoryEntry[]) => {
+    setReviewPackets(nextHistory);
+    await reviewPacketHistoryRepository.save(nextHistory);
+  }, []);
+
   const saveQuickLog = useCallback(
     async (definition: QuickLogDefinition, value: unknown) => {
       const nextLog: LogEntry = {
@@ -373,9 +405,10 @@ export function useAppState() {
         persistPrivacyLock(nextPrivacyLock),
         persistProgramProgress(nextProgramProgress),
         persistProgramHistory([]),
+        persistReviewPackets([]),
       ]);
     },
-    [persistPrivacyLock, persistProgramHistory, persistProgramProgress],
+    [persistPrivacyLock, persistProgramHistory, persistProgramProgress, persistReviewPackets],
   );
 
   const changeLanguage = useCallback(
@@ -414,6 +447,7 @@ export function useAppState() {
     setPrivacyLock(fallbackPrivacyLock);
     setProgramProgress(null);
     setProgramHistory([]);
+    setReviewPackets([]);
     await Promise.all([
       onboardingRepository.clear(),
       logsRepository.clear(),
@@ -422,6 +456,7 @@ export function useAppState() {
       privacyLockRepository.clear(),
       programProgressRepository.clear(),
       programHistoryRepository.clear(),
+      reviewPacketHistoryRepository.clear(),
     ]);
   }, []);
 
@@ -594,6 +629,19 @@ export function useAppState() {
     [onboarding, persistProgramHistory, persistProgramProgress, programHistory, programSummary, today.activeProgram, today.alerts, today.currentPriority],
   );
 
+  const saveReviewPacket = useCallback(
+    async (section: ReviewSection, packet: { kind: "packet"; title: string; blocks: ReviewPacketHistoryEntry["blocks"] }) => {
+      const nextEntry = createReviewPacketHistoryEntry({
+        createdAt: new Date().toISOString(),
+        packet,
+        section,
+      });
+
+      await persistReviewPackets(appendReviewPacketHistory(reviewPackets, nextEntry));
+    },
+    [persistReviewPackets, reviewPackets],
+  );
+
   return {
     activeTab,
     content,
@@ -612,6 +660,7 @@ export function useAppState() {
     programDayPlan,
     programPaused,
     programHistory,
+    reviewPackets,
     programSummary,
     programCompletionPercent: today.activeProgram ? programCompletionPercent(today.activeProgram, programProgress) : 0,
     completeOnboarding,
@@ -625,6 +674,7 @@ export function useAppState() {
     resetOnboarding,
     resumeProgram,
     restProgramToday,
+    saveReviewPacket,
     setActiveTab,
     startRecommendedProgram,
     skipProgramToday,

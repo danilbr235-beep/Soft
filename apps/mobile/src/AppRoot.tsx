@@ -89,7 +89,14 @@ function AppRootContent() {
           />
         ) : null}
         {app.activeTab === "Review" ? (
-          <ReviewScreen copy={copy} logs={app.logs} programHistory={app.programHistory} />
+          <ReviewScreen
+            copy={copy}
+            language={app.language}
+            logs={app.logs}
+            onSavePacket={app.saveReviewPacket}
+            programHistory={app.programHistory}
+            reviewPackets={app.reviewPackets}
+          />
         ) : null}
         {app.activeTab === "Learn" ? (
           <LearnScreen
