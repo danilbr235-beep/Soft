@@ -47,6 +47,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Add multiple read formats for the Review recap so the same section can be framed as a snapshot, a next-step plan, or a coach-style note. (Initial slice complete.)
 - Add a structured Review packet for handoff/export-ready reading, with separate summary, next-step, signals, and history blocks. (Initial slice complete.)
 - Keep a local archive of prepared Review packets so recap handoffs survive reloads on the same device. (Initial slice complete.)
+- Add archive filters and packet export actions so saved Review packets are reusable instead of read-only. (Initial slice complete.)
 - Keep Review read-only and conservative, without pretending diagnosis or causality.
 
 ## P1 Programs

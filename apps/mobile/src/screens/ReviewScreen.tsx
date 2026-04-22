@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, Share, StyleSheet, Text, View } from "react-native";
 import { buildProgramReview } from "@pmhc/programs";
 import { buildTrackingPeriodReview, buildTrackingReviewDigest, buildTrackingWeeklyReview } from "@pmhc/tracking";
 import type { LanguageCopy } from "@pmhc/i18n";
@@ -9,6 +9,12 @@ import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 import type { ReviewPacketHistoryEntry } from "../reviewPacketHistory";
 import { buildReviewRecap, type ReviewRecapFormat, type ReviewRecapResult, type ReviewSection } from "../reviewRecap";
+import {
+  buildReviewPacketExportText,
+  filterReviewPacketHistory,
+  formatPacketSavedAt as formatReviewPacketSavedAt,
+  type ReviewPacketArchiveFilter,
+} from "../reviewPacketExport";
 
 type Props = {
   copy: LanguageCopy;
@@ -22,6 +28,8 @@ type Props = {
 export function ReviewScreen({ copy, language, logs, onSavePacket, programHistory, reviewPackets }: Props) {
   const [activeSection, setActiveSection] = useState<ReviewSection>("overview");
   const [activeFormat, setActiveFormat] = useState<ReviewRecapFormat>("snapshot");
+  const [archiveFilter, setArchiveFilter] = useState<ReviewPacketArchiveFilter>("all");
+  const [exportStatus, setExportStatus] = useState<"copied" | "shared" | "unavailable" | null>(null);
   const [recapPreview, setRecapPreview] = useState<ReviewRecapResult | null>(null);
   const reviewDigest = useMemo(() => buildTrackingReviewDigest(logs, programHistory), [logs, programHistory]);
   const weeklyReview = useMemo(() => buildTrackingWeeklyReview(logs, programHistory), [logs, programHistory]);
@@ -29,6 +37,11 @@ export function ReviewScreen({ copy, language, logs, onSavePacket, programHistor
   const programReview = useMemo(() => buildProgramReview(programHistory), [programHistory]);
   const sectionOrder: ReviewSection[] = ["overview", "week", "month", "cycles"];
   const formatOrder: ReviewRecapFormat[] = ["snapshot", "plan", "coach", "packet"];
+  const archiveFilterOrder: ReviewPacketArchiveFilter[] = ["all", ...sectionOrder];
+  const visibleReviewPackets = useMemo(
+    () => filterReviewPacketHistory(reviewPackets, archiveFilter),
+    [archiveFilter, reviewPackets],
+  );
 
   function selectSection(section: ReviewSection) {
     setActiveSection(section);
@@ -56,6 +69,21 @@ export function ReviewScreen({ copy, language, logs, onSavePacket, programHistor
   function selectFormat(format: ReviewRecapFormat) {
     setActiveFormat(format);
     setRecapPreview(null);
+  }
+
+  function selectArchiveFilter(filter: ReviewPacketArchiveFilter) {
+    setArchiveFilter(filter);
+    setExportStatus(null);
+  }
+
+  async function exportPacket(packet: ReviewPacketHistoryEntry) {
+    const text = buildReviewPacketExportText({
+      copy,
+      entry: packet,
+      language,
+    });
+    const result = await exportReviewPacketText(text);
+    setExportStatus(result);
   }
 
   return (
@@ -219,19 +247,55 @@ export function ReviewScreen({ copy, language, logs, onSavePacket, programHistor
       <Surface>
         <Text style={styles.title}>{copy.review.archiveTitle}</Text>
         <Text style={styles.body}>{copy.review.archiveBody}</Text>
+        <Text style={styles.signalDetail}>{copy.review.archiveFilterTitle}</Text>
+        <View style={styles.filterRow}>
+          {archiveFilterOrder.map((filter) => {
+            const active = filter === archiveFilter;
+            const label = filter === "all" ? copy.review.archiveFilterLabels.all : copy.review.filterLabels[filter];
+
+            return (
+              <Pressable
+                accessibilityLabel={copy.review.openArchiveFilter(label)}
+                accessibilityRole="button"
+                key={filter}
+                onPress={() => selectArchiveFilter(filter)}
+                style={[styles.filterButton, active && styles.activeFilterButton]}
+              >
+                <Text style={[styles.filterButtonText, active && styles.activeFilterButtonText]}>{label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        {exportStatus ? <Text style={styles.hintMeta}>{copy.review.exportStatuses[exportStatus]}</Text> : null}
         {reviewPackets.length > 0 ? (
           <View style={styles.packetList}>
-            {reviewPackets.map((packet, index) => (
+            {visibleReviewPackets.length > 0 ? visibleReviewPackets.map((packet, index) => (
               <View key={packet.id} style={[styles.archiveEntry, index > 0 ? styles.archiveEntryDivider : null]}>
                 <Text style={styles.hintMeta}>
                   {copy.review.archiveSavedAt(
                     copy.review.filterLabels[packet.section],
-                    formatPacketSavedAt(packet.createdAt, language),
+                    formatReviewPacketSavedAt(packet.createdAt, language),
                   )}
                 </Text>
                 <PacketBlocksView blocks={packet.blocks} title={packet.title} />
+                <Pressable
+                  accessibilityLabel={copy.review.exportPacket(packet.title)}
+                  accessibilityRole="button"
+                  onPress={() => {
+                    void exportPacket(packet);
+                  }}
+                  style={styles.secondaryButton}
+                >
+                  <Text style={styles.secondaryButtonText}>{copy.review.exportPacketAction}</Text>
+                </Pressable>
               </View>
-            ))}
+            )) : (
+              <Text style={styles.body}>
+                {copy.review.archiveEmptyFiltered(
+                  archiveFilter === "all" ? copy.review.archiveFilterLabels.all : copy.review.filterLabels[archiveFilter],
+                )}
+              </Text>
+            )}
           </View>
         ) : (
           <Text style={styles.body}>{copy.review.archiveEmpty}</Text>
@@ -298,19 +362,44 @@ function PacketBlocksView({
   );
 }
 
-function formatPacketSavedAt(createdAt: string, language: AppLanguage) {
-  const date = new Date(createdAt);
-
-  if (Number.isNaN(date.getTime())) {
-    return createdAt;
+async function exportReviewPacketText(text: string): Promise<"copied" | "shared" | "unavailable"> {
+  if (Platform.OS === "web") {
+    const copied = await copyTextOnWeb(text);
+    return copied ? "copied" : "unavailable";
   }
 
-  return new Intl.DateTimeFormat(language === "ru" ? "ru-RU" : "en-US", {
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    month: "short",
-  }).format(date);
+  try {
+    await Share.share({ message: text });
+    return "shared";
+  } catch {
+    return "unavailable";
+  }
+}
+
+async function copyTextOnWeb(text: string) {
+  if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return true;
+  }
+
+  if (typeof document === "undefined") {
+    return false;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "true");
+  textarea.style.position = "absolute";
+  textarea.style.opacity = "0";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    return typeof document.execCommand === "function" ? document.execCommand("copy") : false;
+  } finally {
+    document.body.removeChild(textarea);
+  }
 }
 
 const styles = StyleSheet.create({
@@ -374,6 +463,20 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: colors.ink,
     fontWeight: "900",
+  },
+  secondaryButton: {
+    minHeight: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    backgroundColor: colors.panelSoft,
+    paddingHorizontal: spacing.md,
+  },
+  secondaryButtonText: {
+    color: colors.text,
+    fontWeight: "800",
   },
   recapPreview: {
     gap: spacing.xs,

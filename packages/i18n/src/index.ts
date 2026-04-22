@@ -219,8 +219,15 @@ export type LanguageCopy = {
     recapPreview: (label: string) => string;
     archiveTitle: string;
     archiveBody: string;
+    archiveFilterTitle: string;
+    archiveFilterLabels: Record<"all", string>;
+    openArchiveFilter: (label: string) => string;
     archiveEmpty: string;
+    archiveEmptyFiltered: (label: string) => string;
     archiveSavedAt: (section: string, savedAt: string) => string;
+    exportPacketAction: string;
+    exportPacket: (title: string) => string;
+    exportStatuses: Record<"copied" | "shared" | "unavailable", string>;
     packetTitle: (label: string) => string;
     packetBlockTitles: ReviewPacketBlockCopy;
     packetNoNext: string;
@@ -802,8 +809,21 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       recapPreview: (label) => `Preview: ${label}`,
       archiveTitle: "Recent packets",
       archiveBody: "Prepared packet recaps stay local on this device until you clear app data.",
+      archiveFilterTitle: "Archive filter",
+      archiveFilterLabels: {
+        all: "All",
+      },
+      openArchiveFilter: (label) => `Filter packet archive: ${label}`,
       archiveEmpty: "No saved packets yet. Prepare one from any review section first.",
+      archiveEmptyFiltered: (label) => `No saved packets for ${label} yet.`,
       archiveSavedAt: (section, savedAt) => `${section} - saved ${savedAt}`,
+      exportPacketAction: "Export packet",
+      exportPacket: (title) => `Export packet ${title}`,
+      exportStatuses: {
+        copied: "Packet copied.",
+        shared: "Packet ready to share.",
+        unavailable: "Packet export is not available on this device.",
+      },
       packetTitle: (label) => `${label} packet`,
       packetBlockTitles: {
         summary: "Summary",
@@ -1358,8 +1378,21 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       recapPreview: (label) => `Предпросмотр: ${label}`,
       archiveTitle: "Недавние пакеты",
       archiveBody: "Подготовленные пакетные сводки хранятся только локально на этом устройстве, пока вы не очистите данные приложения.",
+      archiveFilterTitle: "Фильтр архива",
+      archiveFilterLabels: {
+        all: "Все",
+      },
+      openArchiveFilter: (label) => `Фильтр архива пакетов: ${label}`,
       archiveEmpty: "Сохраненных пакетов пока нет. Сначала подготовьте пакет в одном из разделов обзора.",
+      archiveEmptyFiltered: (label) => `Для раздела ${label} сохраненных пакетов пока нет.`,
       archiveSavedAt: (section, savedAt) => `${section} - сохранено ${savedAt}`,
+      exportPacketAction: "Экспорт пакета",
+      exportPacket: (title) => `Экспортировать пакет: ${title}`,
+      exportStatuses: {
+        copied: "Пакет скопирован.",
+        shared: "Пакет готов к отправке.",
+        unavailable: "Экспорт пакета недоступен на этом устройстве.",
+      },
       packetTitle: (label) => `Пакет: ${label}`,
       packetBlockTitles: {
         summary: "Суть",

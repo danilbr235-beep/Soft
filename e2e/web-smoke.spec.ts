@@ -29,6 +29,17 @@ test("shows a recovery screen instead of a blank page when startup rendering fai
 });
 
 test("mobile web MVP opens, completes onboarding, and records a quick log", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (text: string) => {
+          localStorage.setItem("pmhc:test-clipboard", text);
+        },
+      },
+    });
+  });
+
   await page.goto("/");
 
   await expect(page.getByText("A calm daily coach")).toBeVisible();
@@ -103,6 +114,12 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("History snapshot", { exact: true })).toHaveCount(2);
   await expect(page.getByText("Recent packets")).toBeVisible();
   await expect(page.getByText("Prepared packet recaps stay local on this device until you clear app data.")).toBeVisible();
+  await page.getByLabel("Filter packet archive: 7 days").click();
+  await expect(page.getByText("No saved packets for 7 days yet.")).toBeVisible();
+  await page.getByLabel("Filter packet archive: 30 days").click();
+  await page.getByLabel("Export packet 30 days packet").click();
+  await expect(page.getByText("Packet copied.")).toBeVisible();
+  await expect(page.evaluate(() => localStorage.getItem("pmhc:test-clipboard"))).resolves.toContain("30 days packet");
   await page.reload();
   if ((await page.getByLabel("Unlock demo vault").count()) > 0) {
     await page.getByLabel("Unlock demo vault").click();

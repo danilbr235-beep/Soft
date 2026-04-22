@@ -73,7 +73,11 @@ describe("Track pattern hint copy", () => {
     expect(getCopy("en").review.formatLabels.packet).toBe("Packet");
     expect(getCopy("en").review.recapPreview("Snapshot")).toBe("Preview: Snapshot");
     expect(getCopy("en").review.archiveTitle).toBe("Recent packets");
+    expect(getCopy("en").review.archiveFilterLabels.all).toBe("All");
+    expect(getCopy("en").review.openArchiveFilter("30 days")).toContain("Filter packet archive");
     expect(getCopy("en").review.archiveSavedAt("30 days", "Apr 22, 10:00")).toContain("saved");
+    expect(getCopy("en").review.exportPacketAction).toBe("Export packet");
+    expect(getCopy("en").review.exportStatuses.copied).toBe("Packet copied.");
     expect(getCopy("en").review.packetBlockTitles.history).toBe("History snapshot");
     expect(getCopy("ru").review.title).toBe("Обзор");
     expect(getCopy("ru").nav.openLabels.Review.length).toBeGreaterThan(0);
@@ -88,5 +92,15 @@ describe("Track pattern hint copy", () => {
   it("includes Learn digest recommendation copy in both languages", () => {
     expect(getCopy("en").learn.recommendedReason.digest).toBe("Because it fits your current review digest");
     expect(getCopy("ru").learn.recommendedReason.digest.length).toBeGreaterThan(0);
+  });
+
+  it("includes review archive export copy in both languages", () => {
+    expect(getCopy("en").review.archiveFilterLabels.all).toBe("All");
+    expect(getCopy("en").review.openArchiveFilter("30 days")).toContain("Filter packet archive");
+    expect(getCopy("en").review.exportPacketAction).toBe("Export packet");
+    expect(getCopy("en").review.exportStatuses.copied).toBe("Packet copied.");
+    expect(getCopy("ru").review.archiveFilterLabels.all.length).toBeGreaterThan(0);
+    expect(getCopy("ru").review.exportPacketAction.length).toBeGreaterThan(0);
+    expect(getCopy("ru").review.exportStatuses.copied.length).toBeGreaterThan(0);
   });
 });

@@ -28,6 +28,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Adds recap formats for Review summaries so the same section can be read as a snapshot, action plan, or coach note.
 - Adds an export-ready Review packet with structured blocks for summary, next step, signals, and history snapshot.
 - Keeps a local Review packet archive so prepared packets stay available across reloads on the same device.
+- Adds archive filtering and packet export actions inside Review so saved packets are easier to reuse.
 - Adds conservative Track pattern hints from paired recent logs without causal claims.
 - Adds varied Programs day plans with task-level local checklist progress, rest days, and progress summaries.
 - Adds a Programs detail view with phase, pace, progress summary, and the active checklist.
@@ -124,3 +125,4 @@ The app now supports:
 31. Review recap formats for snapshot, action-plan, and coach-note reads.
 32. Review packet format with structured summary, next-step, signals, and history blocks.
 33. Local Review packet archive that persists prepared packets across reloads on the same device.
+34. Review packet archive filters plus packet export actions for reuse from the saved archive.
