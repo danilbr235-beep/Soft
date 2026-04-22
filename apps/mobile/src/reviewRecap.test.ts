@@ -54,6 +54,7 @@ describe("buildReviewRecap", () => {
   it("builds an overview recap from the digest", () => {
     const text = buildReviewRecap({
       copy: getCopy("en"),
+      format: "snapshot",
       monthlyReview,
       programReview,
       reviewDigest,
@@ -70,6 +71,7 @@ describe("buildReviewRecap", () => {
   it("builds a cycle fallback recap when no finished cycles exist", () => {
     const text = buildReviewRecap({
       copy: getCopy("en"),
+      format: "snapshot",
       monthlyReview,
       programReview: null,
       reviewDigest,
@@ -79,5 +81,37 @@ describe("buildReviewRecap", () => {
 
     expect(text).toContain("Program review");
     expect(text).toContain("No finished cycles yet.");
+  });
+
+  it("builds an action-plan recap", () => {
+    const text = buildReviewRecap({
+      copy: getCopy("en"),
+      format: "plan",
+      monthlyReview,
+      programReview,
+      reviewDigest,
+      section: "month",
+      weeklyReview,
+    });
+
+    expect(text).toContain("Focus:");
+    expect(text).toContain("Do next:");
+    expect(text).toContain("Keep in view:");
+  });
+
+  it("builds a coach-note recap", () => {
+    const text = buildReviewRecap({
+      copy: getCopy("en"),
+      format: "coach",
+      monthlyReview,
+      programReview,
+      reviewDigest,
+      section: "cycles",
+      weeklyReview,
+    });
+
+    expect(text).toContain("Program review reads");
+    expect(text).toContain("Why:");
+    expect(text).toContain("Context:");
   });
 });

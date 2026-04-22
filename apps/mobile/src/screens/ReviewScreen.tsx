@@ -7,7 +7,7 @@ import { colors, radii, spacing } from "@pmhc/ui";
 import type { LogEntry, ProgramHistoryEntry } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
-import { buildReviewRecap, type ReviewSection } from "../reviewRecap";
+import { buildReviewRecap, type ReviewRecapFormat, type ReviewSection } from "../reviewRecap";
 
 type Props = {
   copy: LanguageCopy;
@@ -17,12 +17,14 @@ type Props = {
 
 export function ReviewScreen({ copy, logs, programHistory }: Props) {
   const [activeSection, setActiveSection] = useState<ReviewSection>("overview");
+  const [activeFormat, setActiveFormat] = useState<ReviewRecapFormat>("snapshot");
   const [recapPreview, setRecapPreview] = useState<string | null>(null);
   const reviewDigest = useMemo(() => buildTrackingReviewDigest(logs, programHistory), [logs, programHistory]);
   const weeklyReview = useMemo(() => buildTrackingWeeklyReview(logs, programHistory), [logs, programHistory]);
   const monthlyReview = useMemo(() => buildTrackingPeriodReview(logs, programHistory, 30), [logs, programHistory]);
   const programReview = useMemo(() => buildProgramReview(programHistory), [programHistory]);
   const sectionOrder: ReviewSection[] = ["overview", "week", "month", "cycles"];
+  const formatOrder: ReviewRecapFormat[] = ["snapshot", "plan", "coach"];
 
   function selectSection(section: ReviewSection) {
     setActiveSection(section);
@@ -33,6 +35,7 @@ export function ReviewScreen({ copy, logs, programHistory }: Props) {
     setRecapPreview(
       buildReviewRecap({
         copy,
+        format: activeFormat,
         monthlyReview,
         programReview,
         reviewDigest,
@@ -40,6 +43,11 @@ export function ReviewScreen({ copy, logs, programHistory }: Props) {
         weeklyReview,
       }),
     );
+  }
+
+  function selectFormat(format: ReviewRecapFormat) {
+    setActiveFormat(format);
+    setRecapPreview(null);
   }
 
   return (
@@ -162,6 +170,25 @@ export function ReviewScreen({ copy, logs, programHistory }: Props) {
       <Surface>
         <Text style={styles.title}>{copy.review.recapTitle}</Text>
         <Text style={styles.body}>{copy.review.recapBody}</Text>
+        <Text style={styles.signalDetail}>{copy.review.summaryFormatTitle}</Text>
+        <View style={styles.filterRow}>
+          {formatOrder.map((format) => {
+            const active = format === activeFormat;
+            return (
+              <Pressable
+                accessibilityLabel={copy.review.openFormat(copy.review.formatLabels[format])}
+                accessibilityRole="button"
+                key={format}
+                onPress={() => selectFormat(format)}
+                style={[styles.filterButton, active && styles.activeFilterButton]}
+              >
+                <Text style={[styles.filterButtonText, active && styles.activeFilterButtonText]}>
+                  {copy.review.formatLabels[format]}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
         <Pressable
           accessibilityLabel={copy.review.recapAction}
           accessibilityRole="button"
@@ -172,7 +199,7 @@ export function ReviewScreen({ copy, logs, programHistory }: Props) {
         </Pressable>
         {recapPreview ? (
           <View style={styles.recapPreview}>
-            <Text style={styles.hintMeta}>{copy.review.recapPreview}</Text>
+            <Text style={styles.hintMeta}>{copy.review.recapPreview(copy.review.formatLabels[activeFormat])}</Text>
             <Text style={styles.recapText}>{recapPreview}</Text>
           </View>
         ) : null}

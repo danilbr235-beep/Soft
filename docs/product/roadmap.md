@@ -44,6 +44,7 @@ This roadmap keeps the MVP moving in controlled layers: stability first, then de
 - Show recent finished-program review with a simple direction trend. (Initial slice complete.)
 - Add section switching so Review can focus on one slice at a time without becoming a long mixed feed. (Initial slice complete.)
 - Add a private recap/export-ready preview for the currently selected Review slice. (Initial local preview slice complete.)
+- Add multiple read formats for the Review recap so the same section can be framed as a snapshot, a next-step plan, or a coach-style note. (Initial slice complete.)
 - Keep Review read-only and conservative, without pretending diagnosis or causality.
 
 ## P1 Programs

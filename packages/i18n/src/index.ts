@@ -60,6 +60,7 @@ type ProgramReviewTrendCopy = Record<
   string
 >;
 type ReviewSectionCopy = Record<"overview" | "week" | "month" | "cycles", string>;
+type ReviewRecapFormatCopy = Record<"snapshot" | "plan" | "coach", string>;
 
 function russianCycleWord(count: number) {
   const lastTwo = count % 100;
@@ -208,11 +209,22 @@ export type LanguageCopy = {
     subtitle: string;
     filterLabels: ReviewSectionCopy;
     openFilter: (label: string) => string;
+    summaryFormatTitle: string;
+    formatLabels: ReviewRecapFormatCopy;
+    openFormat: (label: string) => string;
     recapTitle: string;
     recapBody: string;
     recapAction: string;
-    recapPreview: string;
+    recapPreview: (label: string) => string;
     noCycles: string;
+    planFocus: (text: string) => string;
+    planReason: (text: string) => string;
+    planNext: (text: string) => string;
+    planWatch: (text: string) => string;
+    coachLead: (title: string, tone: string | null) => string;
+    coachWhy: (text: string) => string;
+    coachNext: (text: string) => string;
+    coachWatch: (text: string) => string;
   };
   learn: {
     title: string;
@@ -766,11 +778,26 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         cycles: "Cycles",
       },
       openFilter: (label) => `Open Review section: ${label}`,
+      summaryFormatTitle: "Format",
+      formatLabels: {
+        snapshot: "Snapshot",
+        plan: "Action plan",
+        coach: "Coach note",
+      },
+      openFormat: (label) => `Open recap format: ${label}`,
       recapTitle: "Private recap",
       recapBody: "Prepare a short local summary for the section you're looking at now.",
       recapAction: "Prepare recap",
-      recapPreview: "Recap preview",
+      recapPreview: (label) => `Preview: ${label}`,
       noCycles: "No finished cycles yet. Keep the current cycle light and let a little more history build first.",
+      planFocus: (text) => `Focus: ${text}`,
+      planReason: (text) => `Why this read: ${text}`,
+      planNext: (text) => `Do next: ${text}`,
+      planWatch: (text) => `Keep in view: ${text}`,
+      coachLead: (title, tone) => (tone ? `${title} reads ${tone}.` : `${title}.`),
+      coachWhy: (text) => `Why: ${text}`,
+      coachNext: (text) => `Next step: ${text}`,
+      coachWatch: (text) => `Context: ${text}`,
     },
     learn: {
       title: "Learn",
@@ -1292,11 +1319,26 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         cycles: "Циклы",
       },
       openFilter: (label) => `Открыть раздел обзора: ${label}`,
+      summaryFormatTitle: "Формат",
+      formatLabels: {
+        snapshot: "Кратко",
+        plan: "План действий",
+        coach: "Заметка коуча",
+      },
+      openFormat: (label) => `Открыть формат сводки: ${label}`,
       recapTitle: "Личная сводка",
       recapBody: "Подготовьте короткий локальный итог по тому разделу, который сейчас открыт.",
       recapAction: "Подготовить сводку",
-      recapPreview: "Предпросмотр сводки",
+      recapPreview: (label) => `Предпросмотр: ${label}`,
       noCycles: "Завершенных циклов пока нет. Лучше спокойно продолжить текущий цикл и дать истории немного накопиться.",
+      planFocus: (text) => `Фокус: ${text}`,
+      planReason: (text) => `Почему так: ${text}`,
+      planNext: (text) => `Что делать дальше: ${text}`,
+      planWatch: (text) => `Что держать в поле зрения: ${text}`,
+      coachLead: (title, tone) => (tone ? `${title}: сейчас это выглядит как "${tone}".` : `${title}.`),
+      coachWhy: (text) => `Почему: ${text}`,
+      coachNext: (text) => `Следующий шаг: ${text}`,
+      coachWatch: (text) => `Контекст: ${text}`,
     },
     learn: {
       title: "База",

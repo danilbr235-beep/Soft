@@ -25,6 +25,7 @@ This repository replaces the previous goals-manager prototype with a production-
 - Adds a weekly Review read that combines recent logs with recent program-cycle context into one conservative summary.
 - Adds a 30-day Review read that gives a broader period view across recent logs and completed cycles.
 - Adds a private Review recap preview that prepares a short local summary for the current Review section.
+- Adds recap formats for Review summaries so the same section can be read as a snapshot, action plan, or coach note.
 - Adds conservative Track pattern hints from paired recent logs without causal claims.
 - Adds varied Programs day plans with task-level local checklist progress, rest days, and progress summaries.
 - Adds a Programs detail view with phase, pace, progress summary, and the active checklist.
@@ -118,3 +119,4 @@ The app now supports:
 28. Review 30-day summary with a broader period read across recent logs and recent cycle completions.
 29. Review digest with one consolidated read across week, 30-day review, and recent cycle context.
 30. Review section switching plus a local recap preview for the currently selected review slice.
+31. Review recap formats for snapshot, action-plan, and coach-note reads.
