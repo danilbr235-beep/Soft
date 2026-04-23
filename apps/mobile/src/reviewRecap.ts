@@ -1,12 +1,13 @@
 import type { LanguageCopy } from "@pmhc/i18n";
 import type { ProgramReviewSummary } from "@pmhc/programs";
 import type { TrackingPeriodReviewSummary, TrackingReviewDigest, TrackingWeeklyReviewSummary } from "@pmhc/tracking";
+import type { DaySimplificationReview } from "./daySimplificationReview";
 import type { MorningNudgeReview } from "./morningNudgeReview";
 import type { MorningRoutineReview } from "./morningRoutineReview";
 
 export type ReviewSection = "overview" | "week" | "month" | "cycles";
 export type ReviewRecapFormat = "snapshot" | "plan" | "coach" | "packet";
-export type ReviewPacketBlockId = "summary" | "next" | "signals" | "morning" | "nudge" | "history";
+export type ReviewPacketBlockId = "summary" | "next" | "signals" | "morning" | "nudge" | "lighter" | "history";
 
 export type ReviewPacketBlock = {
   id: ReviewPacketBlockId;
@@ -27,6 +28,7 @@ export type ReviewRecapResult =
 
 type ReviewRecapInput = {
   copy: LanguageCopy;
+  daySimplificationReview?: DaySimplificationReview | null;
   format: ReviewRecapFormat;
   morningNudgeReview?: MorningNudgeReview | null;
   morningRoutineReview?: MorningRoutineReview | null;
@@ -51,6 +53,7 @@ type ReviewRecapParts = {
 
 export function buildReviewRecap({
   copy,
+  daySimplificationReview,
   format,
   morningNudgeReview,
   morningRoutineReview,
@@ -63,6 +66,7 @@ export function buildReviewRecap({
 }: ReviewRecapInput): ReviewRecapResult {
   const parts = buildReviewRecapParts({
     copy,
+    daySimplificationReview,
     includeMorningInSharedFields: format !== "packet",
     morningNudgeReview,
     morningRoutineReview,
@@ -80,6 +84,7 @@ export function buildReviewRecap({
       blocks: buildReviewPacketBlocks(
         parts,
         copy,
+        daySimplificationReview,
         morningNudgeReview,
         morningRoutineReview,
         packetOptions?.includeMorningRoutine ?? true,
@@ -128,6 +133,7 @@ export function buildReviewRecap({
 
 function buildReviewRecapParts({
   copy,
+  daySimplificationReview,
   includeMorningInSharedFields,
   morningNudgeReview,
   morningRoutineReview,
@@ -138,9 +144,18 @@ function buildReviewRecapParts({
   weeklyReview,
 }: Omit<ReviewRecapInput, "format" | "packetOptions"> & { includeMorningInSharedFields: boolean }): ReviewRecapParts {
   const morningMeta = includeMorningInSharedFields ? morningRoutineReview?.meta ?? null : null;
+  const lighterMeta = includeMorningInSharedFields ? daySimplificationReview?.meta ?? null : null;
   const morningContextLines =
     includeMorningInSharedFields && morningRoutineReview
       ? [`${morningRoutineReview.title}: ${morningRoutineReview.tone}`, ...morningRoutineReview.stepLines]
+      : [];
+  const lighterContextLines =
+    includeMorningInSharedFields && daySimplificationReview
+      ? compactLines([
+          `${daySimplificationReview.title}: ${daySimplificationReview.tone}`,
+          daySimplificationReview.todayLine,
+          daySimplificationReview.sourceLine,
+        ])
       : [];
   const morningNudgeContextLines =
     includeMorningInSharedFields && morningNudgeReview
@@ -165,6 +180,7 @@ function buildReviewRecapParts({
           weeklyReview.symptomLogsInWeek,
         ),
         morningMeta,
+        lighterMeta,
       ]).join("\n"),
       context: compactLines([
         weeklyReview.latestProgramId
@@ -173,6 +189,7 @@ function buildReviewRecapParts({
             )
           : null,
         ...morningContextLines,
+        ...lighterContextLines,
         ...morningNudgeContextLines,
       ]).join("\n"),
     };
@@ -238,6 +255,7 @@ function buildReviewRecapParts({
     meta: compactLines([
       copy.track.reviewDigestConfidenceLabels[reviewDigest.confidence],
       morningMeta,
+      lighterMeta,
     ]).join("\n"),
     context: [
       copy.track.reviewDigestWindows(
@@ -250,6 +268,7 @@ function buildReviewRecapParts({
           )
         : null,
       ...morningContextLines,
+      ...lighterContextLines,
       ...morningNudgeContextLines,
     ]
       .filter((line): line is string => line != null)
@@ -260,6 +279,7 @@ function buildReviewRecapParts({
 function buildReviewPacketBlocks(
   parts: ReviewRecapParts,
   copy: LanguageCopy,
+  daySimplificationReview: DaySimplificationReview | null | undefined,
   morningNudgeReview: MorningNudgeReview | null | undefined,
   morningRoutineReview: MorningRoutineReview | null | undefined,
   includeMorningRoutine: boolean,
@@ -292,6 +312,22 @@ function buildReviewPacketBlocks(
               morningRoutineReview.nextStep,
               morningRoutineReview.meta,
               ...morningRoutineReview.stepLines,
+            ]),
+          } satisfies ReviewPacketBlock,
+        ]
+      : []),
+    ...(daySimplificationReview && daySimplificationReview.activeDays > 0
+      ? [
+          {
+            id: "lighter",
+            title: daySimplificationReview.title,
+            lines: compactLines([
+              daySimplificationReview.tone,
+              daySimplificationReview.reason,
+              daySimplificationReview.nextStep,
+              daySimplificationReview.meta,
+              daySimplificationReview.todayLine,
+              daySimplificationReview.sourceLine,
             ]),
           } satisfies ReviewPacketBlock,
         ]

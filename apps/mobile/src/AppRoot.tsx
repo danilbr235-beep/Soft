@@ -111,6 +111,7 @@ function AppRootContent() {
         {app.activeTab === "Review" ? (
           <ReviewScreen
             copy={copy}
+            daySimplificationReview={app.daySimplificationReview}
             language={app.language}
             logs={app.logs}
             morningNudgeReview={app.morningNudgeReview}

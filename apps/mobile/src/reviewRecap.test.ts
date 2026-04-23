@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getCopy } from "@pmhc/i18n";
 import type { ProgramReviewSummary } from "@pmhc/programs";
 import type { TrackingPeriodReviewSummary, TrackingReviewDigest, TrackingWeeklyReviewSummary } from "@pmhc/tracking";
+import type { DaySimplificationReview } from "./daySimplificationReview";
 import type { MorningNudgeReview } from "./morningNudgeReview";
 import type { MorningRoutineReview } from "./morningRoutineReview";
 import { buildReviewRecap } from "./reviewRecap";
@@ -95,10 +96,33 @@ const morningNudgeReview: MorningNudgeReview = {
   guidanceMeta: "2 adjustments in the last 30 days",
 };
 
+const daySimplificationReview: DaySimplificationReview = {
+  title: "Lighter day review",
+  body: "A short 7-day read of how often the app kept the day in the lighter preset.",
+  toneId: "targeted",
+  reasonId: "mixed_sources",
+  nextStepId: "watch_repeat",
+  tone: "Used as support",
+  reason: "The lighter preset came from both Today and Programs, which usually means the scope needed trimming from more than one angle.",
+  nextStepTitle: "Lighter-day next step",
+  nextStep: "Watch whether the same compression shows up again before adding more ambition.",
+  meta: "Lighter days: 2/7 - Current streak: 1 day",
+  todayLine: "Active today from Today.",
+  sourceLine: "Today: 1 - Programs: 1",
+  activeDays: 2,
+  streak: 1,
+  todayActive: true,
+  sourceCounts: {
+    today: 1,
+    programs: 1,
+  },
+};
+
 describe("buildReviewRecap", () => {
   it("builds an overview recap from the digest", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
+      daySimplificationReview,
       format: "snapshot",
       morningNudgeReview,
       morningRoutineReview,
@@ -120,6 +144,7 @@ describe("buildReviewRecap", () => {
   it("builds a cycle fallback recap when no finished cycles exist", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
+      daySimplificationReview,
       format: "snapshot",
       morningNudgeReview,
       morningRoutineReview,
@@ -139,6 +164,7 @@ describe("buildReviewRecap", () => {
   it("builds an action-plan recap", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
+      daySimplificationReview,
       format: "plan",
       morningNudgeReview,
       morningRoutineReview,
@@ -159,6 +185,7 @@ describe("buildReviewRecap", () => {
   it("builds a coach-note recap", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
+      daySimplificationReview,
       format: "coach",
       morningNudgeReview,
       morningRoutineReview,
@@ -179,6 +206,7 @@ describe("buildReviewRecap", () => {
   it("builds a structured packet recap", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
+      daySimplificationReview,
       format: "packet",
       morningNudgeReview,
       morningRoutineReview,
@@ -201,18 +229,21 @@ describe("buildReviewRecap", () => {
       "Next step",
       "Signals",
       "Morning routine",
+      "Lighter day review",
       "Morning nudge",
       "History snapshot",
     ]);
     expect(result.blocks[0]?.lines.join(" ")).toContain("30-day review");
     expect(result.blocks[3]?.lines.join(" ")).toContain("Morning routine review");
-    expect(result.blocks[4]?.lines.join(" ")).toContain("Daily - 09:00");
-    expect(result.blocks[5]?.lines.join(" ")).toContain("Latest 30-day cycle context");
+    expect(result.blocks[4]?.lines.join(" ")).toContain("Today: 1 - Programs: 1");
+    expect(result.blocks[5]?.lines.join(" ")).toContain("Daily - 09:00");
+    expect(result.blocks[6]?.lines.join(" ")).toContain("Latest 30-day cycle context");
   });
 
   it("carries morning routine review context into an overview packet", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
+      daySimplificationReview,
       format: "packet",
       morningNudgeReview,
       morningRoutineReview,
@@ -231,13 +262,15 @@ describe("buildReviewRecap", () => {
 
     expect(result.blocks[2]?.lines.join(" ")).not.toContain("Full mornings: 1/7");
     expect(result.blocks[3]?.lines.join(" ")).toContain("Full mornings: 1/7");
-    expect(result.blocks[4]?.lines.join(" ")).toContain("Morning nudge review");
-    expect(result.blocks[5]?.lines.join(" ")).not.toContain("Morning routine review: Building consistency");
+    expect(result.blocks[4]?.lines.join(" ")).toContain("Used as support");
+    expect(result.blocks[5]?.lines.join(" ")).toContain("Morning nudge review");
+    expect(result.blocks[6]?.lines.join(" ")).not.toContain("Morning routine review: Building consistency");
   });
 
   it("can omit the dedicated morning block from a packet", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
+      daySimplificationReview,
       format: "packet",
       morningNudgeReview,
       morningRoutineReview,
@@ -261,6 +294,7 @@ describe("buildReviewRecap", () => {
       "Summary",
       "Next step",
       "Signals",
+      "Lighter day review",
       "Morning nudge",
       "History snapshot",
     ]);

@@ -25,6 +25,11 @@ const history: ReviewPacketHistoryEntry[] = [
         lines: ["Building consistency", "Full mornings: 1/7 - Partial mornings: 2 - Streak: 1 day"],
       },
       {
+        id: "lighter",
+        title: "Lighter day review",
+        lines: ["Used as support", "Lighter days: 2/7 - Current streak: 1 day", "Today: 1 - Programs: 1"],
+      },
+      {
         id: "nudge",
         title: "Morning nudge",
         lines: ["Timing: Daily - 09:00", "Style: Supportive"],
@@ -70,6 +75,8 @@ describe("reviewPacketExport", () => {
     expect(text).toContain("Recovery-first month");
     expect(text).toContain("Morning routine");
     expect(text).toContain("Building consistency");
+    expect(text).toContain("Lighter day review");
+    expect(text).toContain("Today: 1 - Programs: 1");
     expect(text).toContain("Morning nudge");
     expect(text).toContain("Daily - 09:00");
   });

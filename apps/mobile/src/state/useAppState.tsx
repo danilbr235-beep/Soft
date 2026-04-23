@@ -54,6 +54,7 @@ import type {
 import { buildCoachAdaptiveNudge } from "../coachAdaptiveNudge";
 import { QuickLogSheet } from "../components/QuickLogSheet";
 import { starterContent } from "../data/starterContent";
+import { buildDaySimplificationReview } from "../daySimplificationReview";
 import {
   buildDaySimplificationState,
   isDaySimplificationStore,
@@ -469,6 +470,13 @@ export function useAppState() {
       store: daySimplificationStore,
     });
   }, [adaptiveDayGuidance.state, daySimplificationStore, language, today.date, today.todayMode]);
+  const daySimplificationReview = useMemo(() => {
+    return buildDaySimplificationReview({
+      date: today.date,
+      language,
+      store: daySimplificationStore,
+    });
+  }, [daySimplificationStore, language, today.date]);
   const surfacedToday = useMemo<TodayPayload>(() => {
     if (!daySimplification.active) {
       return today;
@@ -1137,6 +1145,7 @@ export function useAppState() {
     morningRoutineReview,
     adaptiveDayGuidance,
     daySimplification,
+    daySimplificationReview,
     today: surfacedToday,
     todayQuickLogs,
     pendingSyncCount: nextPendingJobs(syncQueue).length,

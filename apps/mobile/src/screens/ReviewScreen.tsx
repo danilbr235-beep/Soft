@@ -7,6 +7,7 @@ import { colors, radii, spacing } from "@pmhc/ui";
 import type { AppLanguage, LogEntry, ProgramHistoryEntry } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
+import type { DaySimplificationReview } from "../daySimplificationReview";
 import type { MorningNudgeReview } from "../morningNudgeReview";
 import type { MorningRoutineReview } from "../morningRoutineReview";
 import type { ReviewPreferences } from "../reviewPreferences";
@@ -21,6 +22,7 @@ import {
 
 type Props = {
   copy: LanguageCopy;
+  daySimplificationReview: DaySimplificationReview;
   language: AppLanguage;
   logs: LogEntry[];
   morningNudgeReview: MorningNudgeReview;
@@ -33,6 +35,7 @@ type Props = {
 
 export function ReviewScreen({
   copy,
+  daySimplificationReview,
   language,
   logs,
   morningNudgeReview,
@@ -68,6 +71,7 @@ export function ReviewScreen({
     const nextPreview = buildReviewRecap({
       copy,
       format: activeFormat,
+      daySimplificationReview,
       morningNudgeReview,
       morningRoutineReview,
       monthlyReview,
@@ -156,6 +160,7 @@ export function ReviewScreen({
           </Surface>
           <MorningRoutineReviewCard review={morningRoutineReview} />
           <MorningNudgeReviewCard review={morningNudgeReview} />
+          <DaySimplificationReviewCard review={daySimplificationReview} />
         </>
       ) : null}
       {activeSection === "week" ? (
@@ -179,6 +184,7 @@ export function ReviewScreen({
             tone={copy.track.weeklyReviewTones[weeklyReview.tone]}
           />
           <MorningRoutineReviewCard review={morningRoutineReview} />
+          <DaySimplificationReviewCard review={daySimplificationReview} />
         </>
       ) : null}
       {activeSection === "month" ? (
@@ -330,6 +336,22 @@ export function ReviewScreen({
         )}
       </Surface>
     </Screen>
+  );
+}
+
+function DaySimplificationReviewCard({ review }: { review: DaySimplificationReview }) {
+  return (
+    <Surface>
+      <Text style={styles.title}>{review.title}</Text>
+      <Text style={styles.body}>{review.body}</Text>
+      <Text style={styles.hintTitle}>{review.tone}</Text>
+      <Text style={styles.body}>{review.reason}</Text>
+      <Text style={styles.signalDetail}>{review.nextStepTitle}</Text>
+      <Text style={styles.body}>{review.nextStep}</Text>
+      <Text style={styles.hintMeta}>{review.meta}</Text>
+      <Text style={styles.hintMeta}>{review.todayLine}</Text>
+      {review.sourceLine ? <Text style={styles.hintMeta}>{review.sourceLine}</Text> : null}
+    </Surface>
   );
 }
 
