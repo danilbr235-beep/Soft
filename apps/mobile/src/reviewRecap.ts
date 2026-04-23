@@ -5,7 +5,7 @@ import type { MorningRoutineReview } from "./morningRoutineReview";
 
 export type ReviewSection = "overview" | "week" | "month" | "cycles";
 export type ReviewRecapFormat = "snapshot" | "plan" | "coach" | "packet";
-export type ReviewPacketBlockId = "summary" | "next" | "signals" | "history";
+export type ReviewPacketBlockId = "summary" | "next" | "signals" | "morning" | "history";
 
 export type ReviewPacketBlock = {
   id: ReviewPacketBlockId;
@@ -29,6 +29,9 @@ type ReviewRecapInput = {
   format: ReviewRecapFormat;
   morningRoutineReview?: MorningRoutineReview | null;
   monthlyReview: TrackingPeriodReviewSummary;
+  packetOptions?: {
+    includeMorningRoutine: boolean;
+  };
   programReview: ProgramReviewSummary | null;
   reviewDigest: TrackingReviewDigest;
   section: ReviewSection;
@@ -49,6 +52,7 @@ export function buildReviewRecap({
   format,
   morningRoutineReview,
   monthlyReview,
+  packetOptions,
   programReview,
   reviewDigest,
   section,
@@ -56,6 +60,7 @@ export function buildReviewRecap({
 }: ReviewRecapInput): ReviewRecapResult {
   const parts = buildReviewRecapParts({
     copy,
+    includeMorningInSharedFields: format !== "packet",
     morningRoutineReview,
     monthlyReview,
     programReview,
@@ -68,7 +73,7 @@ export function buildReviewRecap({
     return {
       kind: "packet",
       title: copy.review.packetTitle(copy.review.filterLabels[section]),
-      blocks: buildReviewPacketBlocks(parts, copy),
+      blocks: buildReviewPacketBlocks(parts, copy, morningRoutineReview, packetOptions?.includeMorningRoutine ?? true),
     };
   }
 
@@ -113,17 +118,19 @@ export function buildReviewRecap({
 
 function buildReviewRecapParts({
   copy,
+  includeMorningInSharedFields,
   morningRoutineReview,
   monthlyReview,
   programReview,
   reviewDigest,
   section,
   weeklyReview,
-}: Omit<ReviewRecapInput, "format">): ReviewRecapParts {
-  const morningMeta = morningRoutineReview?.meta ?? null;
-  const morningContextLines = morningRoutineReview
-    ? [`${morningRoutineReview.title}: ${morningRoutineReview.tone}`, ...morningRoutineReview.stepLines]
-    : [];
+}: Omit<ReviewRecapInput, "format" | "packetOptions"> & { includeMorningInSharedFields: boolean }): ReviewRecapParts {
+  const morningMeta = includeMorningInSharedFields ? morningRoutineReview?.meta ?? null : null;
+  const morningContextLines =
+    includeMorningInSharedFields && morningRoutineReview
+      ? [`${morningRoutineReview.title}: ${morningRoutineReview.tone}`, ...morningRoutineReview.stepLines]
+      : [];
 
   if (section === "week") {
     return {
@@ -228,7 +235,12 @@ function buildReviewRecapParts({
   };
 }
 
-function buildReviewPacketBlocks(parts: ReviewRecapParts, copy: LanguageCopy): ReviewPacketBlock[] {
+function buildReviewPacketBlocks(
+  parts: ReviewRecapParts,
+  copy: LanguageCopy,
+  morningRoutineReview: MorningRoutineReview | null | undefined,
+  includeMorningRoutine: boolean,
+): ReviewPacketBlock[] {
   return [
     {
       id: "summary",
@@ -245,6 +257,22 @@ function buildReviewPacketBlocks(parts: ReviewRecapParts, copy: LanguageCopy): R
       title: copy.review.packetBlockTitles.signals,
       lines: splitPreviewLines(parts.meta, copy.review.packetNoSignals),
     },
+    ...(includeMorningRoutine && morningRoutineReview
+      ? [
+          {
+            id: "morning",
+            title: copy.review.packetBlockTitles.morning,
+            lines: compactLines([
+              morningRoutineReview.title,
+              morningRoutineReview.tone,
+              morningRoutineReview.reason,
+              morningRoutineReview.nextStep,
+              morningRoutineReview.meta,
+              ...morningRoutineReview.stepLines,
+            ]),
+          } satisfies ReviewPacketBlock,
+        ]
+      : []),
     {
       id: "history",
       title: copy.review.packetBlockTitles.history,

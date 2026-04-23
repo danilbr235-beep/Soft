@@ -60,7 +60,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Mode")).toBeVisible();
   await expect(page.getByText("Up to date")).toBeVisible();
   await expect(page.getByText("Vault on")).toBeVisible();
-  await expect(page.getByText("Morning routine", { exact: true })).toBeVisible();
+  await expect(page.getByText("Morning routine", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Wake and light anchor")).toBeVisible();
   await expect(page.getByText("0 of 3", { exact: true })).toBeVisible();
   await expect(page.getByText("Land the wake-and-light anchor first. Add the other two steps only after that starts to stick.")).toBeVisible();
@@ -146,6 +146,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Preview: Packet")).toBeVisible();
   await expect(page.getByText("30 days packet")).toHaveCount(2);
   await expect(page.getByText("Signals", { exact: true })).toHaveCount(2);
+  await expect(page.getByText("Morning routine", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("History snapshot", { exact: true })).toHaveCount(2);
   await expect(page.getByText("Recent packets")).toBeVisible();
   await expect(page.getByText("Prepared packet recaps stay local on this device until you clear app data.")).toBeVisible();
@@ -155,6 +156,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Export packet 30 days packet").click();
   await expect(page.getByText("Packet copied.")).toBeVisible();
   await expect(page.evaluate(() => localStorage.getItem("pmhc:test-clipboard"))).resolves.toContain("30 days packet");
+  await expect(page.evaluate(() => localStorage.getItem("pmhc:test-clipboard"))).resolves.toContain("Morning routine");
   await page.reload();
   if ((await page.getByLabel("Unlock demo vault").count()) > 0) {
     await page.getByLabel("Unlock demo vault").click();
@@ -256,6 +258,17 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByRole("textbox", { name: "PIN" }).fill("1234");
   await page.getByLabel("Unlock with PIN").click();
   await expect(page.getByText("Privacy vault")).toBeVisible();
+  await expect(page.getByText("Review packets")).toBeVisible();
+  await page.getByLabel("Set default review section: 7 days").click();
+  await page.getByLabel("Set default recap format: Packet").click();
+  await page.getByLabel("Remove morning routine from review packets").click();
+  await page.getByLabel("Open Review").click();
+  await expect(page.getByText("Weekly review")).toBeVisible();
+  await page.getByLabel("Prepare recap").click();
+  await expect(page.getByText("Preview: Packet")).toBeVisible();
+  await expect(page.getByText("7 days packet")).toHaveCount(2);
+  await page.getByLabel("Filter packet archive: 7 days").click();
+  await expect(page.getByText("Morning routine", { exact: true })).toHaveCount(0);
 });
 
 test("completed program shows a conservative wrap-up", async ({ page }) => {

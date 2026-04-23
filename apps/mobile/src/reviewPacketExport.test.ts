@@ -19,6 +19,11 @@ const history: ReviewPacketHistoryEntry[] = [
         title: "Summary",
         lines: ["Recovery-first month", "A symptom check-in keeps this month conservative."],
       },
+      {
+        id: "morning",
+        title: "Morning routine",
+        lines: ["Building consistency", "Full mornings: 1/7 - Partial mornings: 2 - Streak: 1 day"],
+      },
     ],
     createdAt: "2026-04-22T12:00:00.000Z",
   },
@@ -58,6 +63,8 @@ describe("reviewPacketExport", () => {
     expect(text).toContain("30 days - saved");
     expect(text).toContain("Summary");
     expect(text).toContain("Recovery-first month");
+    expect(text).toContain("Morning routine");
+    expect(text).toContain("Building consistency");
   });
 
   it("formats saved-at timestamps for supported locales", () => {

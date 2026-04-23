@@ -8,6 +8,7 @@ import type { AppLanguage, LogEntry, ProgramHistoryEntry } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 import type { MorningRoutineReview } from "../morningRoutineReview";
+import type { ReviewPreferences } from "../reviewPreferences";
 import type { ReviewPacketHistoryEntry } from "../reviewPacketHistory";
 import { buildReviewRecap, type ReviewRecapFormat, type ReviewRecapResult, type ReviewSection } from "../reviewRecap";
 import {
@@ -23,6 +24,7 @@ type Props = {
   logs: LogEntry[];
   morningRoutineReview: MorningRoutineReview;
   onSavePacket: (section: ReviewSection, packet: Extract<ReviewRecapResult, { kind: "packet" }>) => Promise<void> | void;
+  preferences: ReviewPreferences;
   programHistory: ProgramHistoryEntry[];
   reviewPackets: ReviewPacketHistoryEntry[];
 };
@@ -33,11 +35,12 @@ export function ReviewScreen({
   logs,
   morningRoutineReview,
   onSavePacket,
+  preferences,
   programHistory,
   reviewPackets,
 }: Props) {
-  const [activeSection, setActiveSection] = useState<ReviewSection>("overview");
-  const [activeFormat, setActiveFormat] = useState<ReviewRecapFormat>("snapshot");
+  const [activeSection, setActiveSection] = useState<ReviewSection>(preferences.defaultSection);
+  const [activeFormat, setActiveFormat] = useState<ReviewRecapFormat>(preferences.defaultFormat);
   const [archiveFilter, setArchiveFilter] = useState<ReviewPacketArchiveFilter>("all");
   const [exportStatus, setExportStatus] = useState<"copied" | "shared" | "unavailable" | null>(null);
   const [recapPreview, setRecapPreview] = useState<ReviewRecapResult | null>(null);
@@ -64,6 +67,9 @@ export function ReviewScreen({
       format: activeFormat,
       morningRoutineReview,
       monthlyReview,
+      packetOptions: {
+        includeMorningRoutine: preferences.includeMorningRoutineInPacket,
+      },
       programReview,
       reviewDigest,
       section: activeSection,

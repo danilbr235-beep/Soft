@@ -107,6 +107,7 @@ function AppRootContent() {
             logs={app.logs}
             morningRoutineReview={app.morningRoutineReview}
             onSavePacket={app.saveReviewPacket}
+            preferences={app.reviewPreferences}
             programHistory={app.programHistory}
             reviewPackets={app.reviewPackets}
           />
@@ -169,7 +170,11 @@ function AppRootContent() {
             onLockNow={app.lockNow}
             onSetPrivacyPin={app.setPrivacyPin}
             onToggleVaultLock={app.togglePrivacyVault}
+            onChangeReviewDefaultFormat={app.changeReviewDefaultFormat}
+            onChangeReviewDefaultSection={app.changeReviewDefaultSection}
+            onToggleMorningRoutineInPacket={app.toggleMorningRoutineInPacket}
             resetOnboarding={app.resetOnboarding}
+            reviewPreferences={app.reviewPreferences}
           />
         ) : null}
       </View>

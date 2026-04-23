@@ -3,6 +3,8 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { languageName, type LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { AppLanguage, PrivacyLockState } from "@pmhc/types";
+import type { ReviewPreferences } from "../reviewPreferences";
+import type { ReviewRecapFormat, ReviewSection } from "../reviewRecap";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 
@@ -12,11 +14,15 @@ type Props = {
   copy: LanguageCopy;
   language: AppLanguage;
   onChangeLanguage: (language: AppLanguage) => void;
+  onChangeReviewDefaultFormat: (format: ReviewRecapFormat) => void;
+  onChangeReviewDefaultSection: (section: ReviewSection) => void;
   onClearPrivacyPin: () => void;
   onLockNow: () => void;
   onSetPrivacyPin: (pin: string) => void;
+  onToggleMorningRoutineInPacket: () => void;
   onToggleVaultLock: () => void;
   resetOnboarding: () => void;
+  reviewPreferences: ReviewPreferences;
 };
 
 export function SettingsScreen({
@@ -24,16 +30,22 @@ export function SettingsScreen({
   hasPrivacyPin,
   language,
   onChangeLanguage,
+  onChangeReviewDefaultFormat,
+  onChangeReviewDefaultSection,
   onClearPrivacyPin,
   onLockNow,
   onSetPrivacyPin,
+  onToggleMorningRoutineInPacket,
   onToggleVaultLock,
   privacyLock,
   resetOnboarding,
+  reviewPreferences,
 }: Props) {
   const [pinDraft, setPinDraft] = useState("");
   const normalizedPin = pinDraft.replace(/\D/g, "").slice(0, 8);
   const canSavePin = normalizedPin.length >= 4;
+  const reviewSections: ReviewSection[] = ["overview", "week", "month", "cycles"];
+  const reviewFormats: ReviewRecapFormat[] = ["snapshot", "plan", "coach", "packet"];
 
   function savePin() {
     if (!canSavePin) {
@@ -132,6 +144,59 @@ export function SettingsScreen({
       <Surface>
         <Text style={styles.title}>{copy.settings.medicalBoundary}</Text>
         <Text style={styles.body}>{copy.settings.medicalBoundaryBody}</Text>
+      </Surface>
+      <Surface>
+        <Text style={styles.title}>{copy.settings.reviewPacketsTitle}</Text>
+        <Text style={styles.body}>{copy.settings.reviewPacketsBody}</Text>
+        <Text style={styles.infoTitle}>{copy.settings.defaultReviewSectionTitle}</Text>
+        <View style={styles.actions}>
+          {reviewSections.map((section) => (
+            <Pressable
+              key={section}
+              accessibilityLabel={copy.settings.setDefaultReviewSection(copy.review.filterLabels[section])}
+              accessibilityRole="button"
+              onPress={() => onChangeReviewDefaultSection(section)}
+              style={[styles.button, reviewPreferences.defaultSection === section && styles.activeButton]}
+            >
+              <Text style={styles.buttonText}>{copy.review.filterLabels[section]}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={styles.infoTitle}>{copy.settings.defaultReviewFormatTitle}</Text>
+        <View style={styles.actions}>
+          {reviewFormats.map((format) => (
+            <Pressable
+              key={format}
+              accessibilityLabel={copy.settings.setDefaultReviewFormat(copy.review.formatLabels[format])}
+              accessibilityRole="button"
+              onPress={() => onChangeReviewDefaultFormat(format)}
+              style={[styles.button, reviewPreferences.defaultFormat === format && styles.activeButton]}
+            >
+              <Text style={styles.buttonText}>{copy.review.formatLabels[format]}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <View style={styles.infoBlock}>
+          <Text style={styles.infoTitle}>{copy.settings.packetMorningTitle}</Text>
+          <Text style={styles.body}>{copy.settings.packetMorningBody}</Text>
+          <Pressable
+            accessibilityLabel={
+              reviewPreferences.includeMorningRoutineInPacket
+                ? copy.settings.excludeMorningRoutineInPacket
+                : copy.settings.includeMorningRoutineInPacket
+            }
+            accessibilityRole="button"
+            onPress={onToggleMorningRoutineInPacket}
+            style={[styles.button, reviewPreferences.includeMorningRoutineInPacket && styles.activeButton]}
+          >
+            <Text style={styles.buttonText}>
+              {reviewPreferences.includeMorningRoutineInPacket
+                ? copy.settings.morningRoutineInPacketOn
+                : copy.settings.morningRoutineInPacketOff}
+            </Text>
+          </Pressable>
+        </View>
+        <Text style={styles.body}>{copy.settings.reviewPacketsHint}</Text>
       </Surface>
       <Pressable accessibilityRole="button" onPress={resetOnboarding} style={styles.resetButton}>
         <Text style={styles.buttonText}>{copy.settings.reset}</Text>

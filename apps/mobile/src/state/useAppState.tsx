@@ -69,6 +69,7 @@ import {
   type MorningRoutineStepId,
 } from "../morningRoutineProgress";
 import { buildMorningRoutineReview } from "../morningRoutineReview";
+import { defaultReviewPreferences, isReviewPreferences, type ReviewPreferences } from "../reviewPreferences";
 import { type ReviewSection } from "../reviewRecap";
 import {
   appendReviewPacketHistory,
@@ -90,6 +91,7 @@ const [
   programProgressKey,
   programHistoryKey,
   reviewPacketHistoryKey,
+  reviewPreferencesKey,
   dailySessionProgressKey,
   morningRoutineProgressKey,
 ] = appStorageKeys;
@@ -131,6 +133,12 @@ const reviewPacketHistoryRepository = createJsonRepository<ReviewPacketHistoryEn
   reviewPacketHistoryKey,
   [],
   isReviewPacketHistoryArray,
+);
+const reviewPreferencesRepository = createJsonRepository<ReviewPreferences>(
+  AsyncStorage,
+  reviewPreferencesKey,
+  defaultReviewPreferences,
+  isReviewPreferences,
 );
 const dailySessionProgressRepository = createJsonRepository<DailySessionProgressStore>(
   AsyncStorage,
@@ -187,6 +195,7 @@ export function useAppState() {
   const [programProgress, setProgramProgress] = useState<ProgramProgress | null>(null);
   const [programHistory, setProgramHistory] = useState<ProgramHistoryEntry[]>([]);
   const [reviewPackets, setReviewPackets] = useState<ReviewPacketHistoryEntry[]>([]);
+  const [reviewPreferences, setReviewPreferences] = useState<ReviewPreferences>(defaultReviewPreferences);
   const [dailySessionProgress, setDailySessionProgress] = useState<DailySessionProgressStore>({});
   const [morningRoutineProgress, setMorningRoutineProgress] = useState<MorningRoutineProgressStore>({});
   const [learnFocusItemId, setLearnFocusItemId] = useState<string | null>(null);
@@ -212,6 +221,7 @@ export function useAppState() {
           savedProgramProgress,
           savedProgramHistory,
           savedReviewPackets,
+          savedReviewPreferences,
           savedDailySessionProgress,
           savedMorningRoutineProgress,
         ] =
@@ -224,6 +234,7 @@ export function useAppState() {
             programProgressRepository.load(),
             programHistoryRepository.load(),
             reviewPacketHistoryRepository.load(),
+            reviewPreferencesRepository.load(),
             dailySessionProgressRepository.load(),
             morningRoutineProgressRepository.load(),
           ]);
@@ -247,6 +258,7 @@ export function useAppState() {
         setProgramProgress(savedProgramProgress);
         setProgramHistory(savedProgramHistory);
         setReviewPackets(savedReviewPackets);
+        setReviewPreferences(savedReviewPreferences);
         setDailySessionProgress(savedDailySessionProgress);
         setMorningRoutineProgress(savedMorningRoutineProgress);
       } catch {
@@ -263,6 +275,7 @@ export function useAppState() {
         setProgramProgress(null);
         setProgramHistory([]);
         setReviewPackets([]);
+        setReviewPreferences(defaultReviewPreferences);
         setDailySessionProgress({});
         setMorningRoutineProgress({});
       } finally {
@@ -458,6 +471,10 @@ export function useAppState() {
     setReviewPackets(nextHistory);
     await reviewPacketHistoryRepository.save(nextHistory);
   }, []);
+  const persistReviewPreferences = useCallback(async (nextPreferences: ReviewPreferences) => {
+    setReviewPreferences(nextPreferences);
+    await reviewPreferencesRepository.save(nextPreferences);
+  }, []);
   const persistDailySessionProgress = useCallback(async (nextProgress: DailySessionProgressStore) => {
     setDailySessionProgress(nextProgress);
     await dailySessionProgressRepository.save(nextProgress);
@@ -572,6 +589,30 @@ export function useAppState() {
     },
     [onboarding],
   );
+  const changeReviewDefaultSection = useCallback(
+    async (defaultSection: ReviewSection) => {
+      await persistReviewPreferences({
+        ...reviewPreferences,
+        defaultSection,
+      });
+    },
+    [persistReviewPreferences, reviewPreferences],
+  );
+  const changeReviewDefaultFormat = useCallback(
+    async (defaultFormat: ReviewPreferences["defaultFormat"]) => {
+      await persistReviewPreferences({
+        ...reviewPreferences,
+        defaultFormat,
+      });
+    },
+    [persistReviewPreferences, reviewPreferences],
+  );
+  const toggleMorningRoutineInPacket = useCallback(async () => {
+    await persistReviewPreferences({
+      ...reviewPreferences,
+      includeMorningRoutineInPacket: !reviewPreferences.includeMorningRoutineInPacket,
+    });
+  }, [persistReviewPreferences, reviewPreferences]);
 
   const resetOnboarding = useCallback(async () => {
     setOnboarding(null);
@@ -583,6 +624,7 @@ export function useAppState() {
     setProgramProgress(null);
     setProgramHistory([]);
     setReviewPackets([]);
+    setReviewPreferences(defaultReviewPreferences);
     setDailySessionProgress({});
     setMorningRoutineProgress({});
     setLearnFocusItemId(null);
@@ -595,6 +637,7 @@ export function useAppState() {
       programProgressRepository.clear(),
       programHistoryRepository.clear(),
       reviewPacketHistoryRepository.clear(),
+      reviewPreferencesRepository.clear(),
       dailySessionProgressRepository.clear(),
       morningRoutineProgressRepository.clear(),
     ]);
@@ -852,6 +895,7 @@ export function useAppState() {
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,
     reviewDigest,
+    reviewPreferences,
     hasPrivacyPin: hasPrivacyPin(privacyLock),
     programDayPlan,
     programPaused,
@@ -861,6 +905,8 @@ export function useAppState() {
     programCompletionPercent: today.activeProgram ? programCompletionPercent(today.activeProgram, programProgress) : 0,
     completeOnboarding,
     changeLanguage,
+    changeReviewDefaultFormat,
+    changeReviewDefaultSection,
     completeProgramToday,
     clearPrivacyPin: clearPrivacyPinCode,
     clearLearnFocus,
@@ -882,6 +928,7 @@ export function useAppState() {
     setPrivacyPin: setPrivacyPinCode,
     togglePrivacyVault,
     toggleProgramTask,
+    toggleMorningRoutineInPacket,
     toggleSavedContent,
     completeContent,
     updateLogValue,

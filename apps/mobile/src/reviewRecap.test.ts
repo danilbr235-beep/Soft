@@ -172,10 +172,12 @@ describe("buildReviewRecap", () => {
       "Summary",
       "Next step",
       "Signals",
+      "Morning routine",
       "History snapshot",
     ]);
     expect(result.blocks[0]?.lines.join(" ")).toContain("30-day review");
-    expect(result.blocks[3]?.lines.join(" ")).toContain("Latest 30-day cycle context");
+    expect(result.blocks[3]?.lines.join(" ")).toContain("Morning routine review");
+    expect(result.blocks[4]?.lines.join(" ")).toContain("Latest 30-day cycle context");
   });
 
   it("carries morning routine review context into an overview packet", () => {
@@ -196,7 +198,37 @@ describe("buildReviewRecap", () => {
       return;
     }
 
-    expect(result.blocks[2]?.lines.join(" ")).toContain("Full mornings: 1/7");
-    expect(result.blocks[3]?.lines.join(" ")).toContain("Morning routine review: Building consistency");
+    expect(result.blocks[2]?.lines.join(" ")).not.toContain("Full mornings: 1/7");
+    expect(result.blocks[3]?.lines.join(" ")).toContain("Full mornings: 1/7");
+    expect(result.blocks[4]?.lines.join(" ")).not.toContain("Morning routine review: Building consistency");
+  });
+
+  it("can omit the dedicated morning block from a packet", () => {
+    const result = buildReviewRecap({
+      copy: getCopy("en"),
+      format: "packet",
+      morningRoutineReview,
+      monthlyReview,
+      packetOptions: {
+        includeMorningRoutine: false,
+      },
+      programReview,
+      reviewDigest,
+      section: "overview",
+      weeklyReview,
+    });
+
+    expect(result.kind).toBe("packet");
+
+    if (result.kind !== "packet") {
+      return;
+    }
+
+    expect(result.blocks.map((block) => block.title)).toEqual([
+      "Summary",
+      "Next step",
+      "Signals",
+      "History snapshot",
+    ]);
   });
 });

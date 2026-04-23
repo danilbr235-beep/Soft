@@ -61,7 +61,7 @@ type ProgramReviewTrendCopy = Record<
 >;
 type ReviewSectionCopy = Record<"overview" | "week" | "month" | "cycles", string>;
 type ReviewRecapFormatCopy = Record<"snapshot" | "plan" | "coach" | "packet", string>;
-type ReviewPacketBlockCopy = Record<"summary" | "next" | "signals" | "history", string>;
+type ReviewPacketBlockCopy = Record<"summary" | "next" | "signals" | "morning" | "history", string>;
 
 function russianCycleWord(count: number) {
   const lastTwo = count % 100;
@@ -383,6 +383,19 @@ export type LanguageCopy = {
     pinNotSet: string;
     autoLockTitle: string;
     autoLockStatus: (minutes: number) => string;
+    reviewPacketsTitle: string;
+    reviewPacketsBody: string;
+    defaultReviewSectionTitle: string;
+    defaultReviewFormatTitle: string;
+    setDefaultReviewSection: (label: string) => string;
+    setDefaultReviewFormat: (label: string) => string;
+    packetMorningTitle: string;
+    packetMorningBody: string;
+    includeMorningRoutineInPacket: string;
+    excludeMorningRoutineInPacket: string;
+    morningRoutineInPacketOn: string;
+    morningRoutineInPacketOff: string;
+    reviewPacketsHint: string;
     medicalBoundary: string;
     medicalBoundaryBody: string;
     reset: string;
@@ -836,6 +849,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         summary: "Summary",
         next: "Next step",
         signals: "Signals",
+        morning: "Morning routine",
         history: "History snapshot",
       },
       packetNoNext: "No extra next-step block for this slice.",
@@ -1103,6 +1117,19 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       pinNotSet: "No PIN is set yet.",
       autoLockTitle: "Auto-lock",
       autoLockStatus: (minutes) => `Auto-lock after ${minutes} minutes of inactivity.`,
+      reviewPacketsTitle: "Review packets",
+      reviewPacketsBody: "Choose how the Review tab opens and whether the morning loop becomes a dedicated packet block.",
+      defaultReviewSectionTitle: "Default review section",
+      defaultReviewFormatTitle: "Default recap format",
+      setDefaultReviewSection: (label) => `Set default review section: ${label}`,
+      setDefaultReviewFormat: (label) => `Set default recap format: ${label}`,
+      packetMorningTitle: "Morning routine block",
+      packetMorningBody: "Keep the 7-day morning routine read as a separate packet block instead of folding it into the general review only.",
+      includeMorningRoutineInPacket: "Include morning routine in review packets",
+      excludeMorningRoutineInPacket: "Remove morning routine from review packets",
+      morningRoutineInPacketOn: "Morning block on",
+      morningRoutineInPacketOff: "Morning block off",
+      reviewPacketsHint: "These packet preferences stay local on this device.",
       medicalBoundary: "Medical boundary",
       medicalBoundaryBody: "This app supports education and tracking. It does not diagnose or replace professional care.",
       reset: "Reset local demo state",
@@ -1422,6 +1449,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         summary: "Суть",
         next: "Следующий шаг",
         signals: "Сигналы",
+        morning: "Утренняя рутина",
         history: "Снимок истории",
       },
       packetNoNext: "Для этого среза отдельный следующий шаг пока не нужен.",
@@ -1693,6 +1721,19 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       pinNotSet: "PIN пока не задан.",
       autoLockTitle: "Автозамок",
       autoLockStatus: (minutes) => `Автозамок сработает через ${minutes} ${russianMinuteWord(minutes)} бездействия.`,
+      reviewPacketsTitle: "Пакеты обзора",
+      reviewPacketsBody: "Здесь можно выбрать, с какого среза и формата открывать Review, и делать ли утреннюю рутину отдельным блоком в пакете.",
+      defaultReviewSectionTitle: "Срез по умолчанию",
+      defaultReviewFormatTitle: "Формат по умолчанию",
+      setDefaultReviewSection: (label) => `Выбрать срез по умолчанию: ${label}`,
+      setDefaultReviewFormat: (label) => `Выбрать формат по умолчанию: ${label}`,
+      packetMorningTitle: "Блок с утренней рутиной",
+      packetMorningBody: "Если включено, 7-дневный разбор утренней рутины попадет в packet как отдельный блок, а не растворится в общем обзоре.",
+      includeMorningRoutineInPacket: "Добавить утреннюю рутину в packet",
+      excludeMorningRoutineInPacket: "Убрать утреннюю рутину из packet",
+      morningRoutineInPacketOn: "Блок с утренней рутиной включен",
+      morningRoutineInPacketOff: "Блок с утренней рутиной выключен",
+      reviewPacketsHint: "Эти настройки packet хранятся только локально на этом устройстве.",
       medicalBoundary: "Медицинская граница",
       medicalBoundaryBody: "Приложение помогает учиться и наблюдать за собой. Оно не ставит диагнозы и не заменяет врача.",
       reset: "Сбросить локальное демо",
