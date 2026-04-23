@@ -354,6 +354,28 @@ test("settings can apply a review preset from current usage guidance", async ({ 
   await expect(page.getByText("7 days packet")).toHaveCount(2);
 });
 
+test("settings can apply a lighter day preset from current guidance", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByText("Start privately").click();
+  await page.getByLabel("Confidence").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Mixed signals").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Simple mode").click();
+  await page.getByLabel("Generate Today").click();
+
+  await page.getByLabel("Open Settings").click();
+  await expect(page.getByText("Should I simplify today?")).toBeVisible();
+  await expect(page.getByText("A lighter preset is ready if you want the app to trim today's scope for you.")).toBeVisible();
+  await expect(page.getByText("Today: up to 2 of 4 priority actions stay visible.")).toBeVisible();
+  await expect(page.getByText("Programs: up to 2 of 3 tasks stay visible.")).toBeVisible();
+  await page.getByLabel("Use lighter day").click();
+  await expect(page.getByText("Current day already runs in the lighter preset.")).toBeVisible();
+  await page.getByLabel("Open Today").click();
+  await expect(page.getByText("Lighter day is on").first()).toBeVisible();
+});
+
 test("programs can switch on a lighter day plan and today can restore it", async ({ page }) => {
   await page.goto("/");
 
@@ -401,6 +423,9 @@ test("coach can suggest when to simplify the whole day", async ({ page }) => {
   await expect(
     page.getByText("Land the morning anchor, log two calm scores, and stop there unless the day stays quiet."),
   ).toBeVisible();
+  await expect(page.getByText("A lighter preset is ready if you want the app to trim today's scope for you.")).toBeVisible();
+  await page.getByLabel("Use lighter day").click();
+  await expect(page.getByLabel("Return to full day")).toBeVisible();
 });
 
 test("completed program shows a conservative wrap-up", async ({ page }) => {

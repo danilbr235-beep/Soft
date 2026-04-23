@@ -165,26 +165,35 @@ function AppRootContent() {
         ) : null}
         {app.activeTab === "Coach" ? (
           <CoachScreen
+            actionCardCount={app.today.actionCards.length}
             adaptiveDayGuidance={app.adaptiveDayGuidance}
             copy={copy}
+            daySimplification={app.daySimplification}
             language={app.language}
             morningRoutineReview={app.morningRoutineReview}
+            onApplyDaySimplification={() => app.applyDaySimplification("today")}
+            onClearDaySimplification={app.clearDaySimplification}
+            programTaskCount={app.programDayPlan?.tasks.length ?? 0}
             reviewDigest={app.reviewDigest}
             today={app.today}
           />
         ) : null}
         {app.activeTab === "Settings" ? (
           <SettingsScreen
+            actionCardCount={app.today.actionCards.length}
             adaptiveDayGuidance={app.adaptiveDayGuidance}
             copy={copy}
+            daySimplification={app.daySimplification}
             hasPrivacyPin={app.hasPrivacyPin}
             language={app.language}
             morningNudgePlan={app.morningNudge}
             morningNudgePreferences={app.morningNudgePreferences}
             morningNudgeReview={app.morningNudgeReview}
             morningRoutineReview={app.morningRoutineReview}
+            onApplyDaySimplification={() => app.applyDaySimplification("today")}
             onApplyMorningNudgePreferences={app.applyMorningNudgePreferences}
             onApplyReviewPreferences={app.applyReviewPreferences}
+            onClearDaySimplification={app.clearDaySimplification}
             onClearPrivacyPin={app.clearPrivacyPin}
             privacyLock={app.privacyLock}
             onChangeLanguage={app.changeLanguage}
@@ -198,6 +207,7 @@ function AppRootContent() {
             onChangeReviewDefaultFormat={app.changeReviewDefaultFormat}
             onChangeReviewDefaultSection={app.changeReviewDefaultSection}
             onToggleMorningRoutineInPacket={app.toggleMorningRoutineInPacket}
+            programTaskCount={app.programDayPlan?.tasks.length ?? 0}
             resetOnboarding={app.resetOnboarding}
             reviewPackets={app.reviewPackets}
             reviewPreferences={app.reviewPreferences}

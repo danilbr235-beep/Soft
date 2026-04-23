@@ -6,6 +6,8 @@ import { buildCoachQuickAnswers, type CoachQuickAnswer } from "@pmhc/rules";
 import type { AppLanguage, TodayPayload } from "@pmhc/types";
 import type { CoachQuestionId, CoachReviewDigest } from "@pmhc/rules";
 import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
+import { buildDaySimplificationGuidance } from "../daySimplificationGuidance";
+import type { DaySimplificationState } from "../daySimplification";
 import { buildCoachMorningAnswer, type CoachMorningAnswer } from "../coachMorningAnswer";
 import type { MorningRoutineReview } from "../morningRoutineReview";
 import { Screen } from "../components/Screen";
@@ -15,17 +17,27 @@ type CoachScreenAnswer = CoachQuickAnswer | CoachAdaptiveNudge | CoachMorningAns
 type CoachScreenQuestionId = CoachQuestionId | CoachAdaptiveNudge["id"] | CoachMorningAnswer["id"];
 
 export function CoachScreen({
+  actionCardCount,
   adaptiveDayGuidance,
   copy,
+  daySimplification,
   language,
   morningRoutineReview,
+  onApplyDaySimplification,
+  onClearDaySimplification,
+  programTaskCount,
   reviewDigest,
   today,
 }: {
+  actionCardCount: number;
   adaptiveDayGuidance: CoachAdaptiveNudge;
   copy: LanguageCopy;
+  daySimplification: DaySimplificationState;
   language: AppLanguage;
   morningRoutineReview: MorningRoutineReview;
+  onApplyDaySimplification: () => void;
+  onClearDaySimplification: () => void;
+  programTaskCount: number;
   reviewDigest: CoachReviewDigest;
   today: TodayPayload;
 }) {
@@ -38,6 +50,14 @@ export function CoachScreen({
     ];
   }, [adaptiveDayGuidance, language, morningRoutineReview, reviewDigest, today]);
   const selectedAnswer = answers.find((answer) => answer.id === selectedId) ?? answers[0];
+  const simplificationGuidance = buildDaySimplificationGuidance({
+    actionCardCount,
+    adaptiveDayGuidance,
+    daySimplification,
+    language,
+    programTaskCount,
+  });
+  const showSimplificationAction = selectedAnswer.id === adaptiveDayGuidance.id && simplificationGuidance.ctaLabel;
 
   return (
     <Screen title={copy.coach.title} subtitle={copy.coach.subtitle}>
@@ -69,7 +89,27 @@ export function CoachScreen({
           <View style={styles.nextStepBlock}>
             <Text style={styles.nextStepLabel}>{copy.coach.nextStep}</Text>
             <Text style={styles.nextStepText}>{selectedAnswer.nextStep}</Text>
+            {selectedAnswer.id === adaptiveDayGuidance.id ? (
+              <>
+                <Text style={styles.hintText}>{simplificationGuidance.statusLabel}</Text>
+                {simplificationGuidance.lines.map((line) => (
+                  <Text key={line} style={styles.hintText}>
+                    {line}
+                  </Text>
+                ))}
+              </>
+            ) : null}
           </View>
+        ) : null}
+        {showSimplificationAction ? (
+          <Pressable
+            accessibilityLabel={simplificationGuidance.ctaLabel ?? undefined}
+            accessibilityRole="button"
+            onPress={simplificationGuidance.action === "restore" ? onClearDaySimplification : onApplyDaySimplification}
+            style={styles.actionButton}
+          >
+            <Text style={styles.actionButtonText}>{simplificationGuidance.ctaLabel}</Text>
+          </Pressable>
         ) : null}
       </Surface>
       <Surface>
@@ -150,5 +190,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "800",
     lineHeight: 20,
+  },
+  hintText: {
+    color: colors.steel,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  actionButton: {
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: colors.moss,
+    backgroundColor: colors.panelSoft,
+  },
+  actionButtonText: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "800",
   },
 });

@@ -4,6 +4,8 @@ import { languageName, type LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { AppLanguage, PrivacyLockState } from "@pmhc/types";
 import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
+import { buildDaySimplificationGuidance } from "../daySimplificationGuidance";
+import type { DaySimplificationState } from "../daySimplification";
 import type {
   MorningNudgePlan,
   MorningNudgePreferences,
@@ -23,13 +25,17 @@ import { Surface } from "../components/Surface";
 type Props = {
   privacyLock: PrivacyLockState;
   hasPrivacyPin: boolean;
+  actionCardCount: number;
   adaptiveDayGuidance: CoachAdaptiveNudge;
   copy: LanguageCopy;
+  daySimplification: DaySimplificationState;
   language: AppLanguage;
   morningNudgePlan: MorningNudgePlan;
   morningNudgePreferences: MorningNudgePreferences;
   morningNudgeReview: MorningNudgeReview;
+  onApplyDaySimplification: () => void;
   onApplyMorningNudgePreferences: (preferences: MorningNudgePreferences) => void;
+  onClearDaySimplification: () => void;
   morningRoutineReview: MorningRoutineReview;
   onChangeLanguage: (language: AppLanguage) => void;
   onChangeMorningNudgeTimePreset: (timePreset: MorningNudgeTimePreset) => void;
@@ -44,20 +50,25 @@ type Props = {
   onToggleMorningNudgesEnabled: () => void;
   onToggleMorningRoutineInPacket: () => void;
   onToggleVaultLock: () => void;
+  programTaskCount: number;
   resetOnboarding: () => void;
   reviewPackets: ReviewPacketHistoryEntry[];
   reviewPreferences: ReviewPreferences;
 };
 
 export function SettingsScreen({
+  actionCardCount,
   adaptiveDayGuidance,
   copy,
+  daySimplification,
   hasPrivacyPin,
   language,
   morningNudgePlan,
   morningNudgePreferences,
   morningNudgeReview,
+  onApplyDaySimplification,
   onApplyMorningNudgePreferences,
+  onClearDaySimplification,
   morningRoutineReview,
   onChangeLanguage,
   onChangeMorningNudgeTimePreset,
@@ -72,6 +83,7 @@ export function SettingsScreen({
   onToggleMorningNudgesEnabled,
   onToggleMorningRoutineInPacket,
   onToggleVaultLock,
+  programTaskCount,
   privacyLock,
   resetOnboarding,
   reviewPackets,
@@ -94,6 +106,13 @@ export function SettingsScreen({
     language,
     morningRoutineReview,
     preferences: reviewPreferences,
+  });
+  const daySimplificationGuidance = buildDaySimplificationGuidance({
+    actionCardCount,
+    adaptiveDayGuidance,
+    daySimplification,
+    language,
+    programTaskCount,
   });
 
   function savePin() {
@@ -228,10 +247,26 @@ export function SettingsScreen({
           <Text style={styles.hintText}>{`${morningNudgePlan.focusTitle}: ${morningNudgePlan.focusLabel}`}</Text>
         </View>
         <View style={styles.infoBlock}>
-          <Text style={styles.infoTitle}>{adaptiveDayGuidance.title}</Text>
-          <Text style={styles.statusText}>{adaptiveDayGuidance.tone}</Text>
-          <Text style={styles.body}>{adaptiveDayGuidance.body}</Text>
+          <Text style={styles.infoTitle}>{daySimplificationGuidance.title}</Text>
+          <Text style={styles.statusText}>{daySimplificationGuidance.tone}</Text>
+          <Text style={styles.body}>{daySimplificationGuidance.body}</Text>
+          <Text style={styles.hintText}>{daySimplificationGuidance.statusLabel}</Text>
           <Text style={styles.hintText}>{adaptiveDayGuidance.nextStep}</Text>
+          {daySimplificationGuidance.lines.map((line) => (
+            <Text key={line} style={styles.hintText}>
+              {line}
+            </Text>
+          ))}
+          {daySimplificationGuidance.ctaLabel ? (
+            <Pressable
+              accessibilityLabel={daySimplificationGuidance.ctaLabel}
+              accessibilityRole="button"
+              onPress={daySimplificationGuidance.action === "restore" ? onClearDaySimplification : onApplyDaySimplification}
+              style={[styles.button, styles.activeButton]}
+            >
+              <Text style={styles.buttonText}>{daySimplificationGuidance.ctaLabel}</Text>
+            </Pressable>
+          ) : null}
         </View>
         <View style={styles.infoBlock}>
           <Text style={styles.infoTitle}>{morningNudgeSettingsGuidance.title}</Text>
