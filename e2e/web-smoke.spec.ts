@@ -62,6 +62,9 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Vault on")).toBeVisible();
   await expect(page.getByText("Morning routine", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Wake and light anchor")).toBeVisible();
+  await expect(page.getByText("Morning nudge")).toBeVisible();
+  await expect(page.getByText("Weekdays - 08:00")).toBeVisible();
+  await expect(page.getByText("Keep morning simple. Light first.")).toBeVisible();
   await expect(page.getByText("0 of 3", { exact: true })).toBeVisible();
   await expect(page.getByText("Land the wake-and-light anchor first. Add the other two steps only after that starts to stick.")).toBeVisible();
   await page.getByLabel("Mark done: Wake and light anchor").click();
@@ -258,6 +261,15 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByRole("textbox", { name: "PIN" }).fill("1234");
   await page.getByLabel("Unlock with PIN").click();
   await expect(page.getByText("Privacy vault")).toBeVisible();
+  await expect(page.getByText("Morning nudges")).toBeVisible();
+  await page.getByLabel("Set morning nudge style: Supportive").click();
+  await page.getByLabel("Set morning nudge timing: 09:00").click();
+  await page.getByLabel("Set morning nudge cadence: Daily").click();
+  await page.getByLabel("Open Today").click();
+  await expect(page.getByText("Morning nudge")).toBeVisible();
+  await expect(page.getByText("Daily - 09:00")).toBeVisible();
+  await expect(page.getByText("Today already landed. Keep the same short morning again tomorrow.")).toBeVisible();
+  await page.getByLabel("Open Settings").click();
   await expect(page.getByText("Review packets")).toBeVisible();
   await page.getByLabel("Set default review section: 7 days").click();
   await page.getByLabel("Set default recap format: Packet").click();

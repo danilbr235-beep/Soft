@@ -59,6 +59,9 @@ type ProgramReviewTrendCopy = Record<
   "toward_stability" | "holding_pattern" | "toward_recovery",
   string
 >;
+type MorningNudgeStyleCopy = Record<"discreet" | "supportive", string>;
+type MorningNudgeTimingCopy = Record<"early" | "standard" | "late", string>;
+type MorningNudgeCadenceCopy = Record<"weekdays" | "daily", string>;
 type ReviewSectionCopy = Record<"overview" | "week" | "month" | "cycles", string>;
 type ReviewRecapFormatCopy = Record<"snapshot" | "plan" | "coach" | "packet", string>;
 type ReviewPacketBlockCopy = Record<"summary" | "next" | "signals" | "morning" | "history", string>;
@@ -383,6 +386,22 @@ export type LanguageCopy = {
     pinNotSet: string;
     autoLockTitle: string;
     autoLockStatus: (minutes: number) => string;
+    morningNudgeTitle: string;
+    morningNudgeBody: string;
+    enableMorningNudge: string;
+    disableMorningNudge: string;
+    morningNudgeOn: string;
+    morningNudgeOff: string;
+    morningNudgeStyleTitle: string;
+    morningNudgeStyles: MorningNudgeStyleCopy;
+    setMorningNudgeStyle: (label: string) => string;
+    morningNudgeTimingTitle: string;
+    morningNudgeTimings: MorningNudgeTimingCopy;
+    setMorningNudgeTiming: (label: string) => string;
+    morningNudgeCadenceTitle: string;
+    morningNudgeCadence: MorningNudgeCadenceCopy;
+    setMorningNudgeCadence: (label: string) => string;
+    morningNudgeHint: string;
     reviewPacketsTitle: string;
     reviewPacketsBody: string;
     defaultReviewSectionTitle: string;
@@ -1117,6 +1136,32 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       pinNotSet: "No PIN is set yet.",
       autoLockTitle: "Auto-lock",
       autoLockStatus: (minutes) => `Auto-lock after ${minutes} minutes of inactivity.`,
+      morningNudgeTitle: "Morning nudges",
+      morningNudgeBody: "A local, discreet reminder plan for the morning loop. On web this stays as product behavior and preview copy.",
+      enableMorningNudge: "Turn morning nudges on",
+      disableMorningNudge: "Turn morning nudges off",
+      morningNudgeOn: "Nudges on",
+      morningNudgeOff: "Nudges off",
+      morningNudgeStyleTitle: "Nudge style",
+      morningNudgeStyles: {
+        discreet: "Discreet",
+        supportive: "Supportive",
+      },
+      setMorningNudgeStyle: (label) => `Set morning nudge style: ${label}`,
+      morningNudgeTimingTitle: "Nudge timing",
+      morningNudgeTimings: {
+        early: "07:15",
+        standard: "08:00",
+        late: "09:00",
+      },
+      setMorningNudgeTiming: (label) => `Set morning nudge timing: ${label}`,
+      morningNudgeCadenceTitle: "Nudge cadence",
+      morningNudgeCadence: {
+        weekdays: "Weekdays",
+        daily: "Daily",
+      },
+      setMorningNudgeCadence: (label) => `Set morning nudge cadence: ${label}`,
+      morningNudgeHint: "This stays local for now. Native notification delivery can plug into the same timing and copy later.",
       reviewPacketsTitle: "Review packets",
       reviewPacketsBody: "Choose how the Review tab opens and whether the morning loop becomes a dedicated packet block.",
       defaultReviewSectionTitle: "Default review section",
@@ -1721,6 +1766,32 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       pinNotSet: "PIN пока не задан.",
       autoLockTitle: "Автозамок",
       autoLockStatus: (minutes) => `Автозамок сработает через ${minutes} ${russianMinuteWord(minutes)} бездействия.`,
+      morningNudgeTitle: "Утренние сигналы",
+      morningNudgeBody: "Локальный и незаметный план напоминания для утреннего цикла. В web-версии это пока поведение приложения и текстовый preview.",
+      enableMorningNudge: "Включить утренние сигналы",
+      disableMorningNudge: "Выключить утренние сигналы",
+      morningNudgeOn: "Сигналы включены",
+      morningNudgeOff: "Сигналы выключены",
+      morningNudgeStyleTitle: "Стиль сигнала",
+      morningNudgeStyles: {
+        discreet: "Незаметный",
+        supportive: "Поддерживающий",
+      },
+      setMorningNudgeStyle: (label) => `Выбрать стиль сигнала: ${label}`,
+      morningNudgeTimingTitle: "Время сигнала",
+      morningNudgeTimings: {
+        early: "07:15",
+        standard: "08:00",
+        late: "09:00",
+      },
+      setMorningNudgeTiming: (label) => `Выбрать время сигнала: ${label}`,
+      morningNudgeCadenceTitle: "Ритм сигнала",
+      morningNudgeCadence: {
+        weekdays: "Будни",
+        daily: "Каждый день",
+      },
+      setMorningNudgeCadence: (label) => `Выбрать ритм сигнала: ${label}`,
+      morningNudgeHint: "Пока это локальная настройка. Позже к тем же времени и тексту можно будет подключить нативную доставку.",
       reviewPacketsTitle: "Пакеты обзора",
       reviewPacketsBody: "Здесь можно выбрать, с какого среза и формата открывать Review, и делать ли утреннюю рутину отдельным блоком в пакете.",
       defaultReviewSectionTitle: "Срез по умолчанию",

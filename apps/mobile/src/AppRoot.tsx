@@ -73,6 +73,7 @@ function AppRootContent() {
             copy={copy}
             dailySession={app.dailySession}
             morningExperiments={app.morningExperiments}
+            morningNudge={app.morningNudge}
             morningRoutine={app.morningRoutine}
             privacyLock={app.privacyLock}
             today={app.today}
@@ -164,11 +165,17 @@ function AppRootContent() {
             copy={copy}
             hasPrivacyPin={app.hasPrivacyPin}
             language={app.language}
+            morningNudgePlan={app.morningNudge}
+            morningNudgePreferences={app.morningNudgePreferences}
             onClearPrivacyPin={app.clearPrivacyPin}
             privacyLock={app.privacyLock}
             onChangeLanguage={app.changeLanguage}
+            onChangeMorningNudgeTimePreset={app.changeMorningNudgeTimePreset}
+            onChangeMorningNudgeTone={app.changeMorningNudgeTone}
+            onChangeMorningNudgeWeekdaysOnly={app.changeMorningNudgeWeekdaysOnly}
             onLockNow={app.lockNow}
             onSetPrivacyPin={app.setPrivacyPin}
+            onToggleMorningNudgesEnabled={app.toggleMorningNudgesEnabled}
             onToggleVaultLock={app.togglePrivacyVault}
             onChangeReviewDefaultFormat={app.changeReviewDefaultFormat}
             onChangeReviewDefaultSection={app.changeReviewDefaultSection}

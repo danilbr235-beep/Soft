@@ -4,6 +4,7 @@ import { colors, radii, spacing } from "@pmhc/ui";
 import type { Alert, CurrentPriority, DailyStateTile, QuickLogDefinition } from "@pmhc/types";
 import type { MorningExperiments } from "../morningExperiments";
 import type { DailySession, DailySessionStepId } from "../dailySession";
+import type { MorningNudgePlan } from "../morningNudge";
 import type { MorningRoutine } from "../morningRoutine";
 import type { MorningRoutineStepId } from "../morningRoutineProgress";
 import type { TodayStatusItem } from "../todayStatus";
@@ -301,6 +302,38 @@ export function MorningExperimentsBlock({
             </Pressable>
           </View>
         ))}
+      </View>
+    </Surface>
+  );
+}
+
+export function MorningNudgeBlock({ plan }: { plan: MorningNudgePlan }) {
+  return (
+    <Surface>
+      <View style={styles.sessionHeader}>
+        <View style={styles.sessionHeaderText}>
+          <Text style={styles.kicker}>{plan.title}</Text>
+          <Text style={styles.body}>{plan.body}</Text>
+        </View>
+        <Text style={styles.sessionProgress}>{plan.stateLabel}</Text>
+      </View>
+      <View style={styles.routineMetricRow}>
+        <View style={styles.routineMetric}>
+          <Text style={styles.routineMetricLabel}>{plan.timingTitle}</Text>
+          <Text style={styles.routineMetricValue}>{plan.timingLabel}</Text>
+        </View>
+        <View style={styles.routineMetric}>
+          <Text style={styles.routineMetricLabel}>{plan.styleTitle}</Text>
+          <Text style={styles.routineMetricValue}>{plan.styleLabel}</Text>
+        </View>
+        <View style={styles.routineMetric}>
+          <Text style={styles.routineMetricLabel}>{plan.focusTitle}</Text>
+          <Text style={styles.routineMetricValue}>{plan.focusLabel}</Text>
+        </View>
+      </View>
+      <View style={styles.routineGuidance}>
+        <Text style={styles.routineGuidanceTitle}>{plan.previewTitle}</Text>
+        <Text style={styles.routineGuidanceAction}>{plan.previewBody}</Text>
       </View>
     </Surface>
   );

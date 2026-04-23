@@ -4,12 +4,14 @@ import { colors, spacing } from "@pmhc/ui";
 import type { PrivacyLockState, QuickLogDefinition, TodayPayload } from "@pmhc/types";
 import type { DailySession, DailySessionStepId } from "../dailySession";
 import type { MorningExperiments } from "../morningExperiments";
+import type { MorningNudgePlan } from "../morningNudge";
 import type { MorningRoutine } from "../morningRoutine";
 import type { MorningRoutineStepId } from "../morningRoutineProgress";
 import {
   AlertStrip,
   DailySessionBlock,
   MorningExperimentsBlock,
+  MorningNudgeBlock,
   MorningRoutineBlock,
   PriorityCard,
   QuickLogRow,
@@ -25,6 +27,7 @@ type Props = {
   copy: LanguageCopy;
   dailySession: DailySession;
   morningExperiments: MorningExperiments;
+  morningNudge: MorningNudgePlan;
   morningRoutine: MorningRoutine;
   privacyLock: PrivacyLockState;
   onAskCoach: () => void;
@@ -40,6 +43,7 @@ export function TodayScreen({
   copy,
   dailySession,
   morningExperiments,
+  morningNudge,
   morningRoutine,
   onAskCoach,
   onCompleteMorningRoutineStep,
@@ -70,6 +74,7 @@ export function TodayScreen({
         onOpenGuide={onOpenMorningGuide}
         onOpenLog={onOpenMorningLog}
       />
+      {morningNudge.enabled ? <MorningNudgeBlock plan={morningNudge} /> : null}
       <MorningExperimentsBlock experiments={morningExperiments} onOpenExperiment={onOpenMorningExperiment} />
       <PriorityCard copy={copy} priority={today.currentPriority} onAskCoach={onAskCoach} />
       <DailySessionBlock session={dailySession} onOpenStep={onOpenDailySessionStep} />

@@ -3,6 +3,12 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { languageName, type LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { AppLanguage, PrivacyLockState } from "@pmhc/types";
+import type {
+  MorningNudgePlan,
+  MorningNudgePreferences,
+  MorningNudgeTimePreset,
+  MorningNudgeTone,
+} from "../morningNudge";
 import type { ReviewPreferences } from "../reviewPreferences";
 import type { ReviewRecapFormat, ReviewSection } from "../reviewRecap";
 import { Screen } from "../components/Screen";
@@ -13,12 +19,18 @@ type Props = {
   hasPrivacyPin: boolean;
   copy: LanguageCopy;
   language: AppLanguage;
+  morningNudgePlan: MorningNudgePlan;
+  morningNudgePreferences: MorningNudgePreferences;
   onChangeLanguage: (language: AppLanguage) => void;
+  onChangeMorningNudgeTimePreset: (timePreset: MorningNudgeTimePreset) => void;
+  onChangeMorningNudgeTone: (tone: MorningNudgeTone) => void;
+  onChangeMorningNudgeWeekdaysOnly: (weekdaysOnly: boolean) => void;
   onChangeReviewDefaultFormat: (format: ReviewRecapFormat) => void;
   onChangeReviewDefaultSection: (section: ReviewSection) => void;
   onClearPrivacyPin: () => void;
   onLockNow: () => void;
   onSetPrivacyPin: (pin: string) => void;
+  onToggleMorningNudgesEnabled: () => void;
   onToggleMorningRoutineInPacket: () => void;
   onToggleVaultLock: () => void;
   resetOnboarding: () => void;
@@ -29,12 +41,18 @@ export function SettingsScreen({
   copy,
   hasPrivacyPin,
   language,
+  morningNudgePlan,
+  morningNudgePreferences,
   onChangeLanguage,
+  onChangeMorningNudgeTimePreset,
+  onChangeMorningNudgeTone,
+  onChangeMorningNudgeWeekdaysOnly,
   onChangeReviewDefaultFormat,
   onChangeReviewDefaultSection,
   onClearPrivacyPin,
   onLockNow,
   onSetPrivacyPin,
+  onToggleMorningNudgesEnabled,
   onToggleMorningRoutineInPacket,
   onToggleVaultLock,
   privacyLock,
@@ -44,6 +62,8 @@ export function SettingsScreen({
   const [pinDraft, setPinDraft] = useState("");
   const normalizedPin = pinDraft.replace(/\D/g, "").slice(0, 8);
   const canSavePin = normalizedPin.length >= 4;
+  const morningNudgeTones: MorningNudgeTone[] = ["discreet", "supportive"];
+  const morningNudgeTimings: MorningNudgeTimePreset[] = ["early", "standard", "late"];
   const reviewSections: ReviewSection[] = ["overview", "week", "month", "cycles"];
   const reviewFormats: ReviewRecapFormat[] = ["snapshot", "plan", "coach", "packet"];
 
@@ -104,6 +124,81 @@ export function SettingsScreen({
             <Text style={styles.buttonText}>{copy.settings.lockDemoVault}</Text>
           </Pressable>
         </View>
+      </Surface>
+      <Surface>
+        <Text style={styles.title}>{copy.settings.morningNudgeTitle}</Text>
+        <Text style={styles.body}>{copy.settings.morningNudgeBody}</Text>
+        <View style={styles.actions}>
+          <Pressable
+            accessibilityLabel={
+              morningNudgePreferences.enabled
+                ? copy.settings.disableMorningNudge
+                : copy.settings.enableMorningNudge
+            }
+            accessibilityRole="button"
+            onPress={onToggleMorningNudgesEnabled}
+            style={[styles.button, morningNudgePreferences.enabled && styles.activeButton]}
+          >
+            <Text style={styles.buttonText}>
+              {morningNudgePreferences.enabled ? copy.settings.morningNudgeOn : copy.settings.morningNudgeOff}
+            </Text>
+          </Pressable>
+        </View>
+        <Text style={styles.infoTitle}>{copy.settings.morningNudgeStyleTitle}</Text>
+        <View style={styles.actions}>
+          {morningNudgeTones.map((tone) => (
+            <Pressable
+              key={tone}
+              accessibilityLabel={copy.settings.setMorningNudgeStyle(copy.settings.morningNudgeStyles[tone])}
+              accessibilityRole="button"
+              onPress={() => onChangeMorningNudgeTone(tone)}
+              style={[styles.button, morningNudgePreferences.tone === tone && styles.activeButton]}
+            >
+              <Text style={styles.buttonText}>{copy.settings.morningNudgeStyles[tone]}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={styles.infoTitle}>{copy.settings.morningNudgeTimingTitle}</Text>
+        <View style={styles.actions}>
+          {morningNudgeTimings.map((timePreset) => (
+            <Pressable
+              key={timePreset}
+              accessibilityLabel={copy.settings.setMorningNudgeTiming(copy.settings.morningNudgeTimings[timePreset])}
+              accessibilityRole="button"
+              onPress={() => onChangeMorningNudgeTimePreset(timePreset)}
+              style={[styles.button, morningNudgePreferences.timePreset === timePreset && styles.activeButton]}
+            >
+              <Text style={styles.buttonText}>{copy.settings.morningNudgeTimings[timePreset]}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <Text style={styles.infoTitle}>{copy.settings.morningNudgeCadenceTitle}</Text>
+        <View style={styles.actions}>
+          <Pressable
+            accessibilityLabel={copy.settings.setMorningNudgeCadence(copy.settings.morningNudgeCadence.weekdays)}
+            accessibilityRole="button"
+            onPress={() => onChangeMorningNudgeWeekdaysOnly(true)}
+            style={[styles.button, morningNudgePreferences.weekdaysOnly && styles.activeButton]}
+          >
+            <Text style={styles.buttonText}>{copy.settings.morningNudgeCadence.weekdays}</Text>
+          </Pressable>
+          <Pressable
+            accessibilityLabel={copy.settings.setMorningNudgeCadence(copy.settings.morningNudgeCadence.daily)}
+            accessibilityRole="button"
+            onPress={() => onChangeMorningNudgeWeekdaysOnly(false)}
+            style={[styles.button, !morningNudgePreferences.weekdaysOnly && styles.activeButton]}
+          >
+            <Text style={styles.buttonText}>{copy.settings.morningNudgeCadence.daily}</Text>
+          </Pressable>
+        </View>
+        <View style={styles.infoBlock}>
+          <Text style={styles.infoTitle}>{morningNudgePlan.previewTitle}</Text>
+          <Text style={styles.body}>{morningNudgePlan.previewBody}</Text>
+          <Text style={styles.hintText}>{`${morningNudgePlan.timingTitle}: ${morningNudgePlan.timingLabel}`}</Text>
+          <Text style={styles.hintText}>{`${morningNudgePlan.styleTitle}: ${morningNudgePlan.styleLabel}`}</Text>
+          <Text style={styles.hintText}>{`${morningNudgePlan.focusTitle}: ${morningNudgePlan.focusLabel}`}</Text>
+        </View>
+        <Text style={styles.body}>{copy.settings.morningNudgeHint}</Text>
       </Surface>
       <Surface>
         <Text style={styles.title}>{copy.settings.pinTitle}</Text>
@@ -230,6 +325,10 @@ const styles = StyleSheet.create({
   infoTitle: {
     color: colors.text,
     fontWeight: "900",
+  },
+  hintText: {
+    color: colors.steel,
+    lineHeight: 19,
   },
   actions: {
     flexDirection: "row",
