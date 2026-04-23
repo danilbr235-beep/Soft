@@ -73,6 +73,7 @@ function AppRootContent() {
             adaptiveDayGuidance={app.adaptiveDayGuidance}
             copy={copy}
             dailySession={app.dailySession}
+            language={app.language}
             morningExperiments={app.morningExperiments}
             morningNudge={app.morningNudge}
             morningNudgeReview={app.morningNudgeReview}
@@ -134,6 +135,7 @@ function AppRootContent() {
         ) : null}
         {app.activeTab === "Programs" ? (
           <ProgramsScreen
+            adaptiveDayGuidance={app.adaptiveDayGuidance}
             alerts={app.today.alerts}
             activeProgram={app.today.activeProgram}
             copy={copy}
@@ -142,6 +144,7 @@ function AppRootContent() {
             dayPlan={app.programDayPlan}
             history={app.programHistory}
             isPaused={app.programPaused}
+            language={app.language}
             logs={app.logs}
             progressSummary={app.programSummary}
             onCompleteToday={app.completeProgramToday}

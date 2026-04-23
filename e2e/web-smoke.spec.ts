@@ -73,6 +73,8 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("1 of 3", { exact: true })).toBeVisible();
   await expect(page.getByText("Pair the quick morning log right after the anchor instead of adding a new step.").first()).toBeVisible();
   await expect(page.getByText("Use one rail")).toBeVisible();
+  await expect(page.getByText("Morning rail first")).toBeVisible();
+  await expect(page.getByText("Practice can wait")).toBeVisible();
   await expect(page.getByText("Optional morning experiments", { exact: true })).toBeVisible();
   await expect(page.getByText("Cold finish: caution first")).toBeVisible();
   await expect(page.getByText("Should I simplify today?")).toBeVisible();
@@ -90,6 +92,8 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Save Morning Yes").click();
   await expect(page.getByText("3 of 3", { exact: true })).toBeVisible();
   await expect(page.getByText("Repeat the same three-step morning tomorrow before changing the routine.")).toBeVisible();
+  await expect(page.getByText("Stop after one small action")).toBeVisible();
+  await expect(page.getByText("One-line note")).toBeVisible();
   await expect(page.getByText("Build your baseline")).toBeVisible();
   await expect(page.getByText("Start with two calm scores before anything more ambitious.")).toBeVisible();
   await expect(page.getByText("Daily session")).toBeVisible();
@@ -117,7 +121,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Symptom review recommended")).toBeVisible();
   await expect(page.getByText("Keep today conservative")).toBeVisible();
   await expect(page.getByText("Log symptoms and keep the rest of today to one recovery-first action.")).toBeVisible();
-  await expect(page.getByText("Recovery reset")).toBeVisible();
+  await expect(page.getByText("One recovery-first step")).toBeVisible();
 
   await page.getByLabel("Open Track").click();
   await expect(page.getByText("Baseline snapshot")).toBeVisible();
@@ -213,6 +217,9 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Open Programs").click();
   await expect(page.getByText("Day 1 of 14")).toBeVisible();
   await expect(page.getByText("Adjustment for today")).toBeVisible();
+  await expect(page.getByText("Should I simplify today?")).toBeVisible();
+  await expect(page.getByText("Keep the plan narrow")).toBeVisible();
+  await expect(page.getByText("Recommended cap: one task after the opening check-in.")).toBeVisible();
   await expect(page.getByText("Start with the check-in task and wait for the next signal before adding more.")).toBeVisible();
   await expect(page.getByText("Guided by review digest: Baseline-building read")).toBeVisible();
   await page.getByLabel("Pause program").click();

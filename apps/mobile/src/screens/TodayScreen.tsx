@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, spacing } from "@pmhc/ui";
-import type { PrivacyLockState, QuickLogDefinition, TodayPayload } from "@pmhc/types";
+import type { AppLanguage, PrivacyLockState, QuickLogDefinition, TodayPayload } from "@pmhc/types";
 import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
 import type { DailySession, DailySessionStepId } from "../dailySession";
 import type { MorningExperiments } from "../morningExperiments";
@@ -23,11 +23,13 @@ import {
 } from "../components/TodayComponents";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
+import { buildAdaptiveTodayActionCards } from "../todayAdaptiveActionCards";
 import { buildTodayStatusItems } from "../todayStatus";
 
 type Props = {
   today: TodayPayload;
   copy: LanguageCopy;
+  language: AppLanguage;
   dailySession: DailySession;
   adaptiveDayGuidance: CoachAdaptiveNudge;
   morningExperiments: MorningExperiments;
@@ -48,6 +50,7 @@ export function TodayScreen({
   adaptiveDayGuidance,
   copy,
   dailySession,
+  language,
   morningExperiments,
   morningNudge,
   morningNudgeReview,
@@ -71,6 +74,11 @@ export function TodayScreen({
     programTitle: today.activeProgram ? activeProgramTitle : null,
     today,
   });
+  const adaptiveActionCards = buildAdaptiveTodayActionCards({
+    actionCards: today.actionCards,
+    guidanceState: adaptiveDayGuidance.state,
+    language,
+  });
 
   return (
     <Screen eyebrow={today.todayMode} title={copy.today.title} subtitle={activeProgramTitle}>
@@ -89,7 +97,7 @@ export function TodayScreen({
       <StateGrid tiles={today.dailyState} />
       <AlertStrip alerts={today.alerts} />
       <View style={styles.actions}>
-        {today.actionCards.map((card) => (
+        {adaptiveActionCards.map((card) => (
           <Surface key={card.id}>
             <Text style={styles.actionKind}>{copy.today.actionKinds[card.kind]}</Text>
             <Text style={styles.actionTitle}>{card.title}</Text>

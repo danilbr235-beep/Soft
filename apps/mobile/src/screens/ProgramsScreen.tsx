@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
   buildProgramAdjustmentSummary,
   buildProgramCompletionSummary,
+  buildProgramDayGuidanceSummary,
   buildProgramDetailSummary,
   buildProgramNextPaths,
   type ProgramNextPathId,
@@ -10,11 +11,23 @@ import {
 import type { LanguageCopy } from "@pmhc/i18n";
 import { buildTrackingReviewDigest } from "@pmhc/tracking";
 import { colors, radii, spacing } from "@pmhc/ui";
-import type { Alert, CurrentPriority, LogEntry, Program, ProgramDayPlan, ProgramHistoryEntry, ProgramProgressSummary, TodayMode } from "@pmhc/types";
+import type {
+  Alert,
+  AppLanguage,
+  CurrentPriority,
+  LogEntry,
+  Program,
+  ProgramDayPlan,
+  ProgramHistoryEntry,
+  ProgramProgressSummary,
+  TodayMode,
+} from "@pmhc/types";
+import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 
 type Props = {
+  adaptiveDayGuidance: CoachAdaptiveNudge;
   alerts: Alert[];
   activeProgram: Program | null;
   copy: LanguageCopy;
@@ -23,6 +36,7 @@ type Props = {
   dayPlan: ProgramDayPlan | null;
   history: ProgramHistoryEntry[];
   isPaused: boolean;
+  language: AppLanguage;
   logs: LogEntry[];
   progressSummary: ProgramProgressSummary | null;
   onCompleteToday: () => void;
@@ -36,6 +50,7 @@ type Props = {
 };
 
 export function ProgramsScreen({
+  adaptiveDayGuidance,
   alerts,
   activeProgram,
   copy,
@@ -44,6 +59,7 @@ export function ProgramsScreen({
   dayPlan,
   history,
   isPaused,
+  language,
   logs,
   progressSummary,
   onCompleteToday,
@@ -84,6 +100,17 @@ export function ProgramsScreen({
       todayMode,
     });
   }, [alerts, currentPriority, dayPlan, progressSummary, reviewDigest.nextStep, reviewDigest.tone, todayMode]);
+  const dayGuidanceSummary = useMemo(() => {
+    if (!dayPlan) {
+      return null;
+    }
+
+    return buildProgramDayGuidanceSummary({
+      dayPlan,
+      guidanceState: adaptiveDayGuidance.state,
+      language,
+    });
+  }, [adaptiveDayGuidance.state, dayPlan, language]);
   const completionSummary = useMemo(() => {
     if (!progressSummary) {
       return null;
@@ -111,6 +138,17 @@ export function ProgramsScreen({
   const programFinished = completionSummary != null;
   const disableProgramActions = !activeProgram || isPaused || programFinished;
   const disableTaskActions = isPaused || programFinished;
+  const orderedDayPlanTasks = useMemo(() => {
+    if (!dayPlan || !dayGuidanceSummary) {
+      return dayPlan?.tasks ?? [];
+    }
+
+    const tasksById = new Map(dayPlan.tasks.map((task) => [task.id, task]));
+
+    return dayGuidanceSummary.orderedTaskIds
+      .map((taskId) => tasksById.get(taskId))
+      .filter((task): task is ProgramDayPlan["tasks"][number] => task != null);
+  }, [dayGuidanceSummary, dayPlan]);
 
   function renderTaskList() {
     if (!dayPlan) {
@@ -119,7 +157,7 @@ export function ProgramsScreen({
 
     return (
       <View style={styles.taskList}>
-        {dayPlan.tasks.map((task) => {
+        {orderedDayPlanTasks.map((task) => {
           const taskTitle = copy.programs.taskTitles[task.id] ?? task.title;
           const taskDescription = copy.programs.taskDescriptions[task.id] ?? task.description;
           const completed = dayPlan.completedTaskIds.includes(task.id);
@@ -239,6 +277,21 @@ export function ProgramsScreen({
           <Text style={styles.detailLabel}>{copy.programs.adjustmentNextStepTitle}</Text>
           <Text style={styles.body}>{copy.programs.adjustmentNextSteps[adjustmentSummary.nextStep]}</Text>
         </View>
+      </Surface>
+    );
+  }
+
+  function renderDayGuidanceCard() {
+    if (!dayGuidanceSummary || completionSummary) {
+      return null;
+    }
+
+    return (
+      <Surface>
+        <Text style={styles.eyebrow}>{adaptiveDayGuidance.title}</Text>
+        <Text style={styles.sectionTitle}>{dayGuidanceSummary.tone}</Text>
+        <Text style={styles.body}>{dayGuidanceSummary.body}</Text>
+        <Text style={styles.metaText}>{dayGuidanceSummary.taskCapText}</Text>
       </Surface>
     );
   }
@@ -401,6 +454,7 @@ export function ProgramsScreen({
 
         {renderCompletionCard()}
         {renderAdjustmentCard()}
+        {renderDayGuidanceCard()}
 
         <Surface>
           <View style={styles.planHeader}>
@@ -455,6 +509,7 @@ export function ProgramsScreen({
         {renderActionButtons()}
       </Surface>
       {renderAdjustmentCard()}
+      {renderDayGuidanceCard()}
       {dayPlan && detailSummary ? (
         <Surface>
           <View style={styles.planHeader}>
