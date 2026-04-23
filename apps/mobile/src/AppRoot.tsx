@@ -105,11 +105,10 @@ function AppRootContent() {
             copy={copy}
             language={app.language}
             logs={app.logs}
-            morningRoutineProgress={app.morningRoutineProgress}
+            morningRoutineReview={app.morningRoutineReview}
             onSavePacket={app.saveReviewPacket}
             programHistory={app.programHistory}
             reviewPackets={app.reviewPackets}
-            todayDate={app.today.date}
           />
         ) : null}
         {app.activeTab === "Learn" ? (

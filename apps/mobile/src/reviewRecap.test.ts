@@ -52,6 +52,9 @@ const programReview: ProgramReviewSummary = {
 };
 
 const morningRoutineReview: MorningRoutineReview = {
+  toneId: "building",
+  reasonId: "first_full_day",
+  nextStepId: "repeat_full_loop",
   title: "Morning routine review",
   body: "A short 7-day read of whether the morning loop is staying repeatable.",
   tone: "Building consistency",

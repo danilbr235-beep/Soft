@@ -1,7 +1,25 @@
 import type { AppLanguage } from "@pmhc/types";
 import { morningRoutineStepIds, type MorningRoutineProgressStore, type MorningRoutineStepId } from "./morningRoutineProgress";
 
+export type MorningRoutineReviewTone = "building" | "steady" | "reset";
+export type MorningRoutineReviewReason =
+  | "no_signal"
+  | "first_full_day"
+  | "checkin_gap"
+  | "guide_gap"
+  | "partial_only"
+  | "routine_holding";
+export type MorningRoutineReviewNextStep =
+  | "protect_anchor"
+  | "repeat_full_loop"
+  | "pair_checkin"
+  | "open_guide_same_morning"
+  | "keep_same_loop";
+
 export type MorningRoutineReview = {
+  toneId: MorningRoutineReviewTone;
+  reasonId: MorningRoutineReviewReason;
+  nextStepId: MorningRoutineReviewNextStep;
   title: string;
   body: string;
   tone: string;
@@ -14,21 +32,6 @@ export type MorningRoutineReview = {
   partialDays: number;
   streak: number;
 };
-
-type MorningRoutineReviewTone = "building" | "steady" | "reset";
-type MorningRoutineReviewReason =
-  | "no_signal"
-  | "first_full_day"
-  | "checkin_gap"
-  | "guide_gap"
-  | "partial_only"
-  | "routine_holding";
-type MorningRoutineReviewNextStep =
-  | "protect_anchor"
-  | "repeat_full_loop"
-  | "pair_checkin"
-  | "open_guide_same_morning"
-  | "keep_same_loop";
 
 type LocalizedCopy = {
   title: string;
@@ -87,11 +90,14 @@ const copy: Record<AppLanguage, LocalizedCopy> = {
     },
     reasons: {
       no_signal: "По утренней рутине сигнала пока мало, поэтому первый шаг лучше оставить совсем простым.",
-      first_full_day: "Хотя бы одно полное утро уже получилось. Лучше повторить тот же короткий цикл еще раз, а не добавлять новое.",
-      checkin_gap: "Подъем и свет появляются чаще, чем спокойный чек-ин, поэтому цикл пока обрывается слишком рано.",
+      first_full_day:
+        "Хотя бы одно полное утро уже получилось. Лучше повторить тот же короткий цикл еще раз, а не добавлять новое.",
+      checkin_gap:
+        "Подъем и свет появляются чаще, чем спокойный чек-ин, поэтому цикл пока обрывается слишком рано.",
       guide_gap: "Якорь и чек-ин уже появляются, но короткий гид выпадает чаще остальных шагов.",
       partial_only: "Части рутины уже появляются, но пока не складываются в один повторяемый трехшаговый блок.",
-      routine_holding: "Короткий утренний цикл уже держится достаточно регулярно. Сейчас полезнее закрепить его, а не усложнять.",
+      routine_holding:
+        "Короткий утренний цикл уже держится достаточно регулярно. Сейчас полезнее закрепить его, а не усложнять.",
     },
     nextSteps: {
       protect_anchor: "Сначала просто держи подъем и дневной свет. Остальные два шага добавляй только после этого.",
@@ -144,6 +150,9 @@ export function buildMorningRoutineReview({
   });
 
   return {
+    toneId: summary.tone,
+    reasonId: summary.reason,
+    nextStepId: summary.nextStep,
     title: languageCopy.title,
     body: languageCopy.body,
     tone: languageCopy.tones[summary.tone],

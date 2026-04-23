@@ -7,8 +7,7 @@ import { colors, radii, spacing } from "@pmhc/ui";
 import type { AppLanguage, LogEntry, ProgramHistoryEntry } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
-import { buildMorningRoutineReview, type MorningRoutineReview } from "../morningRoutineReview";
-import type { MorningRoutineProgressStore } from "../morningRoutineProgress";
+import type { MorningRoutineReview } from "../morningRoutineReview";
 import type { ReviewPacketHistoryEntry } from "../reviewPacketHistory";
 import { buildReviewRecap, type ReviewRecapFormat, type ReviewRecapResult, type ReviewSection } from "../reviewRecap";
 import {
@@ -22,22 +21,20 @@ type Props = {
   copy: LanguageCopy;
   language: AppLanguage;
   logs: LogEntry[];
-  morningRoutineProgress: MorningRoutineProgressStore;
+  morningRoutineReview: MorningRoutineReview;
   onSavePacket: (section: ReviewSection, packet: Extract<ReviewRecapResult, { kind: "packet" }>) => Promise<void> | void;
   programHistory: ProgramHistoryEntry[];
   reviewPackets: ReviewPacketHistoryEntry[];
-  todayDate: string;
 };
 
 export function ReviewScreen({
   copy,
   language,
   logs,
-  morningRoutineProgress,
+  morningRoutineReview,
   onSavePacket,
   programHistory,
   reviewPackets,
-  todayDate,
 }: Props) {
   const [activeSection, setActiveSection] = useState<ReviewSection>("overview");
   const [activeFormat, setActiveFormat] = useState<ReviewRecapFormat>("snapshot");
@@ -48,15 +45,6 @@ export function ReviewScreen({
   const weeklyReview = useMemo(() => buildTrackingWeeklyReview(logs, programHistory), [logs, programHistory]);
   const monthlyReview = useMemo(() => buildTrackingPeriodReview(logs, programHistory, 30), [logs, programHistory]);
   const programReview = useMemo(() => buildProgramReview(programHistory), [programHistory]);
-  const morningRoutineReview = useMemo(
-    () =>
-      buildMorningRoutineReview({
-        date: todayDate,
-        language,
-        progressStore: morningRoutineProgress,
-      }),
-    [language, morningRoutineProgress, todayDate],
-  );
   const sectionOrder: ReviewSection[] = ["overview", "week", "month", "cycles"];
   const formatOrder: ReviewRecapFormat[] = ["snapshot", "plan", "coach", "packet"];
   const archiveFilterOrder: ReviewPacketArchiveFilter[] = ["all", ...sectionOrder];

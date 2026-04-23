@@ -68,6 +68,7 @@ import {
   type MorningRoutineProgressStore,
   type MorningRoutineStepId,
 } from "../morningRoutineProgress";
+import { buildMorningRoutineReview } from "../morningRoutineReview";
 import { type ReviewSection } from "../reviewRecap";
 import {
   appendReviewPacketHistory,
@@ -334,15 +335,23 @@ export function useAppState() {
     reviewPackets,
     today,
   ]);
+  const morningRoutineReview = useMemo(() => {
+    return buildMorningRoutineReview({
+      date: today.date,
+      language,
+      progressStore: morningRoutineProgress,
+    });
+  }, [language, morningRoutineProgress, today.date]);
   const morningRoutine = useMemo(() => {
     return buildMorningRoutine({
       content,
       language,
       progressEntry: morningRoutineProgress[today.date],
       progressStore: morningRoutineProgress,
+      review: morningRoutineReview,
       today,
     });
-  }, [content, language, morningRoutineProgress, today]);
+  }, [content, language, morningRoutineProgress, morningRoutineReview, today]);
   const morningExperiments = useMemo(() => {
     return buildMorningExperiments({
       content,
@@ -838,6 +847,7 @@ export function useAppState() {
     morningRoutineProgress,
     morningExperiments,
     morningRoutine,
+    morningRoutineReview,
     today,
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,

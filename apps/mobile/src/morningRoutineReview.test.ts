@@ -26,6 +26,8 @@ describe("buildMorningRoutineReview", () => {
       },
     });
 
+    expect(review.toneId).toBe("steady");
+    expect(review.nextStepId).toBe("keep_same_loop");
     expect(review.tone).toBe("Routine is holding");
     expect(review.reason).toContain("landing often enough");
     expect(review.meta).toContain("Full mornings: 4/7");
@@ -52,6 +54,8 @@ describe("buildMorningRoutineReview", () => {
       },
     });
 
+    expect(review.reasonId).toBe("checkin_gap");
+    expect(review.nextStepId).toBe("pair_checkin");
     expect(review.tone).toBe("Tighten the loop");
     expect(review.reason).toContain("wake-and-light anchor");
     expect(review.nextStep).toContain("Pair the quick morning log");

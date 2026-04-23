@@ -1,5 +1,6 @@
 import { morningRoutineEvidenceSources } from "@pmhc/evidence";
 import type { AppLanguage, ContentItem, QuickLogDefinition, TodayPayload } from "@pmhc/types";
+import type { MorningRoutineReview } from "./morningRoutineReview";
 import {
   buildMorningRoutineMetrics,
   morningRoutineStepIds,
@@ -14,6 +15,8 @@ export type MorningRoutineStep = {
   title: string;
   body: string;
   badge: string;
+  highlighted: boolean;
+  highlightLabel: string | null;
   statusLabel: string;
   completed: boolean;
   cta: string;
@@ -26,6 +29,14 @@ export type MorningRoutine = {
   title: string;
   body: string;
   note: string;
+  guidance: {
+    title: string;
+    tone: string;
+    reason: string;
+    nextStepTitle: string;
+    nextStep: string;
+    meta: string;
+  } | null;
   guideItemId: string | null;
   logDefinition: QuickLogDefinition | null;
   metrics: MorningRoutineMetric[];
@@ -37,6 +48,7 @@ type Input = {
   language: AppLanguage;
   progressEntry?: MorningRoutineProgressEntry | null;
   progressStore: MorningRoutineProgressStore;
+  review: MorningRoutineReview | null;
   today: TodayPayload;
 };
 
@@ -47,6 +59,7 @@ const copy = {
     title: "Morning routine",
     body: "A short evidence-backed start: steady wake-up, one calm check-in, one gentle movement cue.",
     note: "Good fit for repeated morning actions. Longer instructions and courses should stay in Learn or Programs.",
+    guidanceTitle: "7-day morning read",
     anchorTitle: "Wake and light anchor",
     anchorBody: "Keep the wake time steady and get outdoor light early when you can.",
     checkinTitle: "One calm check-in",
@@ -61,12 +74,14 @@ const copy = {
     openGuide: "Open guide",
     openLog: "Quick log",
     markDone: "Mark done",
+    startHere: "Start here today",
     stepActionLabel: (title: string, cta: string) => `${cta}: ${title}`,
   },
   ru: {
     title: "Утренняя рутина",
     body: "Короткий старт на проверенной базе: стабильный подъем, один спокойный чек-ин и один мягкий сигнал на движение.",
     note: "Повторяемые утренние действия лучше держать здесь, а длинные инструкции и курсы — в Базе или Плане.",
+    guidanceTitle: "Вывод по утру за 7 дней",
     anchorTitle: "Подъем и дневной свет",
     anchorBody: "Старайся вставать примерно в одно время и получить дневной свет как можно раньше.",
     checkinTitle: "Один спокойный чек-ин",
@@ -81,6 +96,7 @@ const copy = {
     openGuide: "Открыть гид",
     openLog: "Быстрый лог",
     markDone: "Отметить",
+    startHere: "Начни с этого",
     stepActionLabel: (title: string, cta: string) => `${cta}: ${title}`,
   },
 } as const;
@@ -90,6 +106,7 @@ export function buildMorningRoutine({
   language,
   progressEntry,
   progressStore,
+  review,
   today,
 }: Input): MorningRoutine {
   const guide = content.find((item) => item.id === guideId) ?? null;
@@ -101,9 +118,11 @@ export function buildMorningRoutine({
     null;
   const languageCopy = copy[language];
   const completedStepIds = new Set<MorningRoutineStepId>(progressEntry?.completedStepIds ?? []);
+  const focusStepId = selectFocusStepId(review, completedStepIds);
 
   const steps: MorningRoutineStep[] = morningRoutineStepIds.map((stepId) => {
     const completed = completedStepIds.has(stepId);
+    const highlighted = !completed && stepId === focusStepId;
     const statusLabel = completed ? languageCopy.done : languageCopy.ready;
 
     if (stepId === "anchor") {
@@ -114,6 +133,8 @@ export function buildMorningRoutine({
         title: languageCopy.anchorTitle,
         body: languageCopy.anchorBody,
         badge: languageCopy.anchorBadge,
+        highlighted,
+        highlightLabel: highlighted ? languageCopy.startHere : null,
         statusLabel,
         completed,
         cta,
@@ -129,12 +150,17 @@ export function buildMorningRoutine({
         title: languageCopy.checkinTitle,
         body: languageCopy.checkinBody(preferredLog?.label ?? "one signal"),
         badge: languageCopy.checkinBadge,
+        highlighted,
+        highlightLabel: highlighted ? languageCopy.startHere : null,
         statusLabel,
         completed,
         cta: languageCopy.openLog,
         ctaKind: "log",
         actionLabel: languageCopy.stepActionLabel(languageCopy.checkinTitle, languageCopy.openLog),
-        sourceLabels: [morningRoutineEvidenceSources[1]?.organization, morningRoutineEvidenceSources[2]?.organization].filter(Boolean),
+        sourceLabels: [
+          morningRoutineEvidenceSources[1]?.organization,
+          morningRoutineEvidenceSources[2]?.organization,
+        ].filter(Boolean),
       };
     }
 
@@ -143,6 +169,8 @@ export function buildMorningRoutine({
       title: languageCopy.guideTitle,
       body: languageCopy.guideBody,
       badge: languageCopy.guideBadge,
+      highlighted,
+      highlightLabel: highlighted ? languageCopy.startHere : null,
       statusLabel,
       completed,
       cta: languageCopy.openGuide,
@@ -156,9 +184,44 @@ export function buildMorningRoutine({
     title: languageCopy.title,
     body: languageCopy.body,
     note: languageCopy.note,
+    guidance: review
+      ? {
+          title: languageCopy.guidanceTitle,
+          tone: review.tone,
+          reason: review.reason,
+          nextStepTitle: review.nextStepTitle,
+          nextStep: review.nextStep,
+          meta: review.meta,
+        }
+      : null,
     guideItemId: guide?.id ?? null,
     logDefinition: preferredLog,
     metrics: buildMorningRoutineMetrics(progressStore, today.date, language),
     steps,
   };
+}
+
+function selectFocusStepId(
+  review: MorningRoutineReview | null,
+  completedStepIds: Set<MorningRoutineStepId>,
+): MorningRoutineStepId | null {
+  const firstIncompleteStepId = morningRoutineStepIds.find((stepId) => !completedStepIds.has(stepId)) ?? null;
+
+  if (!review || !firstIncompleteStepId) {
+    return firstIncompleteStepId;
+  }
+
+  if (review.nextStepId === "protect_anchor") {
+    return completedStepIds.has("anchor") ? firstIncompleteStepId : "anchor";
+  }
+
+  if (review.nextStepId === "pair_checkin") {
+    return completedStepIds.has("checkin") ? firstIncompleteStepId : "checkin";
+  }
+
+  if (review.nextStepId === "open_guide_same_morning") {
+    return completedStepIds.has("guide") ? firstIncompleteStepId : "guide";
+  }
+
+  return firstIncompleteStepId;
 }

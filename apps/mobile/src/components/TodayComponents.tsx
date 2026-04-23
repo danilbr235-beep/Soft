@@ -195,14 +195,32 @@ export function MorningRoutineBlock({
           </View>
         ))}
       </View>
+      {routine.guidance ? (
+        <View style={styles.routineGuidance}>
+          <Text style={styles.routineGuidanceTitle}>{routine.guidance.title}</Text>
+          <Text style={styles.sessionStepTitle}>{routine.guidance.tone}</Text>
+          <Text style={styles.body}>{routine.guidance.reason}</Text>
+          <Text style={styles.signalDetail}>{routine.guidance.nextStepTitle}</Text>
+          <Text style={styles.routineGuidanceAction}>{routine.guidance.nextStep}</Text>
+          <Text style={styles.hintMeta}>{routine.guidance.meta}</Text>
+        </View>
+      ) : null}
       <View style={styles.sessionList}>
         {routine.steps.map((step, index) => (
-          <View key={step.id} style={[styles.sessionStep, step.completed ? styles.sessionStepDone : null]}>
+          <View
+            key={step.id}
+            style={[
+              styles.sessionStep,
+              step.highlighted ? styles.sessionStepActive : null,
+              step.completed ? styles.sessionStepDone : null,
+            ]}
+          >
             <View style={styles.rowBetween}>
               <Text style={styles.sessionStepTitle}>{`${index + 1}. ${step.title}`}</Text>
               <Text style={[styles.sessionState, step.completed ? styles.sessionStateDone : null]}>{step.statusLabel}</Text>
             </View>
             <Text style={styles.stepBadge}>{step.badge}</Text>
+            {step.highlightLabel ? <Text style={styles.stepHighlight}>{step.highlightLabel}</Text> : null}
             <Text style={styles.body}>{step.body}</Text>
             <View style={styles.sourceRow}>
               {step.sourceLabels.map((label) => (
@@ -498,6 +516,11 @@ const styles = StyleSheet.create({
   sessionStateDone: {
     color: colors.text,
   },
+  signalDetail: {
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 17,
+  },
   sessionButton: {
     minHeight: 42,
     alignItems: "center",
@@ -545,6 +568,26 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     marginTop: spacing.xs,
   },
+  routineGuidance: {
+    borderColor: colors.moss,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    backgroundColor: colors.panelSoft,
+    gap: spacing.xs,
+    padding: spacing.md,
+  },
+  routineGuidanceTitle: {
+    color: colors.moss,
+    fontSize: 11,
+    fontWeight: "900",
+    textTransform: "uppercase",
+  },
+  routineGuidanceAction: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 20,
+  },
   routineFit: {
     color: colors.text,
     fontSize: 14,
@@ -577,6 +620,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800",
     textTransform: "uppercase",
+  },
+  stepHighlight: {
+    color: colors.moss,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  hintMeta: {
+    color: colors.steel,
+    fontSize: 12,
+    fontWeight: "800",
   },
   disabledButton: {
     opacity: 0.5,

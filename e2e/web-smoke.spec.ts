@@ -63,8 +63,10 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Morning routine", { exact: true })).toBeVisible();
   await expect(page.getByText("Wake and light anchor")).toBeVisible();
   await expect(page.getByText("0 of 3", { exact: true })).toBeVisible();
+  await expect(page.getByText("Land the wake-and-light anchor first. Add the other two steps only after that starts to stick.")).toBeVisible();
   await page.getByLabel("Mark done: Wake and light anchor").click();
   await expect(page.getByText("1 of 3", { exact: true })).toBeVisible();
+  await expect(page.getByText("Pair the quick morning log right after the anchor instead of adding a new step.")).toBeVisible();
   await expect(page.getByText("Optional morning experiments", { exact: true })).toBeVisible();
   await expect(page.getByText("Cold finish: caution first")).toBeVisible();
   await page.getByLabel("Open note Cold finish: caution first").click();
@@ -80,6 +82,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByLabel("Save Morning Yes")).toBeVisible();
   await page.getByLabel("Save Morning Yes").click();
   await expect(page.getByText("3 of 3", { exact: true })).toBeVisible();
+  await expect(page.getByText("Repeat the same three-step morning tomorrow before changing the routine.")).toBeVisible();
   await expect(page.getByText("Build your baseline")).toBeVisible();
   await expect(page.getByText("Start with two calm scores before anything more ambitious.")).toBeVisible();
   await expect(page.getByText("Daily session")).toBeVisible();
