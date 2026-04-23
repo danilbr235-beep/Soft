@@ -3,21 +3,38 @@ import type { AppLanguage, TodayPayload } from "@pmhc/types";
 import type { MorningNudgeReview } from "./morningNudgeReview";
 import type { MorningRoutineReview } from "./morningRoutineReview";
 
+export type AdaptiveDayGuidanceState = "recovery" | "narrow" | "protect_morning" | "steady";
+
 export type CoachAdaptiveNudge = {
   id: "simplify";
+  state: AdaptiveDayGuidanceState;
+  tone: string;
   title: string;
   body: string;
   nextStep: string;
 };
-
-type GuidanceState = "recovery" | "narrow" | "protect_morning" | "steady";
 
 const titles: Record<AppLanguage, string> = {
   en: "Should I simplify today?",
   ru: "Стоит ли упростить день?",
 };
 
-const bodyCopy: Record<AppLanguage, Record<GuidanceState, string>> = {
+const toneCopy: Record<AppLanguage, Record<AdaptiveDayGuidanceState, string>> = {
+  en: {
+    recovery: "Recovery-first day",
+    narrow: "Keep today narrow",
+    protect_morning: "Protect the morning rail",
+    steady: "No extra complexity today",
+  },
+  ru: {
+    recovery: "День в recovery-режиме",
+    narrow: "День лучше держать узким",
+    protect_morning: "Собери утренний рельс",
+    steady: "Сегодня без лишней сложности",
+  },
+};
+
+const bodyCopy: Record<AppLanguage, Record<AdaptiveDayGuidanceState, string>> = {
   en: {
     recovery:
       "Yes. The current read is cautious enough that the whole day should stay smaller, not just one task.",
@@ -40,7 +57,7 @@ const bodyCopy: Record<AppLanguage, Record<GuidanceState, string>> = {
   },
 };
 
-const nextStepCopy: Record<AppLanguage, Record<Exclude<GuidanceState, "protect_morning">, string>> = {
+const nextStepCopy: Record<AppLanguage, Record<Exclude<AdaptiveDayGuidanceState, "protect_morning">, string>> = {
   en: {
     recovery: "Keep one recovery-first action, one check-in, and skip any urge to test progress today.",
     narrow: "Land the morning anchor, log two calm scores, and stop there unless the day stays quiet.",
@@ -83,6 +100,8 @@ export function buildCoachAdaptiveNudge({
 
   return {
     id: "simplify",
+    state: guidanceState,
+    tone: toneCopy[language][guidanceState],
     title: titles[language],
     body: [bodyCopy[language][guidanceState], reminderNote].filter(Boolean).join(" "),
     nextStep:
@@ -100,7 +119,7 @@ function selectGuidanceState({
   morningRoutineReview: MorningRoutineReview;
   reviewDigest: CoachReviewDigest;
   today: TodayPayload;
-}): GuidanceState {
+}): AdaptiveDayGuidanceState {
   const hasHighAlert = today.alerts.some(
     (alert) => alert.severity === "medical_attention" || alert.severity === "high_priority",
   );

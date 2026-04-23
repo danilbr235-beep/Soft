@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { Alert, CurrentPriority, DailyStateTile, QuickLogDefinition } from "@pmhc/types";
+import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
 import type { MorningExperiments } from "../morningExperiments";
 import type { DailySession, DailySessionStepId } from "../dailySession";
 import type { MorningNudgePlan } from "../morningNudge";
@@ -28,6 +29,30 @@ export function PriorityCard({ copy, onAskCoach, priority }: PriorityProps) {
       <Text style={styles.body}>{priority.whyItMatters}</Text>
       <Text style={styles.action}>{priority.recommendedAction}</Text>
       {priority.avoidToday ? <Text style={styles.avoid}>{priority.avoidToday}</Text> : null}
+      <Pressable accessibilityRole="button" onPress={onAskCoach} style={styles.secondaryButton}>
+        <Text style={styles.secondaryButtonText}>{copy.today.askCoachWhy}</Text>
+      </Pressable>
+    </Surface>
+  );
+}
+
+export function AdaptiveDayGuidanceBlock({
+  copy,
+  guidance,
+  onAskCoach,
+}: {
+  copy: LanguageCopy;
+  guidance: CoachAdaptiveNudge;
+  onAskCoach: () => void;
+}) {
+  return (
+    <Surface>
+      <View style={styles.rowBetween}>
+        <Text style={styles.kicker}>{guidance.title}</Text>
+        <Text style={styles.sessionProgress}>{guidance.tone}</Text>
+      </View>
+      <Text style={styles.body}>{guidance.body}</Text>
+      <Text style={styles.routineGuidanceAction}>{guidance.nextStep}</Text>
       <Pressable accessibilityRole="button" onPress={onAskCoach} style={styles.secondaryButton}>
         <Text style={styles.secondaryButtonText}>{copy.today.askCoachWhy}</Text>
       </Pressable>

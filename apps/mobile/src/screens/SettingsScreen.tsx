@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { languageName, type LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { AppLanguage, PrivacyLockState } from "@pmhc/types";
+import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
 import type {
   MorningNudgePlan,
   MorningNudgePreferences,
@@ -22,6 +23,7 @@ import { Surface } from "../components/Surface";
 type Props = {
   privacyLock: PrivacyLockState;
   hasPrivacyPin: boolean;
+  adaptiveDayGuidance: CoachAdaptiveNudge;
   copy: LanguageCopy;
   language: AppLanguage;
   morningNudgePlan: MorningNudgePlan;
@@ -48,6 +50,7 @@ type Props = {
 };
 
 export function SettingsScreen({
+  adaptiveDayGuidance,
   copy,
   hasPrivacyPin,
   language,
@@ -223,6 +226,12 @@ export function SettingsScreen({
           <Text style={styles.hintText}>{`${morningNudgePlan.timingTitle}: ${morningNudgePlan.timingLabel}`}</Text>
           <Text style={styles.hintText}>{`${morningNudgePlan.styleTitle}: ${morningNudgePlan.styleLabel}`}</Text>
           <Text style={styles.hintText}>{`${morningNudgePlan.focusTitle}: ${morningNudgePlan.focusLabel}`}</Text>
+        </View>
+        <View style={styles.infoBlock}>
+          <Text style={styles.infoTitle}>{adaptiveDayGuidance.title}</Text>
+          <Text style={styles.statusText}>{adaptiveDayGuidance.tone}</Text>
+          <Text style={styles.body}>{adaptiveDayGuidance.body}</Text>
+          <Text style={styles.hintText}>{adaptiveDayGuidance.nextStep}</Text>
         </View>
         <View style={styles.infoBlock}>
           <Text style={styles.infoTitle}>{morningNudgeSettingsGuidance.title}</Text>

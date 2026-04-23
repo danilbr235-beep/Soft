@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, spacing } from "@pmhc/ui";
 import type { PrivacyLockState, QuickLogDefinition, TodayPayload } from "@pmhc/types";
+import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
 import type { DailySession, DailySessionStepId } from "../dailySession";
 import type { MorningExperiments } from "../morningExperiments";
 import type { MorningNudgePlan } from "../morningNudge";
@@ -9,6 +10,7 @@ import type { MorningNudgeReview } from "../morningNudgeReview";
 import type { MorningRoutine } from "../morningRoutine";
 import type { MorningRoutineStepId } from "../morningRoutineProgress";
 import {
+  AdaptiveDayGuidanceBlock,
   AlertStrip,
   DailySessionBlock,
   MorningExperimentsBlock,
@@ -27,6 +29,7 @@ type Props = {
   today: TodayPayload;
   copy: LanguageCopy;
   dailySession: DailySession;
+  adaptiveDayGuidance: CoachAdaptiveNudge;
   morningExperiments: MorningExperiments;
   morningNudge: MorningNudgePlan;
   morningNudgeReview: MorningNudgeReview;
@@ -42,6 +45,7 @@ type Props = {
 };
 
 export function TodayScreen({
+  adaptiveDayGuidance,
   copy,
   dailySession,
   morningExperiments,
@@ -79,6 +83,7 @@ export function TodayScreen({
       />
       {morningNudge.enabled ? <MorningNudgeBlock plan={morningNudge} review={morningNudgeReview} /> : null}
       <MorningExperimentsBlock experiments={morningExperiments} onOpenExperiment={onOpenMorningExperiment} />
+      <AdaptiveDayGuidanceBlock copy={copy} guidance={adaptiveDayGuidance} onAskCoach={onAskCoach} />
       <PriorityCard copy={copy} priority={today.currentPriority} onAskCoach={onAskCoach} />
       <DailySessionBlock session={dailySession} onOpenStep={onOpenDailySessionStep} />
       <StateGrid tiles={today.dailyState} />

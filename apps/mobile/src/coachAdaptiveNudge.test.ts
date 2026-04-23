@@ -91,6 +91,7 @@ describe("buildCoachAdaptiveNudge", () => {
     });
 
     expect(answer.title).toBe("Should I simplify today?");
+    expect(answer.tone).toBe("Recovery-first day");
     expect(answer.body).toContain("whole day should stay smaller");
     expect(answer.nextStep).toContain("one recovery-first action");
   });
@@ -116,6 +117,7 @@ describe("buildCoachAdaptiveNudge", () => {
       },
     });
 
+    expect(answer.tone).toBe("Protect the morning rail");
     expect(answer.body).toContain("around the morning loop");
     expect(answer.nextStep).toBe("Pair the quick morning log right after the anchor instead of adding a new step.");
   });
@@ -144,6 +146,7 @@ describe("buildCoachAdaptiveNudge", () => {
     });
 
     expect(answer.title).toBe("Стоит ли упростить день?");
+    expect(answer.tone).toBe("День лучше держать узким");
     expect(answer.body).toContain("День лучше держать узким");
     expect(answer.body).toContain("лучше не трогать его время и тон");
     expect(answer.nextStep).toContain("две спокойные оценки");

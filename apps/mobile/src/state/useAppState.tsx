@@ -51,6 +51,7 @@ import type {
   SyncQueueJob,
   TodayPayload,
 } from "@pmhc/types";
+import { buildCoachAdaptiveNudge } from "../coachAdaptiveNudge";
 import { QuickLogSheet } from "../components/QuickLogSheet";
 import { starterContent } from "../data/starterContent";
 import {
@@ -426,6 +427,15 @@ export function useAppState() {
       routineReview: morningRoutineReview,
     });
   }, [language, morningNudge, morningNudgeHistory, morningRoutineReview]);
+  const adaptiveDayGuidance = useMemo(() => {
+    return buildCoachAdaptiveNudge({
+      language,
+      morningNudgeReview,
+      morningRoutineReview,
+      reviewDigest,
+      today,
+    });
+  }, [language, morningNudgeReview, morningRoutineReview, reviewDigest, today]);
 
   const persistLogs = useCallback(async (nextLogs: LogEntry[]) => {
     setLogs(nextLogs);
@@ -1027,6 +1037,7 @@ export function useAppState() {
     morningNudgePreferences,
     morningRoutine,
     morningRoutineReview,
+    adaptiveDayGuidance,
     today,
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,

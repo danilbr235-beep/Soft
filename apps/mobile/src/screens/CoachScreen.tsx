@@ -5,9 +5,8 @@ import { colors, radii, spacing } from "@pmhc/ui";
 import { buildCoachQuickAnswers, type CoachQuickAnswer } from "@pmhc/rules";
 import type { AppLanguage, TodayPayload } from "@pmhc/types";
 import type { CoachQuestionId, CoachReviewDigest } from "@pmhc/rules";
-import { buildCoachAdaptiveNudge, type CoachAdaptiveNudge } from "../coachAdaptiveNudge";
+import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
 import { buildCoachMorningAnswer, type CoachMorningAnswer } from "../coachMorningAnswer";
-import type { MorningNudgeReview } from "../morningNudgeReview";
 import type { MorningRoutineReview } from "../morningRoutineReview";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
@@ -16,16 +15,16 @@ type CoachScreenAnswer = CoachQuickAnswer | CoachAdaptiveNudge | CoachMorningAns
 type CoachScreenQuestionId = CoachQuestionId | CoachAdaptiveNudge["id"] | CoachMorningAnswer["id"];
 
 export function CoachScreen({
+  adaptiveDayGuidance,
   copy,
   language,
-  morningNudgeReview,
   morningRoutineReview,
   reviewDigest,
   today,
 }: {
+  adaptiveDayGuidance: CoachAdaptiveNudge;
   copy: LanguageCopy;
   language: AppLanguage;
-  morningNudgeReview: MorningNudgeReview;
   morningRoutineReview: MorningRoutineReview;
   reviewDigest: CoachReviewDigest;
   today: TodayPayload;
@@ -34,16 +33,10 @@ export function CoachScreen({
   const answers = useMemo<CoachScreenAnswer[]>(() => {
     return [
       ...buildCoachQuickAnswers(today, language, reviewDigest),
-      buildCoachAdaptiveNudge({
-        language,
-        morningNudgeReview,
-        morningRoutineReview,
-        reviewDigest,
-        today,
-      }),
+      adaptiveDayGuidance,
       buildCoachMorningAnswer(morningRoutineReview, language),
     ];
-  }, [language, morningNudgeReview, morningRoutineReview, reviewDigest, today]);
+  }, [adaptiveDayGuidance, language, morningRoutineReview, reviewDigest, today]);
   const selectedAnswer = answers.find((answer) => answer.id === selectedId) ?? answers[0];
 
   return (

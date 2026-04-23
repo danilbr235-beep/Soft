@@ -71,10 +71,11 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Land the wake-and-light anchor first. Add the other two steps only after that starts to stick.")).toBeVisible();
   await page.getByLabel("Mark done: Wake and light anchor").click();
   await expect(page.getByText("1 of 3", { exact: true })).toBeVisible();
-  await expect(page.getByText("Pair the quick morning log right after the anchor instead of adding a new step.")).toBeVisible();
+  await expect(page.getByText("Pair the quick morning log right after the anchor instead of adding a new step.").first()).toBeVisible();
   await expect(page.getByText("Use one rail")).toBeVisible();
   await expect(page.getByText("Optional morning experiments", { exact: true })).toBeVisible();
   await expect(page.getByText("Cold finish: caution first")).toBeVisible();
+  await expect(page.getByText("Should I simplify today?")).toBeVisible();
   await page.getByLabel("Open note Cold finish: caution first").click();
   await expect(page.getByText("Cold finish: caution first")).toBeVisible();
   await page.getByLabel("Back to library").click();
@@ -104,7 +105,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Save Confidence 7").click();
   await expect(page.getByText("2 of 4 done")).toBeVisible();
   await expect(page.getByText("Two-score reset")).toBeVisible();
-  await page.getByText("Ask Coach why").click();
+  await page.getByText("Ask Coach why").first().click();
   await expect(page.getByText("How certain is this?")).toBeVisible();
   await page.getByLabel("Open Today").click();
 
@@ -268,6 +269,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Unlock with PIN").click();
   await expect(page.getByText("Privacy vault")).toBeVisible();
   await expect(page.getByText("Morning nudges")).toBeVisible();
+  await expect(page.getByText("Should I simplify today?")).toBeVisible();
   await page.getByLabel("Set morning nudge style: Supportive").click();
   await page.getByLabel("Set morning nudge timing: 09:00").click();
   await page.getByLabel("Set morning nudge cadence: Daily").click();

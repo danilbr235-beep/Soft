@@ -70,6 +70,7 @@ function AppRootContent() {
       <View style={styles.shell}>
         {app.activeTab === "Today" ? (
           <TodayScreen
+            adaptiveDayGuidance={app.adaptiveDayGuidance}
             copy={copy}
             dailySession={app.dailySession}
             morningExperiments={app.morningExperiments}
@@ -155,9 +156,9 @@ function AppRootContent() {
         ) : null}
         {app.activeTab === "Coach" ? (
           <CoachScreen
+            adaptiveDayGuidance={app.adaptiveDayGuidance}
             copy={copy}
             language={app.language}
-            morningNudgeReview={app.morningNudgeReview}
             morningRoutineReview={app.morningRoutineReview}
             reviewDigest={app.reviewDigest}
             today={app.today}
@@ -165,6 +166,7 @@ function AppRootContent() {
         ) : null}
         {app.activeTab === "Settings" ? (
           <SettingsScreen
+            adaptiveDayGuidance={app.adaptiveDayGuidance}
             copy={copy}
             hasPrivacyPin={app.hasPrivacyPin}
             language={app.language}
