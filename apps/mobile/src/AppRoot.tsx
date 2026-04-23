@@ -73,14 +73,17 @@ function AppRootContent() {
             adaptiveDayGuidance={app.adaptiveDayGuidance}
             copy={copy}
             dailySession={app.dailySession}
+            daySimplification={app.daySimplification}
             language={app.language}
             morningExperiments={app.morningExperiments}
             morningNudge={app.morningNudge}
             morningNudgeReview={app.morningNudgeReview}
             morningRoutine={app.morningRoutine}
+            onApplyDaySimplification={() => app.applyDaySimplification("today")}
             privacyLock={app.privacyLock}
             today={app.today}
             onAskCoach={() => app.setActiveTab("Coach")}
+            onClearDaySimplification={app.clearDaySimplification}
             onCompleteMorningRoutineStep={app.completeMorningRoutineStep}
             onOpenDailySessionStep={app.openDailySessionStep}
             onOpenMorningExperiment={app.openLearnItem}
@@ -141,11 +144,14 @@ function AppRootContent() {
             copy={copy}
             completionPercent={app.programCompletionPercent}
             currentPriority={app.today.currentPriority}
+            daySimplification={app.daySimplification}
             dayPlan={app.programDayPlan}
             history={app.programHistory}
             isPaused={app.programPaused}
             language={app.language}
             logs={app.logs}
+            onApplyDaySimplification={() => app.applyDaySimplification("programs")}
+            onClearDaySimplification={app.clearDaySimplification}
             progressSummary={app.programSummary}
             onCompleteToday={app.completeProgramToday}
             onPauseProgram={app.pauseProgram}

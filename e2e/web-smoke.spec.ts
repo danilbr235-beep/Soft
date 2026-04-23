@@ -354,6 +354,33 @@ test("settings can apply a review preset from current usage guidance", async ({ 
   await expect(page.getByText("7 days packet")).toHaveCount(2);
 });
 
+test("programs can switch on a lighter day plan and today can restore it", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByText("Start privately").click();
+  await page.getByLabel("Confidence").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Mixed signals").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Simple mode").click();
+  await page.getByLabel("Generate Today").click();
+
+  await page.getByLabel("Open Programs").click();
+  await expect(page.getByLabel("Use lighter day")).toBeVisible();
+  await page.getByLabel("Use lighter day").click();
+  await expect(page.getByText("Lighter day is on").first()).toBeVisible();
+  await expect(page.getByText("Showing 2 tasks in the lighter day plan.")).toBeVisible();
+  await expect(page.getByText("1 more task is hidden for later.")).toBeVisible();
+
+  await page.getByLabel("Open Today").click();
+  await expect(page.getByText("Lighter day is on").first()).toBeVisible();
+  await expect(page.getByText("Showing 2 priority actions for today.")).toBeVisible();
+  await expect(page.getByText("2 more actions are hidden for later.")).toBeVisible();
+  await page.getByLabel("Return to full day").click();
+  await expect(page.getByLabel("Use lighter day")).toBeVisible();
+  await expect(page.getByText("Showing 2 priority actions for today.")).toHaveCount(0);
+});
+
 test("coach can suggest when to simplify the whole day", async ({ page }) => {
   await page.goto("/");
 

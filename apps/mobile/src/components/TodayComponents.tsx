@@ -38,10 +38,20 @@ export function PriorityCard({ copy, onAskCoach, priority }: PriorityProps) {
 
 export function AdaptiveDayGuidanceBlock({
   copy,
+  daySimplification,
   guidance,
   onAskCoach,
 }: {
   copy: LanguageCopy;
+  daySimplification?: {
+    applyLabel: string | null;
+    hiddenNote: string | null;
+    onApply?: () => void;
+    onRestore?: () => void;
+    restoreLabel: string | null;
+    statusBody: string | null;
+    statusTitle: string | null;
+  };
   guidance: CoachAdaptiveNudge;
   onAskCoach: () => void;
 }) {
@@ -53,6 +63,33 @@ export function AdaptiveDayGuidanceBlock({
       </View>
       <Text style={styles.body}>{guidance.body}</Text>
       <Text style={styles.routineGuidanceAction}>{guidance.nextStep}</Text>
+      {daySimplification?.statusTitle ? (
+        <View style={styles.routineGuidance}>
+          <Text style={styles.routineGuidanceTitle}>{daySimplification.statusTitle}</Text>
+          {daySimplification.statusBody ? <Text style={styles.routineGuidanceAction}>{daySimplification.statusBody}</Text> : null}
+          {daySimplification.hiddenNote ? <Text style={styles.hintMeta}>{daySimplification.hiddenNote}</Text> : null}
+        </View>
+      ) : null}
+      {daySimplification?.applyLabel && daySimplification.onApply ? (
+        <Pressable
+          accessibilityLabel={daySimplification.applyLabel}
+          accessibilityRole="button"
+          onPress={daySimplification.onApply}
+          style={styles.secondaryButton}
+        >
+          <Text style={styles.secondaryButtonText}>{daySimplification.applyLabel}</Text>
+        </Pressable>
+      ) : null}
+      {daySimplification?.restoreLabel && daySimplification.onRestore ? (
+        <Pressable
+          accessibilityLabel={daySimplification.restoreLabel}
+          accessibilityRole="button"
+          onPress={daySimplification.onRestore}
+          style={styles.secondaryButton}
+        >
+          <Text style={styles.secondaryButtonText}>{daySimplification.restoreLabel}</Text>
+        </Pressable>
+      ) : null}
       <Pressable accessibilityRole="button" onPress={onAskCoach} style={styles.secondaryButton}>
         <Text style={styles.secondaryButtonText}>{copy.today.askCoachWhy}</Text>
       </Pressable>

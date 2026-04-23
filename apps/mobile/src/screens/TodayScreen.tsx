@@ -3,6 +3,11 @@ import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, spacing } from "@pmhc/ui";
 import type { AppLanguage, PrivacyLockState, QuickLogDefinition, TodayPayload } from "@pmhc/types";
 import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
+import {
+  describeTodaySimplification,
+  limitTodayActionCards,
+  type DaySimplificationState,
+} from "../daySimplification";
 import type { DailySession, DailySessionStepId } from "../dailySession";
 import type { MorningExperiments } from "../morningExperiments";
 import type { MorningNudgePlan } from "../morningNudge";
@@ -32,12 +37,15 @@ type Props = {
   language: AppLanguage;
   dailySession: DailySession;
   adaptiveDayGuidance: CoachAdaptiveNudge;
+  daySimplification: DaySimplificationState;
   morningExperiments: MorningExperiments;
   morningNudge: MorningNudgePlan;
   morningNudgeReview: MorningNudgeReview;
   morningRoutine: MorningRoutine;
+  onApplyDaySimplification: () => void;
   privacyLock: PrivacyLockState;
   onAskCoach: () => void;
+  onClearDaySimplification: () => void;
   onCompleteMorningRoutineStep: (stepId: MorningRoutineStepId) => void;
   onLog: (definition: QuickLogDefinition) => void;
   onOpenDailySessionStep: (stepId: DailySessionStepId) => void;
@@ -50,12 +58,15 @@ export function TodayScreen({
   adaptiveDayGuidance,
   copy,
   dailySession,
+  daySimplification,
   language,
   morningExperiments,
   morningNudge,
   morningNudgeReview,
   morningRoutine,
+  onApplyDaySimplification,
   onAskCoach,
+  onClearDaySimplification,
   onCompleteMorningRoutineStep,
   onLog,
   onOpenDailySessionStep,
@@ -79,6 +90,15 @@ export function TodayScreen({
     guidanceState: adaptiveDayGuidance.state,
     language,
   });
+  const visibleActionCards = limitTodayActionCards(adaptiveActionCards, daySimplification);
+  const hiddenActionCount = adaptiveActionCards.length - visibleActionCards.length;
+  const simplificationSummary = daySimplification.active
+    ? describeTodaySimplification({
+        hiddenCount: hiddenActionCount,
+        language,
+        visibleCount: visibleActionCards.length,
+      })
+    : null;
 
   return (
     <Screen eyebrow={today.todayMode} title={copy.today.title} subtitle={activeProgramTitle}>
@@ -91,13 +111,26 @@ export function TodayScreen({
       />
       {morningNudge.enabled ? <MorningNudgeBlock plan={morningNudge} review={morningNudgeReview} /> : null}
       <MorningExperimentsBlock experiments={morningExperiments} onOpenExperiment={onOpenMorningExperiment} />
-      <AdaptiveDayGuidanceBlock copy={copy} guidance={adaptiveDayGuidance} onAskCoach={onAskCoach} />
+      <AdaptiveDayGuidanceBlock
+        copy={copy}
+        daySimplification={{
+          applyLabel: daySimplification.applyLabel,
+          hiddenNote: simplificationSummary?.hidden ?? null,
+          onApply: onApplyDaySimplification,
+          onRestore: onClearDaySimplification,
+          restoreLabel: daySimplification.restoreLabel,
+          statusBody: simplificationSummary?.summary ?? null,
+          statusTitle: daySimplification.statusTitle,
+        }}
+        guidance={adaptiveDayGuidance}
+        onAskCoach={onAskCoach}
+      />
       <PriorityCard copy={copy} priority={today.currentPriority} onAskCoach={onAskCoach} />
       <DailySessionBlock session={dailySession} onOpenStep={onOpenDailySessionStep} />
       <StateGrid tiles={today.dailyState} />
       <AlertStrip alerts={today.alerts} />
       <View style={styles.actions}>
-        {adaptiveActionCards.map((card) => (
+        {visibleActionCards.map((card) => (
           <Surface key={card.id}>
             <Text style={styles.actionKind}>{copy.today.actionKinds[card.kind]}</Text>
             <Text style={styles.actionTitle}>{card.title}</Text>

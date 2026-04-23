@@ -55,6 +55,12 @@ import { buildCoachAdaptiveNudge } from "../coachAdaptiveNudge";
 import { QuickLogSheet } from "../components/QuickLogSheet";
 import { starterContent } from "../data/starterContent";
 import {
+  buildDaySimplificationState,
+  isDaySimplificationStore,
+  type DaySimplificationSource,
+  type DaySimplificationStore,
+} from "../daySimplification";
+import {
   buildDailySession,
   isDailySessionProgressStore,
   markDailySessionStepComplete,
@@ -110,6 +116,7 @@ const [
   morningNudgeHistoryKey,
   dailySessionProgressKey,
   morningRoutineProgressKey,
+  daySimplificationKey,
 ] = appStorageKeys;
 
 const onboardingRepository = createJsonRepository<OnboardingResult | null>(
@@ -180,6 +187,12 @@ const morningRoutineProgressRepository = createJsonRepository<MorningRoutineProg
   {},
   isMorningRoutineProgressStore,
 );
+const daySimplificationRepository = createJsonRepository<DaySimplificationStore>(
+  AsyncStorage,
+  daySimplificationKey,
+  {},
+  isDaySimplificationStore,
+);
 
 const fallbackOnboarding = createOnboardingResult({
   primaryGoal: "sexual_confidence",
@@ -230,6 +243,7 @@ export function useAppState() {
   const [morningNudgeHistory, setMorningNudgeHistory] = useState<MorningNudgeHistoryEntry[]>([]);
   const [dailySessionProgress, setDailySessionProgress] = useState<DailySessionProgressStore>({});
   const [morningRoutineProgress, setMorningRoutineProgress] = useState<MorningRoutineProgressStore>({});
+  const [daySimplificationStore, setDaySimplificationStore] = useState<DaySimplificationStore>({});
   const [learnFocusItemId, setLearnFocusItemId] = useState<string | null>(null);
   const [selectedQuickLog, setSelectedQuickLog] = useState<QuickLogDefinition | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -258,6 +272,7 @@ export function useAppState() {
           savedMorningNudgeHistory,
           savedDailySessionProgress,
           savedMorningRoutineProgress,
+          savedDaySimplification,
         ] =
           await Promise.all([
             onboardingRepository.load(),
@@ -273,6 +288,7 @@ export function useAppState() {
             morningNudgeHistoryRepository.load(),
             dailySessionProgressRepository.load(),
             morningRoutineProgressRepository.load(),
+            daySimplificationRepository.load(),
           ]);
 
         if (!mounted) {
@@ -299,6 +315,7 @@ export function useAppState() {
         setMorningNudgeHistory(savedMorningNudgeHistory);
         setDailySessionProgress(savedDailySessionProgress);
         setMorningRoutineProgress(savedMorningRoutineProgress);
+        setDaySimplificationStore(savedDaySimplification);
       } catch {
         if (!mounted) {
           return;
@@ -318,6 +335,7 @@ export function useAppState() {
         setMorningNudgeHistory([]);
         setDailySessionProgress({});
         setMorningRoutineProgress({});
+        setDaySimplificationStore({});
       } finally {
         if (mounted) {
           setIsReady(true);
@@ -436,6 +454,25 @@ export function useAppState() {
       today,
     });
   }, [language, morningNudgeReview, morningRoutineReview, reviewDigest, today]);
+  const daySimplification = useMemo(() => {
+    return buildDaySimplificationState({
+      baseTodayMode: today.todayMode,
+      date: today.date,
+      guidanceState: adaptiveDayGuidance.state,
+      language,
+      store: daySimplificationStore,
+    });
+  }, [adaptiveDayGuidance.state, daySimplificationStore, language, today.date, today.todayMode]);
+  const surfacedToday = useMemo<TodayPayload>(() => {
+    if (!daySimplification.active) {
+      return today;
+    }
+
+    return {
+      ...today,
+      todayMode: daySimplification.effectiveTodayMode,
+    };
+  }, [daySimplification.active, daySimplification.effectiveTodayMode, today]);
 
   const persistLogs = useCallback(async (nextLogs: LogEntry[]) => {
     setLogs(nextLogs);
@@ -547,6 +584,10 @@ export function useAppState() {
   const persistMorningNudgeHistory = useCallback(async (nextHistory: MorningNudgeHistoryEntry[]) => {
     setMorningNudgeHistory(nextHistory);
     await morningNudgeHistoryRepository.save(nextHistory);
+  }, []);
+  const persistDaySimplificationStore = useCallback(async (nextStore: DaySimplificationStore) => {
+    setDaySimplificationStore(nextStore);
+    await daySimplificationRepository.save(nextStore);
   }, []);
   const saveMorningNudgePreferences = useCallback(
     async (nextPreferences: MorningNudgePreferences) => {
@@ -752,6 +793,27 @@ export function useAppState() {
     },
     [saveMorningNudgePreferences],
   );
+  const applyDaySimplification = useCallback(
+    async (source: DaySimplificationSource) => {
+      await persistDaySimplificationStore({
+        ...daySimplificationStore,
+        [today.date]: {
+          appliedAt: new Date().toISOString(),
+          source,
+        },
+      });
+    },
+    [daySimplificationStore, persistDaySimplificationStore, today.date],
+  );
+  const clearDaySimplification = useCallback(async () => {
+    if (!daySimplificationStore[today.date]) {
+      return;
+    }
+
+    const nextStore = { ...daySimplificationStore };
+    delete nextStore[today.date];
+    await persistDaySimplificationStore(nextStore);
+  }, [daySimplificationStore, persistDaySimplificationStore, today.date]);
 
   const resetOnboarding = useCallback(async () => {
     setOnboarding(null);
@@ -768,6 +830,7 @@ export function useAppState() {
     setMorningNudgeHistory([]);
     setDailySessionProgress({});
     setMorningRoutineProgress({});
+    setDaySimplificationStore({});
     setLearnFocusItemId(null);
     await Promise.all([
       onboardingRepository.clear(),
@@ -783,6 +846,7 @@ export function useAppState() {
       morningNudgeHistoryRepository.clear(),
       dailySessionProgressRepository.clear(),
       morningRoutineProgressRepository.clear(),
+      daySimplificationRepository.clear(),
     ]);
   }, []);
 
@@ -1038,7 +1102,8 @@ export function useAppState() {
     morningRoutine,
     morningRoutineReview,
     adaptiveDayGuidance,
-    today,
+    daySimplification,
+    today: surfacedToday,
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,
     reviewDigest,
@@ -1056,6 +1121,7 @@ export function useAppState() {
     changeMorningNudgeTone,
     changeMorningNudgeWeekdaysOnly,
     applyMorningNudgePreferences,
+    applyDaySimplification,
     applyReviewPreferences,
     changeReviewDefaultFormat,
     changeReviewDefaultSection,
@@ -1065,6 +1131,7 @@ export function useAppState() {
     deleteLog,
     lockNow,
     completeMorningRoutineStep,
+    clearDaySimplification,
     openDailySessionStep,
     openLearnItem,
     openQuickLog: setSelectedQuickLog,

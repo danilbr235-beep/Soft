@@ -23,6 +23,11 @@ import type {
   TodayMode,
 } from "@pmhc/types";
 import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
+import {
+  describeProgramSimplification,
+  limitProgramTasksForDay,
+  type DaySimplificationState,
+} from "../daySimplification";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 
@@ -33,11 +38,14 @@ type Props = {
   copy: LanguageCopy;
   completionPercent: number;
   currentPriority: CurrentPriority;
+  daySimplification: DaySimplificationState;
   dayPlan: ProgramDayPlan | null;
   history: ProgramHistoryEntry[];
   isPaused: boolean;
   language: AppLanguage;
   logs: LogEntry[];
+  onApplyDaySimplification: () => void;
+  onClearDaySimplification: () => void;
   progressSummary: ProgramProgressSummary | null;
   onCompleteToday: () => void;
   onPauseProgram: () => void;
@@ -56,11 +64,14 @@ export function ProgramsScreen({
   copy,
   completionPercent,
   currentPriority,
+  daySimplification,
   dayPlan,
   history,
   isPaused,
   language,
   logs,
+  onApplyDaySimplification,
+  onClearDaySimplification,
   progressSummary,
   onCompleteToday,
   onPauseProgram,
@@ -149,6 +160,21 @@ export function ProgramsScreen({
       .map((taskId) => tasksById.get(taskId))
       .filter((task): task is ProgramDayPlan["tasks"][number] => task != null);
   }, [dayGuidanceSummary, dayPlan]);
+  const visibleDayPlanTasks = useMemo(() => {
+    if (!dayPlan) {
+      return [];
+    }
+
+    return limitProgramTasksForDay(orderedDayPlanTasks, dayPlan.completedTaskIds, daySimplification);
+  }, [dayPlan, daySimplification, orderedDayPlanTasks]);
+  const hiddenTaskCount = orderedDayPlanTasks.length - visibleDayPlanTasks.length;
+  const simplificationSummary = daySimplification.active
+    ? describeProgramSimplification({
+        hiddenCount: hiddenTaskCount,
+        language,
+        visibleCount: visibleDayPlanTasks.length,
+      })
+    : null;
 
   function renderTaskList() {
     if (!dayPlan) {
@@ -157,7 +183,7 @@ export function ProgramsScreen({
 
     return (
       <View style={styles.taskList}>
-        {orderedDayPlanTasks.map((task) => {
+        {visibleDayPlanTasks.map((task) => {
           const taskTitle = copy.programs.taskTitles[task.id] ?? task.title;
           const taskDescription = copy.programs.taskDescriptions[task.id] ?? task.description;
           const completed = dayPlan.completedTaskIds.includes(task.id);
@@ -292,6 +318,33 @@ export function ProgramsScreen({
         <Text style={styles.sectionTitle}>{dayGuidanceSummary.tone}</Text>
         <Text style={styles.body}>{dayGuidanceSummary.body}</Text>
         <Text style={styles.metaText}>{dayGuidanceSummary.taskCapText}</Text>
+        {daySimplification.active && simplificationSummary ? (
+          <View style={styles.detailSummaryList}>
+            <Text style={styles.detailLabel}>{daySimplification.statusTitle}</Text>
+            <Text style={styles.body}>{simplificationSummary.summary}</Text>
+            <Text style={styles.metaText}>{simplificationSummary.hidden}</Text>
+          </View>
+        ) : null}
+        {!daySimplification.active && daySimplification.applyLabel ? (
+          <Pressable
+            accessibilityLabel={daySimplification.applyLabel}
+            accessibilityRole="button"
+            onPress={onApplyDaySimplification}
+            style={styles.secondaryButton}
+          >
+            <Text style={styles.secondaryButtonText}>{daySimplification.applyLabel}</Text>
+          </Pressable>
+        ) : null}
+        {daySimplification.active && daySimplification.restoreLabel ? (
+          <Pressable
+            accessibilityLabel={daySimplification.restoreLabel}
+            accessibilityRole="button"
+            onPress={onClearDaySimplification}
+            style={styles.secondaryButton}
+          >
+            <Text style={styles.secondaryButtonText}>{daySimplification.restoreLabel}</Text>
+          </Pressable>
+        ) : null}
       </Surface>
     );
   }
