@@ -319,6 +319,32 @@ test("settings can apply a calmer morning nudge setup from current guidance", as
   await expect(page.getByText("Weekdays - 08:00")).toBeVisible();
 });
 
+test("settings can apply a review preset from current usage guidance", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByText("Start privately").click();
+  await page.getByLabel("Confidence").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Mixed signals").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Simple mode").click();
+  await page.getByLabel("Generate Today").click();
+
+  await page.getByLabel("Open Settings").click();
+  await expect(page.getByText("Review packets")).toBeVisible();
+  await expect(page.getByText("Recommended review setup")).toBeVisible();
+  await expect(page.getByText("Lean into weekly packets", { exact: true })).toBeVisible();
+  await expect(page.getByText("Section: Overview -> 7 days")).toBeVisible();
+  await expect(page.getByText("Format: Snapshot -> Packet")).toBeVisible();
+  await page.getByLabel("Apply weekly packet setup").click();
+  await expect(page.getByText("Current review settings already match this pattern.")).toBeVisible();
+  await page.getByLabel("Open Review").click();
+  await expect(page.getByText("Weekly review")).toBeVisible();
+  await page.getByLabel("Prepare recap").click();
+  await expect(page.getByText("Preview: Packet")).toBeVisible();
+  await expect(page.getByText("7 days packet")).toHaveCount(2);
+});
+
 test("completed program shows a conservative wrap-up", async ({ page }) => {
   await page.goto("/");
 

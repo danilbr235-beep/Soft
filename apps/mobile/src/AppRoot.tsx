@@ -170,7 +170,9 @@ function AppRootContent() {
             morningNudgePlan={app.morningNudge}
             morningNudgePreferences={app.morningNudgePreferences}
             morningNudgeReview={app.morningNudgeReview}
+            morningRoutineReview={app.morningRoutineReview}
             onApplyMorningNudgePreferences={app.applyMorningNudgePreferences}
+            onApplyReviewPreferences={app.applyReviewPreferences}
             onClearPrivacyPin={app.clearPrivacyPin}
             privacyLock={app.privacyLock}
             onChangeLanguage={app.changeLanguage}
@@ -185,6 +187,7 @@ function AppRootContent() {
             onChangeReviewDefaultSection={app.changeReviewDefaultSection}
             onToggleMorningRoutineInPacket={app.toggleMorningRoutineInPacket}
             resetOnboarding={app.resetOnboarding}
+            reviewPackets={app.reviewPackets}
             reviewPreferences={app.reviewPreferences}
           />
         ) : null}

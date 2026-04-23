@@ -691,6 +691,12 @@ export function useAppState() {
     },
     [persistReviewPreferences, reviewPreferences],
   );
+  const applyReviewPreferences = useCallback(
+    async (nextPreferences: ReviewPreferences) => {
+      await persistReviewPreferences(nextPreferences);
+    },
+    [persistReviewPreferences],
+  );
   const toggleMorningRoutineInPacket = useCallback(async () => {
     await persistReviewPreferences({
       ...reviewPreferences,
@@ -1039,6 +1045,7 @@ export function useAppState() {
     changeMorningNudgeTone,
     changeMorningNudgeWeekdaysOnly,
     applyMorningNudgePreferences,
+    applyReviewPreferences,
     changeReviewDefaultFormat,
     changeReviewDefaultSection,
     completeProgramToday,

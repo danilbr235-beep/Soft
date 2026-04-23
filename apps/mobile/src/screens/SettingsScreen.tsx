@@ -11,7 +11,10 @@ import type {
 } from "../morningNudge";
 import type { MorningNudgeReview } from "../morningNudgeReview";
 import { buildMorningNudgeSettingsGuidance } from "../morningNudgeSettingsGuidance";
+import type { MorningRoutineReview } from "../morningRoutineReview";
 import type { ReviewPreferences } from "../reviewPreferences";
+import { buildReviewPreferencesGuidance } from "../reviewPreferencesGuidance";
+import type { ReviewPacketHistoryEntry } from "../reviewPacketHistory";
 import type { ReviewRecapFormat, ReviewSection } from "../reviewRecap";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
@@ -25,6 +28,7 @@ type Props = {
   morningNudgePreferences: MorningNudgePreferences;
   morningNudgeReview: MorningNudgeReview;
   onApplyMorningNudgePreferences: (preferences: MorningNudgePreferences) => void;
+  morningRoutineReview: MorningRoutineReview;
   onChangeLanguage: (language: AppLanguage) => void;
   onChangeMorningNudgeTimePreset: (timePreset: MorningNudgeTimePreset) => void;
   onChangeMorningNudgeTone: (tone: MorningNudgeTone) => void;
@@ -34,10 +38,12 @@ type Props = {
   onClearPrivacyPin: () => void;
   onLockNow: () => void;
   onSetPrivacyPin: (pin: string) => void;
+  onApplyReviewPreferences: (preferences: ReviewPreferences) => void;
   onToggleMorningNudgesEnabled: () => void;
   onToggleMorningRoutineInPacket: () => void;
   onToggleVaultLock: () => void;
   resetOnboarding: () => void;
+  reviewPackets: ReviewPacketHistoryEntry[];
   reviewPreferences: ReviewPreferences;
 };
 
@@ -49,6 +55,7 @@ export function SettingsScreen({
   morningNudgePreferences,
   morningNudgeReview,
   onApplyMorningNudgePreferences,
+  morningRoutineReview,
   onChangeLanguage,
   onChangeMorningNudgeTimePreset,
   onChangeMorningNudgeTone,
@@ -57,12 +64,14 @@ export function SettingsScreen({
   onChangeReviewDefaultSection,
   onClearPrivacyPin,
   onLockNow,
+  onApplyReviewPreferences,
   onSetPrivacyPin,
   onToggleMorningNudgesEnabled,
   onToggleMorningRoutineInPacket,
   onToggleVaultLock,
   privacyLock,
   resetOnboarding,
+  reviewPackets,
   reviewPreferences,
 }: Props) {
   const [pinDraft, setPinDraft] = useState("");
@@ -76,6 +85,12 @@ export function SettingsScreen({
     language,
     preferences: morningNudgePreferences,
     review: morningNudgeReview,
+  });
+  const reviewPreferencesGuidance = buildReviewPreferencesGuidance({
+    history: reviewPackets,
+    language,
+    morningRoutineReview,
+    preferences: reviewPreferences,
   });
 
   function savePin() {
@@ -277,6 +292,29 @@ export function SettingsScreen({
       <Surface>
         <Text style={styles.title}>{copy.settings.reviewPacketsTitle}</Text>
         <Text style={styles.body}>{copy.settings.reviewPacketsBody}</Text>
+        <View style={styles.infoBlock}>
+          <Text style={styles.infoTitle}>{reviewPreferencesGuidance.title}</Text>
+          <Text style={styles.statusText}>{reviewPreferencesGuidance.tone}</Text>
+          <Text style={styles.body}>{reviewPreferencesGuidance.body}</Text>
+          {reviewPreferencesGuidance.changeLines.map((line) => (
+            <Text key={line} style={styles.hintText}>
+              {line}
+            </Text>
+          ))}
+          <Text style={styles.hintText}>{reviewPreferencesGuidance.meta}</Text>
+          {reviewPreferencesGuidance.recommendedPreferences && reviewPreferencesGuidance.ctaLabel ? (
+            <Pressable
+              accessibilityLabel={reviewPreferencesGuidance.ctaLabel}
+              accessibilityRole="button"
+              onPress={() => onApplyReviewPreferences(reviewPreferencesGuidance.recommendedPreferences!)}
+              style={[styles.button, styles.activeButton]}
+            >
+              <Text style={styles.buttonText}>{reviewPreferencesGuidance.ctaLabel}</Text>
+            </Pressable>
+          ) : (
+            <Text style={styles.body}>{reviewPreferencesGuidance.statusLabel}</Text>
+          )}
+        </View>
         <Text style={styles.infoTitle}>{copy.settings.defaultReviewSectionTitle}</Text>
         <View style={styles.actions}>
           {reviewSections.map((section) => (
