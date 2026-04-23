@@ -65,11 +65,14 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Morning nudge")).toBeVisible();
   await expect(page.getByText("Weekdays - 08:00")).toBeVisible();
   await expect(page.getByText("Keep morning simple. Light first.")).toBeVisible();
+  await expect(page.getByText("Today nudge check")).toBeVisible();
+  await expect(page.getByText("Keep one calm cue")).toBeVisible();
   await expect(page.getByText("0 of 3", { exact: true })).toBeVisible();
   await expect(page.getByText("Land the wake-and-light anchor first. Add the other two steps only after that starts to stick.")).toBeVisible();
   await page.getByLabel("Mark done: Wake and light anchor").click();
   await expect(page.getByText("1 of 3", { exact: true })).toBeVisible();
   await expect(page.getByText("Pair the quick morning log right after the anchor instead of adding a new step.")).toBeVisible();
+  await expect(page.getByText("Use one rail")).toBeVisible();
   await expect(page.getByText("Optional morning experiments", { exact: true })).toBeVisible();
   await expect(page.getByText("Cold finish: caution first")).toBeVisible();
   await page.getByLabel("Open note Cold finish: caution first").click();

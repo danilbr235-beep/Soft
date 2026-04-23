@@ -74,6 +74,7 @@ function AppRootContent() {
             dailySession={app.dailySession}
             morningExperiments={app.morningExperiments}
             morningNudge={app.morningNudge}
+            morningNudgeReview={app.morningNudgeReview}
             morningRoutine={app.morningRoutine}
             privacyLock={app.privacyLock}
             today={app.today}

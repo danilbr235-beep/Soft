@@ -5,6 +5,7 @@ import type { Alert, CurrentPriority, DailyStateTile, QuickLogDefinition } from 
 import type { MorningExperiments } from "../morningExperiments";
 import type { DailySession, DailySessionStepId } from "../dailySession";
 import type { MorningNudgePlan } from "../morningNudge";
+import type { MorningNudgeReview } from "../morningNudgeReview";
 import type { MorningRoutine } from "../morningRoutine";
 import type { MorningRoutineStepId } from "../morningRoutineProgress";
 import type { TodayStatusItem } from "../todayStatus";
@@ -307,7 +308,13 @@ export function MorningExperimentsBlock({
   );
 }
 
-export function MorningNudgeBlock({ plan }: { plan: MorningNudgePlan }) {
+export function MorningNudgeBlock({
+  plan,
+  review,
+}: {
+  plan: MorningNudgePlan;
+  review: MorningNudgeReview;
+}) {
   return (
     <Surface>
       <View style={styles.sessionHeader}>
@@ -334,6 +341,12 @@ export function MorningNudgeBlock({ plan }: { plan: MorningNudgePlan }) {
       <View style={styles.routineGuidance}>
         <Text style={styles.routineGuidanceTitle}>{plan.previewTitle}</Text>
         <Text style={styles.routineGuidanceAction}>{plan.previewBody}</Text>
+      </View>
+      <View style={styles.routineGuidance}>
+        <Text style={styles.routineGuidanceTitle}>{review.guidanceTitle}</Text>
+        <Text style={styles.sessionStepTitle}>{review.guidanceTone}</Text>
+        <Text style={styles.body}>{review.guidanceBody}</Text>
+        <Text style={styles.hintMeta}>{review.guidanceMeta}</Text>
       </View>
     </Surface>
   );

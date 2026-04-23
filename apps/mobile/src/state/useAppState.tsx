@@ -311,10 +311,10 @@ export function useAppState() {
         setPrivacyLock(fallbackPrivacyLock);
         setProgramProgress(null);
         setProgramHistory([]);
-    setReviewPackets([]);
-    setReviewPreferences(defaultReviewPreferences);
-    setMorningNudgePreferences(defaultMorningNudgePreferences);
-    setMorningNudgeHistory([]);
+        setReviewPackets([]);
+        setReviewPreferences(defaultReviewPreferences);
+        setMorningNudgePreferences(defaultMorningNudgePreferences);
+        setMorningNudgeHistory([]);
         setDailySessionProgress({});
         setMorningRoutineProgress({});
       } finally {
@@ -423,8 +423,9 @@ export function useAppState() {
       history: morningNudgeHistory,
       language,
       plan: morningNudge,
+      routineReview: morningRoutineReview,
     });
-  }, [language, morningNudge, morningNudgeHistory]);
+  }, [language, morningNudge, morningNudgeHistory, morningRoutineReview]);
 
   const persistLogs = useCallback(async (nextLogs: LogEntry[]) => {
     setLogs(nextLogs);
@@ -742,6 +743,7 @@ export function useAppState() {
     setReviewPackets([]);
     setReviewPreferences(defaultReviewPreferences);
     setMorningNudgePreferences(defaultMorningNudgePreferences);
+    setMorningNudgeHistory([]);
     setDailySessionProgress({});
     setMorningRoutineProgress({});
     setLearnFocusItemId(null);

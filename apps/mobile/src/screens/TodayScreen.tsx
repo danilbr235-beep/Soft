@@ -5,6 +5,7 @@ import type { PrivacyLockState, QuickLogDefinition, TodayPayload } from "@pmhc/t
 import type { DailySession, DailySessionStepId } from "../dailySession";
 import type { MorningExperiments } from "../morningExperiments";
 import type { MorningNudgePlan } from "../morningNudge";
+import type { MorningNudgeReview } from "../morningNudgeReview";
 import type { MorningRoutine } from "../morningRoutine";
 import type { MorningRoutineStepId } from "../morningRoutineProgress";
 import {
@@ -28,6 +29,7 @@ type Props = {
   dailySession: DailySession;
   morningExperiments: MorningExperiments;
   morningNudge: MorningNudgePlan;
+  morningNudgeReview: MorningNudgeReview;
   morningRoutine: MorningRoutine;
   privacyLock: PrivacyLockState;
   onAskCoach: () => void;
@@ -44,6 +46,7 @@ export function TodayScreen({
   dailySession,
   morningExperiments,
   morningNudge,
+  morningNudgeReview,
   morningRoutine,
   onAskCoach,
   onCompleteMorningRoutineStep,
@@ -74,7 +77,7 @@ export function TodayScreen({
         onOpenGuide={onOpenMorningGuide}
         onOpenLog={onOpenMorningLog}
       />
-      {morningNudge.enabled ? <MorningNudgeBlock plan={morningNudge} /> : null}
+      {morningNudge.enabled ? <MorningNudgeBlock plan={morningNudge} review={morningNudgeReview} /> : null}
       <MorningExperimentsBlock experiments={morningExperiments} onOpenExperiment={onOpenMorningExperiment} />
       <PriorityCard copy={copy} priority={today.currentPriority} onAskCoach={onAskCoach} />
       <DailySessionBlock session={dailySession} onOpenStep={onOpenDailySessionStep} />
