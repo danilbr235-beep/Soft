@@ -185,13 +185,15 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Up to date")).toBeVisible();
 
   await page.getByLabel("Open Learn").click();
+  await expect(page.getByText("Morning routine review")).toBeVisible();
+  await expect(page.getByLabel("Open Two-minute mobility reset").first()).toBeVisible();
   await expect(page.getByText("Recommended for today")).toBeVisible();
   await expect(page.getByText("Clinical backbone")).toBeVisible();
   await expect(page.getByText("American Urological Association")).toBeVisible();
-  await page.getByLabel("Open Build a baseline without overchecking").first().click();
-  await page.getByLabel("Save Build a baseline without overchecking").click();
-  await page.getByLabel("Mark complete Build a baseline without overchecking").click();
-  await expect(page.getByLabel("Completed Build a baseline without overchecking")).toBeVisible();
+  await page.getByLabel("Open Two-minute mobility reset").first().click();
+  await page.getByLabel("Save Two-minute mobility reset").click();
+  await page.getByLabel("Mark complete Two-minute mobility reset").click();
+  await expect(page.getByLabel("Completed Two-minute mobility reset")).toBeVisible();
   await page.getByLabel("Back to library").click();
   await page.getByLabel("Filter Learn content: Recovery").click();
   await expect(page.getByText("Sleep setup for next-day readiness").first()).toBeVisible();
@@ -232,6 +234,8 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
 
   await page.getByLabel("Open Coach").click();
   await expect(page.getByText("How certain is this?")).toBeVisible();
+  await page.getByLabel("Open coach question: What about the morning routine?").click();
+  await expect(page.getByText("Repeat the same three-step morning tomorrow before changing the routine.")).toBeVisible();
   await page.getByLabel("Open coach question: What does this alert mean?").click();
   await expect(page.getByText("No active alerts right now")).toBeVisible();
   await page.getByLabel("Open coach question: What should I do next?").click();

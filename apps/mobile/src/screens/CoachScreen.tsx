@@ -5,22 +5,28 @@ import { colors, radii, spacing } from "@pmhc/ui";
 import { buildCoachQuickAnswers } from "@pmhc/rules";
 import type { AppLanguage, TodayPayload } from "@pmhc/types";
 import type { CoachQuestionId, CoachReviewDigest } from "@pmhc/rules";
+import { buildCoachMorningAnswer } from "../coachMorningAnswer";
+import type { MorningRoutineReview } from "../morningRoutineReview";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 
 export function CoachScreen({
   copy,
   language,
+  morningRoutineReview,
   reviewDigest,
   today,
 }: {
   copy: LanguageCopy;
   language: AppLanguage;
+  morningRoutineReview: MorningRoutineReview;
   reviewDigest: CoachReviewDigest;
   today: TodayPayload;
 }) {
-  const [selectedId, setSelectedId] = useState<CoachQuestionId>("priority");
-  const answers = useMemo(() => buildCoachQuickAnswers(today, language, reviewDigest), [language, reviewDigest, today]);
+  const [selectedId, setSelectedId] = useState<CoachQuestionId | "morning">("priority");
+  const answers = useMemo(() => {
+    return [...buildCoachQuickAnswers(today, language, reviewDigest), buildCoachMorningAnswer(morningRoutineReview, language)];
+  }, [language, morningRoutineReview, reviewDigest, today]);
   const selectedAnswer = answers.find((answer) => answer.id === selectedId) ?? answers[0];
 
   return (

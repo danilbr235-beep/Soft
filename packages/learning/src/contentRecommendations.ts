@@ -25,6 +25,14 @@ export type ContentRecommendationContext = {
   activeProgramCategory: ProgramCategory | null;
   reviewDigestTone?: ContentRecommendationDigestTone | null;
   reviewDigestNextStep?: ContentRecommendationDigestNextStep | null;
+  morningRoutineToneId?: "building" | "steady" | "reset" | null;
+  morningRoutineNextStepId?:
+    | "protect_anchor"
+    | "repeat_full_loop"
+    | "pair_checkin"
+    | "open_guide_same_morning"
+    | "keep_same_loop"
+    | null;
 };
 
 export type ContentRecommendation = {
@@ -71,6 +79,7 @@ export function recommendContentForToday(
   const priorityTags = tagsForPriority(context.priorityDomain);
   const programTags = tagsForProgram(context.activeProgramCategory);
   const digestTags = tagsForDigest(context.reviewDigestTone ?? null, context.reviewDigestNextStep ?? null);
+  const morningBoost = buildMorningBoost(context.morningRoutineToneId ?? null, context.morningRoutineNextStepId ?? null);
 
   return items
     .filter((item) => !item.completed)
@@ -80,7 +89,7 @@ export function recommendContentForToday(
       return {
         item,
         reason,
-        score: scoreReason(reason),
+        score: scoreReason(reason) + morningBoost(item),
         index,
       };
     })
@@ -177,4 +186,45 @@ function tagsForDigest(
   }
 
   return [];
+}
+
+function buildMorningBoost(
+  tone: ContentRecommendationContext["morningRoutineToneId"],
+  nextStep: ContentRecommendationContext["morningRoutineNextStepId"],
+) {
+  return (item: ContentItem) => {
+    if (!tone && !nextStep) {
+      return 0;
+    }
+
+    let score = 0;
+
+    if (item.tags.includes("morning")) {
+      score += 6;
+    }
+
+    if (item.id === "morning-routine-reset") {
+      if (nextStep === "pair_checkin" || nextStep === "open_guide_same_morning" || nextStep === "repeat_full_loop") {
+        score += 20;
+      } else if (nextStep === "keep_same_loop") {
+        score += 12;
+      }
+    }
+
+    if (item.id === "morning-light-walk") {
+      if (nextStep === "protect_anchor") {
+        score += 22;
+      } else if (tone === "building") {
+        score += 10;
+      }
+    }
+
+    if (item.id === "morning-mobility-reset") {
+      if (nextStep === "keep_same_loop" || nextStep === "repeat_full_loop") {
+        score += 10;
+      }
+    }
+
+    return score;
+  };
 }

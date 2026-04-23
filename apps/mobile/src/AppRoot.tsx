@@ -117,6 +117,7 @@ function AppRootContent() {
             content={app.content}
             copy={copy}
             language={app.language}
+            morningRoutineReview={app.morningRoutineReview}
             onMarkCompleted={app.completeContent}
             onClearPreferredItem={app.clearLearnFocus}
             onToggleSaved={app.toggleSavedContent}
@@ -149,7 +150,13 @@ function AppRootContent() {
           />
         ) : null}
         {app.activeTab === "Coach" ? (
-          <CoachScreen copy={copy} language={app.language} reviewDigest={app.reviewDigest} today={app.today} />
+          <CoachScreen
+            copy={copy}
+            language={app.language}
+            morningRoutineReview={app.morningRoutineReview}
+            reviewDigest={app.reviewDigest}
+            today={app.today}
+          />
         ) : null}
         {app.activeTab === "Settings" ? (
           <SettingsScreen

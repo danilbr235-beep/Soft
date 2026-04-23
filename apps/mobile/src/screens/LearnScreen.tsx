@@ -12,6 +12,7 @@ import {
 import type { ContentCategory } from "@pmhc/learning";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { AppLanguage, ContentItem, PriorityDomain, ProgramCategory } from "@pmhc/types";
+import type { MorningRoutineReview } from "../morningRoutineReview";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 
@@ -28,6 +29,7 @@ type Props = {
   priorityDomain: PriorityDomain;
   reviewDigestNextStep: ContentRecommendationDigestNextStep;
   reviewDigestTone: ContentRecommendationDigestTone;
+  morningRoutineReview: MorningRoutineReview;
   onClearPreferredItem: () => void;
 };
 
@@ -54,6 +56,7 @@ export function LearnScreen({
   preferredItemId,
   reviewDigestNextStep,
   reviewDigestTone,
+  morningRoutineReview,
 }: Props) {
   const [selectedCategory, setSelectedCategory] = useState<LearnFilter>("all");
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
@@ -68,11 +71,21 @@ export function LearnScreen({
     () =>
       recommendContentForToday(content, {
         activeProgramCategory,
+        morningRoutineNextStepId: morningRoutineReview.nextStepId,
+        morningRoutineToneId: morningRoutineReview.toneId,
         priorityDomain,
         reviewDigestNextStep,
         reviewDigestTone,
       }),
-    [activeProgramCategory, content, priorityDomain, reviewDigestNextStep, reviewDigestTone],
+    [
+      activeProgramCategory,
+      content,
+      morningRoutineReview.nextStepId,
+      morningRoutineReview.toneId,
+      priorityDomain,
+      reviewDigestNextStep,
+      reviewDigestTone,
+    ],
   );
   const trustedSources = useMemo(
     () =>
@@ -97,6 +110,10 @@ export function LearnScreen({
     [content, selectedCategory],
   );
   const selectedItem = content.find((item) => item.id === selectedItemId);
+  const morningFocusItem = useMemo(
+    () => findMorningFocusItem(content, morningRoutineReview),
+    [content, morningRoutineReview],
+  );
 
   function renderActions(item: ContentItem, title: string) {
     const saveAction = item.saved ? copy.learn.unsave : copy.learn.save;
@@ -180,6 +197,27 @@ export function LearnScreen({
 
   return (
     <Screen title={copy.learn.title} subtitle={copy.learn.subtitle}>
+      {morningFocusItem ? (
+        <Surface>
+          <View style={{ gap: spacing.xs }}>
+            <Text style={styles.eyebrow}>{morningRoutineReview.title}</Text>
+            <Text style={styles.cardTitle}>{morningRoutineReview.tone}</Text>
+            <Text style={styles.summary}>{morningRoutineReview.reason}</Text>
+            <Text style={styles.reason}>{localizedTitle(morningFocusItem, language)}</Text>
+            <Text style={styles.summary}>{morningRoutineReview.nextStep}</Text>
+            <Pressable
+              accessibilityLabel={copy.learn.openDetail(localizedTitle(morningFocusItem, language))}
+              accessibilityRole="button"
+              onPress={() => setSelectedItemId(morningFocusItem.id)}
+              style={styles.inlineLink}
+            >
+              <Text style={styles.openText}>
+                {copy.learn.openDetail(localizedTitle(morningFocusItem, language))}
+              </Text>
+            </Pressable>
+          </View>
+        </Surface>
+      ) : null}
       <Surface>
         <View style={{ gap: spacing.md }}>
           <Text style={styles.sectionTitle}>{copy.learn.recommended}</Text>
@@ -308,6 +346,26 @@ function localizedSummary(item: ContentItem, language: AppLanguage) {
   return language === "ru" ? item.translatedSummaryRu ?? item.summary : item.summary;
 }
 
+function findMorningFocusItem(content: ContentItem[], review: MorningRoutineReview) {
+  const availableItems = content.filter((item) => !item.completed);
+  const preferredIds =
+    review.nextStepId === "protect_anchor"
+      ? ["morning-light-walk", "morning-routine-reset", "morning-mobility-reset"]
+      : review.nextStepId === "keep_same_loop" || review.nextStepId === "repeat_full_loop"
+        ? ["morning-mobility-reset", "morning-light-walk", "morning-routine-reset"]
+        : ["morning-routine-reset", "morning-mobility-reset", "morning-light-walk"];
+
+  for (const id of preferredIds) {
+    const item = availableItems.find((candidate) => candidate.id === id);
+
+    if (item) {
+      return item;
+    }
+  }
+
+  return availableItems.find((item) => item.tags.includes("morning")) ?? null;
+}
+
 function tagLabel(tag: string, copy: LanguageCopy) {
   return isContentCategory(tag) ? copy.learn.categoryLabels[tag] : tag.replace(/_/g, " ");
 }
@@ -401,6 +459,9 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: colors.text,
     fontWeight: "800",
+  },
+  inlineLink: {
+    alignSelf: "flex-start",
   },
   button: {
     minHeight: 44,

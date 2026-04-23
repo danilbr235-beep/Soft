@@ -8,6 +8,19 @@ import {
 
 const content = [
   {
+    id: "morning-guide",
+    type: "guide",
+    title: "Morning reset",
+    summary: "Reset the morning loop.",
+    durationMinutes: 5,
+    trustLevel: "reviewed_source",
+    tags: ["morning", "baseline", "tracking"],
+    sourceName: "Starter",
+    language: "en",
+    saved: false,
+    completed: false,
+  },
+  {
     id: "baseline",
     type: "guide",
     title: "Build a baseline",
@@ -64,15 +77,15 @@ const content = [
 describe("content recommendations", () => {
   it("chooses the first known category from item tags", () => {
     expect(contentCategoryFor(content[0])).toBe("baseline");
-    expect(contentCategoryFor(content[1])).toBe("sleep");
-    expect(contentCategoryFor(content[2])).toBe("pelvic_floor");
+    expect(contentCategoryFor(content[1])).toBe("baseline");
+    expect(contentCategoryFor(content[2])).toBe("sleep");
   });
 
   it("groups content by category in a stable order", () => {
     const groups = groupContentByCategory(content);
 
     expect(groups.map((group) => group.category)).toEqual(["baseline", "sleep", "pelvic_floor", "confidence"]);
-    expect(groups[0].items.map((item) => item.id)).toEqual(["baseline"]);
+    expect(groups[0].items.map((item) => item.id)).toEqual(["morning-guide", "baseline"]);
   });
 
   it("recommends incomplete content tied to the Today priority first", () => {
@@ -83,7 +96,7 @@ describe("content recommendations", () => {
       reviewDigestNextStep: "log_two_scores",
     });
 
-    expect(recommendations.map((item) => item.item.id)).toEqual(["baseline", "sleep", "pelvic"]);
+    expect(recommendations.map((item) => item.item.id)).toEqual(["morning-guide", "baseline", "sleep"]);
     expect(recommendations[0].reason).toBe("digest");
     expect(recommendations.some((item) => item.item.id === "done")).toBe(false);
   });
@@ -113,5 +126,18 @@ describe("content recommendations", () => {
       reason: "digest",
     });
     expect(recommendations[1]?.item.id).toBe("pelvic");
+  });
+
+  it("uses morning routine context to lift the right morning guide", () => {
+    const recommendations = recommendContentForToday(content, {
+      activeProgramCategory: "confidence",
+      priorityDomain: "confidence",
+      reviewDigestTone: "baseline_building",
+      reviewDigestNextStep: "log_two_scores",
+      morningRoutineToneId: "reset",
+      morningRoutineNextStepId: "pair_checkin",
+    });
+
+    expect(recommendations[0]?.item.id).toBe("morning-guide");
   });
 });
