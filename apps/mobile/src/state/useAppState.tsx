@@ -60,6 +60,7 @@ import {
   type DailySessionProgressStore,
   type DailySessionStepId,
 } from "../dailySession";
+import { buildMorningExperiments } from "../morningExperiments";
 import { buildMorningRoutine } from "../morningRoutine";
 import { type ReviewSection } from "../reviewRecap";
 import {
@@ -322,6 +323,12 @@ export function useAppState() {
       today,
     });
   }, [content, language, today]);
+  const morningExperiments = useMemo(() => {
+    return buildMorningExperiments({
+      content,
+      language,
+    });
+  }, [content, language]);
 
   const persistLogs = useCallback(async (nextLogs: LogEntry[]) => {
     setLogs(nextLogs);
@@ -773,6 +780,7 @@ export function useAppState() {
       <QuickLogSheet definition={selectedQuickLog} language={language} onClose={() => setSelectedQuickLog(null)} onSave={saveQuickLog} />
     ) : null,
     language,
+    morningExperiments,
     morningRoutine,
     today,
     pendingSyncCount: nextPendingJobs(syncQueue).length,

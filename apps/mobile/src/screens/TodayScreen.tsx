@@ -3,8 +3,18 @@ import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, spacing } from "@pmhc/ui";
 import type { PrivacyLockState, QuickLogDefinition, TodayPayload } from "@pmhc/types";
 import type { DailySession, DailySessionStepId } from "../dailySession";
+import type { MorningExperiments } from "../morningExperiments";
 import type { MorningRoutine } from "../morningRoutine";
-import { AlertStrip, DailySessionBlock, MorningRoutineBlock, PriorityCard, QuickLogRow, StateGrid, TodayStatusRow } from "../components/TodayComponents";
+import {
+  AlertStrip,
+  DailySessionBlock,
+  MorningExperimentsBlock,
+  MorningRoutineBlock,
+  PriorityCard,
+  QuickLogRow,
+  StateGrid,
+  TodayStatusRow,
+} from "../components/TodayComponents";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
 import { buildTodayStatusItems } from "../todayStatus";
@@ -13,11 +23,13 @@ type Props = {
   today: TodayPayload;
   copy: LanguageCopy;
   dailySession: DailySession;
+  morningExperiments: MorningExperiments;
   morningRoutine: MorningRoutine;
   privacyLock: PrivacyLockState;
   onAskCoach: () => void;
   onLog: (definition: QuickLogDefinition) => void;
   onOpenDailySessionStep: (stepId: DailySessionStepId) => void;
+  onOpenMorningExperiment: (itemId: string | null) => void;
   onOpenMorningGuide: () => void;
   onOpenMorningLog: () => void;
 };
@@ -25,10 +37,12 @@ type Props = {
 export function TodayScreen({
   copy,
   dailySession,
+  morningExperiments,
   morningRoutine,
   onAskCoach,
   onLog,
   onOpenDailySessionStep,
+  onOpenMorningExperiment,
   onOpenMorningGuide,
   onOpenMorningLog,
   privacyLock,
@@ -48,6 +62,7 @@ export function TodayScreen({
     <Screen eyebrow={today.todayMode} title={copy.today.title} subtitle={activeProgramTitle}>
       <TodayStatusRow items={statusItems} />
       <MorningRoutineBlock routine={morningRoutine} onOpenGuide={onOpenMorningGuide} onOpenLog={onOpenMorningLog} />
+      <MorningExperimentsBlock experiments={morningExperiments} onOpenExperiment={onOpenMorningExperiment} />
       <PriorityCard copy={copy} priority={today.currentPriority} onAskCoach={onAskCoach} />
       <DailySessionBlock session={dailySession} onOpenStep={onOpenDailySessionStep} />
       <StateGrid tiles={today.dailyState} />

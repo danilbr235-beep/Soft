@@ -62,6 +62,12 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Vault on")).toBeVisible();
   await expect(page.getByText("Morning routine", { exact: true })).toBeVisible();
   await expect(page.getByText("Wake and light anchor")).toBeVisible();
+  await expect(page.getByText("Optional morning experiments", { exact: true })).toBeVisible();
+  await expect(page.getByText("Cold finish: caution first")).toBeVisible();
+  await page.getByLabel("Open note Cold finish: caution first").click();
+  await expect(page.getByText("Cold finish: caution first")).toBeVisible();
+  await page.getByLabel("Back to library").click();
+  await page.getByLabel("Open Today").click();
   await page.getByLabel("Open guide").first().click();
   await expect(page.getByText("Morning reset: light, signal, move")).toBeVisible();
   await page.getByLabel("Back to library").click();

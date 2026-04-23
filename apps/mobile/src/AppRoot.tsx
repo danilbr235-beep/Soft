@@ -72,11 +72,13 @@ function AppRootContent() {
           <TodayScreen
             copy={copy}
             dailySession={app.dailySession}
+            morningExperiments={app.morningExperiments}
             morningRoutine={app.morningRoutine}
             privacyLock={app.privacyLock}
             today={app.today}
             onAskCoach={() => app.setActiveTab("Coach")}
             onOpenDailySessionStep={app.openDailySessionStep}
+            onOpenMorningExperiment={app.openLearnItem}
             onOpenMorningGuide={() => app.openLearnItem(app.morningRoutine.guideItemId)}
             onOpenMorningLog={() => {
               if (app.morningRoutine.logDefinition) {

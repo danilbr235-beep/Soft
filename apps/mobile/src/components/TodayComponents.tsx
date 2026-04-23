@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { Alert, CurrentPriority, DailyStateTile, QuickLogDefinition } from "@pmhc/types";
+import type { MorningExperiments } from "../morningExperiments";
 import type { DailySession, DailySessionStepId } from "../dailySession";
 import type { MorningRoutine } from "../morningRoutine";
 import type { TodayStatusItem } from "../todayStatus";
@@ -208,6 +209,55 @@ export function MorningRoutineBlock({
                 <Text style={styles.sessionButtonText}>{step.cta}</Text>
               </Pressable>
             ) : null}
+          </View>
+        ))}
+      </View>
+    </Surface>
+  );
+}
+
+export function MorningExperimentsBlock({
+  experiments,
+  onOpenExperiment,
+}: {
+  experiments: MorningExperiments;
+  onOpenExperiment: (itemId: string | null) => void;
+}) {
+  return (
+    <Surface>
+      <View style={styles.sessionHeader}>
+        <View style={styles.sessionHeaderText}>
+          <Text style={styles.kicker}>{experiments.title}</Text>
+          <Text style={styles.body}>{experiments.body}</Text>
+          <Text style={styles.routineNote}>{experiments.note}</Text>
+        </View>
+      </View>
+      <View style={styles.sessionList}>
+        {experiments.items.map((item) => (
+          <View key={item.id} style={styles.sessionStep}>
+            <View style={styles.rowBetween}>
+              <Text style={styles.sessionStepTitle}>{item.title}</Text>
+              <Text style={styles.sessionState}>{item.badge}</Text>
+            </View>
+            <Text style={styles.body}>{item.body}</Text>
+            <Text style={styles.routineFit}>{item.fit}</Text>
+            <Text style={styles.routineCaution}>{item.caution}</Text>
+            <View style={styles.sourceRow}>
+              {item.sourceLabels.map((label) => (
+                <Text key={`${item.id}-${label}`} style={styles.sourcePill}>
+                  {label}
+                </Text>
+              ))}
+            </View>
+            <Pressable
+              accessibilityLabel={`${item.cta} ${item.title}`}
+              accessibilityRole="button"
+              disabled={!item.guideItemId}
+              onPress={() => onOpenExperiment(item.guideItemId)}
+              style={[styles.sessionButton, !item.guideItemId ? styles.disabledButton : null]}
+            >
+              <Text style={styles.sessionButtonText}>{item.cta}</Text>
+            </Pressable>
           </View>
         ))}
       </View>
@@ -445,6 +495,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
   },
+  routineFit: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 20,
+  },
+  routineCaution: {
+    color: colors.amber,
+    fontSize: 13,
+    lineHeight: 19,
+  },
   sourcePill: {
     backgroundColor: colors.panelSoft,
     borderColor: colors.line,
@@ -460,5 +521,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });

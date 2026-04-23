@@ -2,6 +2,55 @@ import type { ContentItem } from "@pmhc/types";
 
 export const starterContent: ContentItem[] = [
   {
+    id: "morning-light-walk",
+    type: "guide",
+    title: "Morning light walk: a low-pressure reset",
+    translatedTitleRu: "Утренняя прогулка на свету: мягкая перезагрузка",
+    summary: "A short guide to pairing outdoor light and easy movement with a steady wake cue.",
+    durationMinutes: 4,
+    trustLevel: "reviewed_source",
+    tags: ["general", "morning"],
+    sourceName: "Morning experiments brief",
+    language: "en",
+    translatedSummaryRu:
+      "Короткий гид о том, как соединить дневной свет и легкое движение с устойчивым сигналом на пробуждение.",
+    saved: false,
+    completed: false,
+  },
+  {
+    id: "morning-mobility-reset",
+    type: "guide",
+    title: "Two-minute mobility reset",
+    translatedTitleRu: "Двухминутная мобилити-перезагрузка",
+    summary: "A short guide for gentle morning mobility when you want movement without intensity.",
+    durationMinutes: 3,
+    trustLevel: "reviewed_source",
+    tags: ["general", "morning"],
+    sourceName: "Morning experiments brief",
+    language: "en",
+    translatedSummaryRu:
+      "Короткий гид по мягкой утренней подвижности, когда хочется движения без лишней интенсивности.",
+    saved: false,
+    completed: false,
+  },
+  {
+    id: "morning-cold-caution",
+    type: "summary",
+    title: "Cold finish: caution first",
+    translatedTitleRu: "Холодный финиш: сначала осторожность",
+    summary:
+      "A conservative note on why cold exposure stays optional here, where the practical boundary sits, and why it does not belong in the core morning loop.",
+    durationMinutes: 3,
+    trustLevel: "reviewed_source",
+    tags: ["general", "morning"],
+    sourceName: "Cold exposure caution note",
+    language: "en",
+    translatedSummaryRu:
+      "Консервативная заметка о том, почему холод здесь остается только опцией, где проходит практическая граница и почему его не стоит ставить в базовый утренний цикл.",
+    saved: false,
+    completed: false,
+  },
+  {
     id: "morning-routine-reset",
     type: "guide",
     title: "Morning reset: light, signal, move",
