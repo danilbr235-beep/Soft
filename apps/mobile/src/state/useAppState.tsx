@@ -62,13 +62,18 @@ import {
 } from "../dailySession";
 import { buildMorningExperiments } from "../morningExperiments";
 import {
+  appendMorningNudgeHistory,
   buildMorningNudgePlan,
+  createMorningNudgeHistoryEntry,
   defaultMorningNudgePreferences,
+  isMorningNudgeHistoryArray,
   isMorningNudgePreferences,
+  type MorningNudgeHistoryEntry,
   type MorningNudgePreferences,
   type MorningNudgeTimePreset,
   type MorningNudgeTone,
 } from "../morningNudge";
+import { buildMorningNudgeReview } from "../morningNudgeReview";
 import { buildMorningRoutine } from "../morningRoutine";
 import {
   isMorningRoutineProgressStore,
@@ -101,6 +106,7 @@ const [
   reviewPacketHistoryKey,
   reviewPreferencesKey,
   morningNudgesKey,
+  morningNudgeHistoryKey,
   dailySessionProgressKey,
   morningRoutineProgressKey,
 ] = appStorageKeys;
@@ -154,6 +160,12 @@ const morningNudgesRepository = createJsonRepository<MorningNudgePreferences>(
   morningNudgesKey,
   defaultMorningNudgePreferences,
   isMorningNudgePreferences,
+);
+const morningNudgeHistoryRepository = createJsonRepository<MorningNudgeHistoryEntry[]>(
+  AsyncStorage,
+  morningNudgeHistoryKey,
+  [],
+  isMorningNudgeHistoryArray,
 );
 const dailySessionProgressRepository = createJsonRepository<DailySessionProgressStore>(
   AsyncStorage,
@@ -214,6 +226,7 @@ export function useAppState() {
   const [morningNudgePreferences, setMorningNudgePreferences] = useState<MorningNudgePreferences>(
     defaultMorningNudgePreferences,
   );
+  const [morningNudgeHistory, setMorningNudgeHistory] = useState<MorningNudgeHistoryEntry[]>([]);
   const [dailySessionProgress, setDailySessionProgress] = useState<DailySessionProgressStore>({});
   const [morningRoutineProgress, setMorningRoutineProgress] = useState<MorningRoutineProgressStore>({});
   const [learnFocusItemId, setLearnFocusItemId] = useState<string | null>(null);
@@ -241,6 +254,7 @@ export function useAppState() {
           savedReviewPackets,
           savedReviewPreferences,
           savedMorningNudges,
+          savedMorningNudgeHistory,
           savedDailySessionProgress,
           savedMorningRoutineProgress,
         ] =
@@ -255,6 +269,7 @@ export function useAppState() {
             reviewPacketHistoryRepository.load(),
             reviewPreferencesRepository.load(),
             morningNudgesRepository.load(),
+            morningNudgeHistoryRepository.load(),
             dailySessionProgressRepository.load(),
             morningRoutineProgressRepository.load(),
           ]);
@@ -280,6 +295,7 @@ export function useAppState() {
         setReviewPackets(savedReviewPackets);
         setReviewPreferences(savedReviewPreferences);
         setMorningNudgePreferences(savedMorningNudges);
+        setMorningNudgeHistory(savedMorningNudgeHistory);
         setDailySessionProgress(savedDailySessionProgress);
         setMorningRoutineProgress(savedMorningRoutineProgress);
       } catch {
@@ -295,9 +311,10 @@ export function useAppState() {
         setPrivacyLock(fallbackPrivacyLock);
         setProgramProgress(null);
         setProgramHistory([]);
-        setReviewPackets([]);
-        setReviewPreferences(defaultReviewPreferences);
-        setMorningNudgePreferences(defaultMorningNudgePreferences);
+    setReviewPackets([]);
+    setReviewPreferences(defaultReviewPreferences);
+    setMorningNudgePreferences(defaultMorningNudgePreferences);
+    setMorningNudgeHistory([]);
         setDailySessionProgress({});
         setMorningRoutineProgress({});
       } finally {
@@ -401,6 +418,13 @@ export function useAppState() {
       review: morningRoutineReview,
     });
   }, [language, morningNudgePreferences, morningRoutineProgress, morningRoutineReview, today.date]);
+  const morningNudgeReview = useMemo(() => {
+    return buildMorningNudgeReview({
+      history: morningNudgeHistory,
+      language,
+      plan: morningNudge,
+    });
+  }, [language, morningNudge, morningNudgeHistory]);
 
   const persistLogs = useCallback(async (nextLogs: LogEntry[]) => {
     setLogs(nextLogs);
@@ -509,6 +533,27 @@ export function useAppState() {
     setMorningNudgePreferences(nextPreferences);
     await morningNudgesRepository.save(nextPreferences);
   }, []);
+  const persistMorningNudgeHistory = useCallback(async (nextHistory: MorningNudgeHistoryEntry[]) => {
+    setMorningNudgeHistory(nextHistory);
+    await morningNudgeHistoryRepository.save(nextHistory);
+  }, []);
+  const saveMorningNudgePreferences = useCallback(
+    async (nextPreferences: MorningNudgePreferences) => {
+      const nextHistory = appendMorningNudgeHistory(
+        morningNudgeHistory,
+        createMorningNudgeHistoryEntry({
+          changedAt: new Date().toISOString(),
+          preferences: nextPreferences,
+        }),
+      );
+
+      await Promise.all([
+        persistMorningNudgePreferences(nextPreferences),
+        persistMorningNudgeHistory(nextHistory),
+      ]);
+    },
+    [morningNudgeHistory, persistMorningNudgeHistory, persistMorningNudgePreferences],
+  );
   const persistDailySessionProgress = useCallback(async (nextProgress: DailySessionProgressStore) => {
     setDailySessionProgress(nextProgress);
     await dailySessionProgressRepository.save(nextProgress);
@@ -583,12 +628,16 @@ export function useAppState() {
         persistProgramProgress(nextProgramProgress),
         persistProgramHistory([]),
         persistReviewPackets([]),
+        persistMorningNudgePreferences(defaultMorningNudgePreferences),
+        persistMorningNudgeHistory([]),
         persistDailySessionProgress({}),
         persistMorningRoutineProgress({}),
       ]);
     },
     [
       persistDailySessionProgress,
+      persistMorningNudgeHistory,
+      persistMorningNudgePreferences,
       persistMorningRoutineProgress,
       persistPrivacyLock,
       persistProgramHistory,
@@ -648,37 +697,37 @@ export function useAppState() {
     });
   }, [persistReviewPreferences, reviewPreferences]);
   const toggleMorningNudgesEnabled = useCallback(async () => {
-    await persistMorningNudgePreferences({
+    await saveMorningNudgePreferences({
       ...morningNudgePreferences,
       enabled: !morningNudgePreferences.enabled,
     });
-  }, [morningNudgePreferences, persistMorningNudgePreferences]);
+  }, [morningNudgePreferences, saveMorningNudgePreferences]);
   const changeMorningNudgeTone = useCallback(
     async (tone: MorningNudgeTone) => {
-      await persistMorningNudgePreferences({
+      await saveMorningNudgePreferences({
         ...morningNudgePreferences,
         tone,
       });
     },
-    [morningNudgePreferences, persistMorningNudgePreferences],
+    [morningNudgePreferences, saveMorningNudgePreferences],
   );
   const changeMorningNudgeTimePreset = useCallback(
     async (timePreset: MorningNudgeTimePreset) => {
-      await persistMorningNudgePreferences({
+      await saveMorningNudgePreferences({
         ...morningNudgePreferences,
         timePreset,
       });
     },
-    [morningNudgePreferences, persistMorningNudgePreferences],
+    [morningNudgePreferences, saveMorningNudgePreferences],
   );
   const changeMorningNudgeWeekdaysOnly = useCallback(
     async (weekdaysOnly: boolean) => {
-      await persistMorningNudgePreferences({
+      await saveMorningNudgePreferences({
         ...morningNudgePreferences,
         weekdaysOnly,
       });
     },
-    [morningNudgePreferences, persistMorningNudgePreferences],
+    [morningNudgePreferences, saveMorningNudgePreferences],
   );
 
   const resetOnboarding = useCallback(async () => {
@@ -707,6 +756,7 @@ export function useAppState() {
       reviewPacketHistoryRepository.clear(),
       reviewPreferencesRepository.clear(),
       morningNudgesRepository.clear(),
+      morningNudgeHistoryRepository.clear(),
       dailySessionProgressRepository.clear(),
       morningRoutineProgressRepository.clear(),
     ]);
@@ -959,6 +1009,7 @@ export function useAppState() {
     morningRoutineProgress,
     morningExperiments,
     morningNudge,
+    morningNudgeReview,
     morningNudgePreferences,
     morningRoutine,
     morningRoutineReview,

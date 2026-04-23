@@ -12,6 +12,11 @@ export type MorningNudgePreferences = {
   weekdaysOnly: boolean;
 };
 
+export type MorningNudgeHistoryEntry = MorningNudgePreferences & {
+  id: string;
+  changedAt: string;
+};
+
 export type MorningNudgePlan = {
   enabled: boolean;
   title: string;
@@ -33,6 +38,8 @@ export const defaultMorningNudgePreferences: MorningNudgePreferences = {
   timePreset: "standard",
   weekdaysOnly: true,
 };
+
+export const morningNudgeHistoryLimit = 12;
 
 const timeLabels: Record<MorningNudgeTimePreset, string> = {
   early: "07:15",
@@ -180,6 +187,50 @@ export function isMorningNudgePreferences(value: unknown): value is MorningNudge
   );
 }
 
+export function createMorningNudgeHistoryEntry({
+  changedAt,
+  preferences,
+}: {
+  changedAt: string;
+  preferences: MorningNudgePreferences;
+}): MorningNudgeHistoryEntry {
+  return {
+    id: `morning-nudge-${Date.parse(changedAt) || changedAt}`,
+    changedAt,
+    ...preferences,
+  };
+}
+
+export function appendMorningNudgeHistory(
+  history: MorningNudgeHistoryEntry[],
+  entry: MorningNudgeHistoryEntry,
+  limit = morningNudgeHistoryLimit,
+) {
+  const latestEntry = history[0];
+
+  if (latestEntry && getHistorySignature(latestEntry) === getHistorySignature(entry)) {
+    return history;
+  }
+
+  return [entry, ...history].slice(0, limit);
+}
+
+export function isMorningNudgeHistoryArray(value: unknown): value is MorningNudgeHistoryEntry[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (entry) =>
+        isRecord(entry) &&
+        typeof entry.id === "string" &&
+        typeof entry.changedAt === "string" &&
+        typeof entry.enabled === "boolean" &&
+        isMorningNudgeTone(entry.tone) &&
+        isMorningNudgeTimePreset(entry.timePreset) &&
+        typeof entry.weekdaysOnly === "boolean",
+    )
+  );
+}
+
 function buildPreviewBody({
   completedToday,
   language,
@@ -216,4 +267,13 @@ function isMorningNudgeTimePreset(value: unknown): value is MorningNudgeTimePres
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function getHistorySignature(entry: MorningNudgeHistoryEntry) {
+  return JSON.stringify({
+    enabled: entry.enabled,
+    tone: entry.tone,
+    timePreset: entry.timePreset,
+    weekdaysOnly: entry.weekdaysOnly,
+  });
 }

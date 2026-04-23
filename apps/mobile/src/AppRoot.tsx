@@ -106,6 +106,7 @@ function AppRootContent() {
             copy={copy}
             language={app.language}
             logs={app.logs}
+            morningNudgeReview={app.morningNudgeReview}
             morningRoutineReview={app.morningRoutineReview}
             onSavePacket={app.saveReviewPacket}
             preferences={app.reviewPreferences}

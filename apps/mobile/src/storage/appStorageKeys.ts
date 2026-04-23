@@ -9,6 +9,7 @@ export const appStorageKeys = [
   "pmhc:review-packets",
   "pmhc:review-preferences",
   "pmhc:morning-nudges",
+  "pmhc:morning-nudge-history",
   "pmhc:daily-session",
   "pmhc:morning-routine",
 ] as const;

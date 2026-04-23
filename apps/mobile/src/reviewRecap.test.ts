@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getCopy } from "@pmhc/i18n";
 import type { ProgramReviewSummary } from "@pmhc/programs";
 import type { TrackingPeriodReviewSummary, TrackingReviewDigest, TrackingWeeklyReviewSummary } from "@pmhc/tracking";
+import type { MorningNudgeReview } from "./morningNudgeReview";
 import type { MorningRoutineReview } from "./morningRoutineReview";
 import { buildReviewRecap } from "./reviewRecap";
 
@@ -72,11 +73,29 @@ const morningRoutineReview: MorningRoutineReview = {
   streak: 1,
 };
 
+const morningNudgeReview: MorningNudgeReview = {
+  title: "Morning nudge review",
+  body: "A short read of the current local reminder setup for the morning loop.",
+  stateTitle: "State",
+  stateLabel: "On",
+  timingTitle: "Timing",
+  timingLabel: "Daily - 09:00",
+  styleTitle: "Style",
+  styleLabel: "Supportive",
+  focusTitle: "Current focus",
+  focusLabel: "Repeat full loop",
+  previewTitle: "Preview",
+  previewBody: "Repeat the same three-step morning once more before changing it.",
+  historyTitle: "Recent changes",
+  historyLabel: "Last changed Apr 23, 09:00 - 2 adjustments in the last 30 days",
+};
+
 describe("buildReviewRecap", () => {
   it("builds an overview recap from the digest", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "snapshot",
+      morningNudgeReview,
       morningRoutineReview,
       monthlyReview,
       programReview,
@@ -97,6 +116,7 @@ describe("buildReviewRecap", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "snapshot",
+      morningNudgeReview,
       morningRoutineReview,
       monthlyReview,
       programReview: null,
@@ -115,6 +135,7 @@ describe("buildReviewRecap", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "plan",
+      morningNudgeReview,
       morningRoutineReview,
       monthlyReview,
       programReview,
@@ -134,6 +155,7 @@ describe("buildReviewRecap", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "coach",
+      morningNudgeReview,
       morningRoutineReview,
       monthlyReview,
       programReview,
@@ -153,6 +175,7 @@ describe("buildReviewRecap", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "packet",
+      morningNudgeReview,
       morningRoutineReview,
       monthlyReview,
       programReview,
@@ -173,17 +196,20 @@ describe("buildReviewRecap", () => {
       "Next step",
       "Signals",
       "Morning routine",
+      "Morning nudge",
       "History snapshot",
     ]);
     expect(result.blocks[0]?.lines.join(" ")).toContain("30-day review");
     expect(result.blocks[3]?.lines.join(" ")).toContain("Morning routine review");
-    expect(result.blocks[4]?.lines.join(" ")).toContain("Latest 30-day cycle context");
+    expect(result.blocks[4]?.lines.join(" ")).toContain("Daily - 09:00");
+    expect(result.blocks[5]?.lines.join(" ")).toContain("Latest 30-day cycle context");
   });
 
   it("carries morning routine review context into an overview packet", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "packet",
+      morningNudgeReview,
       morningRoutineReview,
       monthlyReview,
       programReview,
@@ -200,13 +226,15 @@ describe("buildReviewRecap", () => {
 
     expect(result.blocks[2]?.lines.join(" ")).not.toContain("Full mornings: 1/7");
     expect(result.blocks[3]?.lines.join(" ")).toContain("Full mornings: 1/7");
-    expect(result.blocks[4]?.lines.join(" ")).not.toContain("Morning routine review: Building consistency");
+    expect(result.blocks[4]?.lines.join(" ")).toContain("Morning nudge review");
+    expect(result.blocks[5]?.lines.join(" ")).not.toContain("Morning routine review: Building consistency");
   });
 
   it("can omit the dedicated morning block from a packet", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "packet",
+      morningNudgeReview,
       morningRoutineReview,
       monthlyReview,
       packetOptions: {
@@ -228,6 +256,7 @@ describe("buildReviewRecap", () => {
       "Summary",
       "Next step",
       "Signals",
+      "Morning nudge",
       "History snapshot",
     ]);
   });

@@ -7,6 +7,7 @@ import { colors, radii, spacing } from "@pmhc/ui";
 import type { AppLanguage, LogEntry, ProgramHistoryEntry } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
+import type { MorningNudgeReview } from "../morningNudgeReview";
 import type { MorningRoutineReview } from "../morningRoutineReview";
 import type { ReviewPreferences } from "../reviewPreferences";
 import type { ReviewPacketHistoryEntry } from "../reviewPacketHistory";
@@ -22,6 +23,7 @@ type Props = {
   copy: LanguageCopy;
   language: AppLanguage;
   logs: LogEntry[];
+  morningNudgeReview: MorningNudgeReview;
   morningRoutineReview: MorningRoutineReview;
   onSavePacket: (section: ReviewSection, packet: Extract<ReviewRecapResult, { kind: "packet" }>) => Promise<void> | void;
   preferences: ReviewPreferences;
@@ -33,6 +35,7 @@ export function ReviewScreen({
   copy,
   language,
   logs,
+  morningNudgeReview,
   morningRoutineReview,
   onSavePacket,
   preferences,
@@ -65,6 +68,7 @@ export function ReviewScreen({
     const nextPreview = buildReviewRecap({
       copy,
       format: activeFormat,
+      morningNudgeReview,
       morningRoutineReview,
       monthlyReview,
       packetOptions: {
@@ -151,6 +155,7 @@ export function ReviewScreen({
             ) : null}
           </Surface>
           <MorningRoutineReviewCard review={morningRoutineReview} />
+          <MorningNudgeReviewCard review={morningNudgeReview} />
         </>
       ) : null}
       {activeSection === "week" ? (
@@ -325,6 +330,27 @@ export function ReviewScreen({
         )}
       </Surface>
     </Screen>
+  );
+}
+
+function MorningNudgeReviewCard({ review }: { review: MorningNudgeReview }) {
+  return (
+    <Surface>
+      <Text style={styles.title}>{review.title}</Text>
+      <Text style={styles.body}>{review.body}</Text>
+      <Text style={styles.signalDetail}>{review.stateTitle}</Text>
+      <Text style={styles.body}>{review.stateLabel}</Text>
+      <Text style={styles.signalDetail}>{review.timingTitle}</Text>
+      <Text style={styles.body}>{review.timingLabel}</Text>
+      <Text style={styles.signalDetail}>{review.styleTitle}</Text>
+      <Text style={styles.body}>{review.styleLabel}</Text>
+      <Text style={styles.signalDetail}>{review.focusTitle}</Text>
+      <Text style={styles.body}>{review.focusLabel}</Text>
+      <Text style={styles.signalDetail}>{review.previewTitle}</Text>
+      <Text style={styles.body}>{review.previewBody}</Text>
+      <Text style={styles.hintMeta}>{review.historyTitle}</Text>
+      <Text style={styles.hintMeta}>{review.historyLabel}</Text>
+    </Surface>
   );
 }
 

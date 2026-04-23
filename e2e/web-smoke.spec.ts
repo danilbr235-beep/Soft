@@ -130,6 +130,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("High confidence")).toBeVisible();
   await expect(page.getByText("Recent reads lean cautious enough that the next block should stay recovery-first.")).toBeVisible();
   await expect(page.getByText("Morning routine review")).toBeVisible();
+  await expect(page.getByText("Morning nudge review")).toBeVisible();
   await expect(page.getByText("Full mornings: 1/7 - Partial mornings: 0 - Streak: 1 day")).toBeVisible();
   await page.getByLabel("Open Review section: 7 days").click();
   await expect(page.getByText("Weekly review")).toBeVisible();
@@ -150,6 +151,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("30 days packet")).toHaveCount(2);
   await expect(page.getByText("Signals", { exact: true })).toHaveCount(2);
   await expect(page.getByText("Morning routine", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Morning nudge", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("History snapshot", { exact: true })).toHaveCount(2);
   await expect(page.getByText("Recent packets")).toBeVisible();
   await expect(page.getByText("Prepared packet recaps stay local on this device until you clear app data.")).toBeVisible();
@@ -160,6 +162,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Packet copied.")).toBeVisible();
   await expect(page.evaluate(() => localStorage.getItem("pmhc:test-clipboard"))).resolves.toContain("30 days packet");
   await expect(page.evaluate(() => localStorage.getItem("pmhc:test-clipboard"))).resolves.toContain("Morning routine");
+  await expect(page.evaluate(() => localStorage.getItem("pmhc:test-clipboard"))).resolves.toContain("Morning nudge");
   await page.reload();
   if ((await page.getByLabel("Unlock demo vault").count()) > 0) {
     await page.getByLabel("Unlock demo vault").click();
@@ -279,6 +282,8 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Prepare recap").click();
   await expect(page.getByText("Preview: Packet")).toBeVisible();
   await expect(page.getByText("7 days packet")).toHaveCount(2);
+  await expect(page.getByText("Morning nudge", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Timing: Daily - 09:00").first()).toBeVisible();
   await page.getByLabel("Filter packet archive: 7 days").click();
   await expect(page.getByText("Morning routine", { exact: true })).toHaveCount(0);
 });

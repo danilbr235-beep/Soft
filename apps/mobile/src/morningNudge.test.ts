@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildMorningNudgePlan, defaultMorningNudgePreferences, isMorningNudgePreferences } from "./morningNudge";
+import {
+  appendMorningNudgeHistory,
+  buildMorningNudgePlan,
+  createMorningNudgeHistoryEntry,
+  defaultMorningNudgePreferences,
+  isMorningNudgePreferences,
+} from "./morningNudge";
 import type { MorningRoutineReview } from "./morningRoutineReview";
 
 const review: MorningRoutineReview = {
@@ -64,5 +70,20 @@ describe("morningNudge", () => {
         weekdaysOnly: true,
       }),
     ).toBe(false);
+  });
+
+  it("deduplicates identical consecutive history entries", () => {
+    const entry = createMorningNudgeHistoryEntry({
+      changedAt: "2026-04-23T07:00:00.000Z",
+      preferences: defaultMorningNudgePreferences,
+    });
+
+    const history = appendMorningNudgeHistory([entry], {
+      ...entry,
+      id: "newer",
+      changedAt: "2026-04-23T08:00:00.000Z",
+    });
+
+    expect(history).toHaveLength(1);
   });
 });

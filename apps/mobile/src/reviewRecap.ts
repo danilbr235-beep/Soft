@@ -1,11 +1,12 @@
 import type { LanguageCopy } from "@pmhc/i18n";
 import type { ProgramReviewSummary } from "@pmhc/programs";
 import type { TrackingPeriodReviewSummary, TrackingReviewDigest, TrackingWeeklyReviewSummary } from "@pmhc/tracking";
+import type { MorningNudgeReview } from "./morningNudgeReview";
 import type { MorningRoutineReview } from "./morningRoutineReview";
 
 export type ReviewSection = "overview" | "week" | "month" | "cycles";
 export type ReviewRecapFormat = "snapshot" | "plan" | "coach" | "packet";
-export type ReviewPacketBlockId = "summary" | "next" | "signals" | "morning" | "history";
+export type ReviewPacketBlockId = "summary" | "next" | "signals" | "morning" | "nudge" | "history";
 
 export type ReviewPacketBlock = {
   id: ReviewPacketBlockId;
@@ -27,6 +28,7 @@ export type ReviewRecapResult =
 type ReviewRecapInput = {
   copy: LanguageCopy;
   format: ReviewRecapFormat;
+  morningNudgeReview?: MorningNudgeReview | null;
   morningRoutineReview?: MorningRoutineReview | null;
   monthlyReview: TrackingPeriodReviewSummary;
   packetOptions?: {
@@ -50,6 +52,7 @@ type ReviewRecapParts = {
 export function buildReviewRecap({
   copy,
   format,
+  morningNudgeReview,
   morningRoutineReview,
   monthlyReview,
   packetOptions,
@@ -61,6 +64,7 @@ export function buildReviewRecap({
   const parts = buildReviewRecapParts({
     copy,
     includeMorningInSharedFields: format !== "packet",
+    morningNudgeReview,
     morningRoutineReview,
     monthlyReview,
     programReview,
@@ -73,7 +77,13 @@ export function buildReviewRecap({
     return {
       kind: "packet",
       title: copy.review.packetTitle(copy.review.filterLabels[section]),
-      blocks: buildReviewPacketBlocks(parts, copy, morningRoutineReview, packetOptions?.includeMorningRoutine ?? true),
+      blocks: buildReviewPacketBlocks(
+        parts,
+        copy,
+        morningNudgeReview,
+        morningRoutineReview,
+        packetOptions?.includeMorningRoutine ?? true,
+      ),
     };
   }
 
@@ -119,6 +129,7 @@ export function buildReviewRecap({
 function buildReviewRecapParts({
   copy,
   includeMorningInSharedFields,
+  morningNudgeReview,
   morningRoutineReview,
   monthlyReview,
   programReview,
@@ -130,6 +141,15 @@ function buildReviewRecapParts({
   const morningContextLines =
     includeMorningInSharedFields && morningRoutineReview
       ? [`${morningRoutineReview.title}: ${morningRoutineReview.tone}`, ...morningRoutineReview.stepLines]
+      : [];
+  const morningNudgeContextLines =
+    includeMorningInSharedFields && morningNudgeReview
+      ? [
+          `${morningNudgeReview.title}: ${morningNudgeReview.stateLabel}`,
+          `${morningNudgeReview.timingTitle}: ${morningNudgeReview.timingLabel}`,
+          `${morningNudgeReview.styleTitle}: ${morningNudgeReview.styleLabel}`,
+          `${morningNudgeReview.historyTitle}: ${morningNudgeReview.historyLabel}`,
+        ]
       : [];
 
   if (section === "week") {
@@ -153,6 +173,7 @@ function buildReviewRecapParts({
             )
           : null,
         ...morningContextLines,
+        ...morningNudgeContextLines,
       ]).join("\n"),
     };
   }
@@ -229,6 +250,7 @@ function buildReviewRecapParts({
           )
         : null,
       ...morningContextLines,
+      ...morningNudgeContextLines,
     ]
       .filter((line): line is string => line != null)
       .join("\n"),
@@ -238,6 +260,7 @@ function buildReviewRecapParts({
 function buildReviewPacketBlocks(
   parts: ReviewRecapParts,
   copy: LanguageCopy,
+  morningNudgeReview: MorningNudgeReview | null | undefined,
   morningRoutineReview: MorningRoutineReview | null | undefined,
   includeMorningRoutine: boolean,
 ): ReviewPacketBlock[] {
@@ -269,6 +292,23 @@ function buildReviewPacketBlocks(
               morningRoutineReview.nextStep,
               morningRoutineReview.meta,
               ...morningRoutineReview.stepLines,
+            ]),
+          } satisfies ReviewPacketBlock,
+        ]
+      : []),
+    ...(morningNudgeReview
+      ? [
+          {
+            id: "nudge",
+            title: copy.review.packetBlockTitles.nudge,
+            lines: compactLines([
+              morningNudgeReview.title,
+              `${morningNudgeReview.stateTitle}: ${morningNudgeReview.stateLabel}`,
+              `${morningNudgeReview.timingTitle}: ${morningNudgeReview.timingLabel}`,
+              `${morningNudgeReview.styleTitle}: ${morningNudgeReview.styleLabel}`,
+              `${morningNudgeReview.focusTitle}: ${morningNudgeReview.focusLabel}`,
+              `${morningNudgeReview.previewTitle}: ${morningNudgeReview.previewBody}`,
+              `${morningNudgeReview.historyTitle}: ${morningNudgeReview.historyLabel}`,
             ]),
           } satisfies ReviewPacketBlock,
         ]
