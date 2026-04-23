@@ -62,6 +62,12 @@ import {
 } from "../dailySession";
 import { buildMorningExperiments } from "../morningExperiments";
 import { buildMorningRoutine } from "../morningRoutine";
+import {
+  isMorningRoutineProgressStore,
+  markMorningRoutineStepComplete,
+  type MorningRoutineProgressStore,
+  type MorningRoutineStepId,
+} from "../morningRoutineProgress";
 import { type ReviewSection } from "../reviewRecap";
 import {
   appendReviewPacketHistory,
@@ -84,6 +90,7 @@ const [
   programHistoryKey,
   reviewPacketHistoryKey,
   dailySessionProgressKey,
+  morningRoutineProgressKey,
 ] = appStorageKeys;
 
 const onboardingRepository = createJsonRepository<OnboardingResult | null>(
@@ -130,6 +137,12 @@ const dailySessionProgressRepository = createJsonRepository<DailySessionProgress
   {},
   isDailySessionProgressStore,
 );
+const morningRoutineProgressRepository = createJsonRepository<MorningRoutineProgressStore>(
+  AsyncStorage,
+  morningRoutineProgressKey,
+  {},
+  isMorningRoutineProgressStore,
+);
 
 const fallbackOnboarding = createOnboardingResult({
   primaryGoal: "sexual_confidence",
@@ -174,6 +187,7 @@ export function useAppState() {
   const [programHistory, setProgramHistory] = useState<ProgramHistoryEntry[]>([]);
   const [reviewPackets, setReviewPackets] = useState<ReviewPacketHistoryEntry[]>([]);
   const [dailySessionProgress, setDailySessionProgress] = useState<DailySessionProgressStore>({});
+  const [morningRoutineProgress, setMorningRoutineProgress] = useState<MorningRoutineProgressStore>({});
   const [learnFocusItemId, setLearnFocusItemId] = useState<string | null>(null);
   const [selectedQuickLog, setSelectedQuickLog] = useState<QuickLogDefinition | null>(null);
   const [isReady, setIsReady] = useState(false);
@@ -198,6 +212,7 @@ export function useAppState() {
           savedProgramHistory,
           savedReviewPackets,
           savedDailySessionProgress,
+          savedMorningRoutineProgress,
         ] =
           await Promise.all([
             onboardingRepository.load(),
@@ -209,6 +224,7 @@ export function useAppState() {
             programHistoryRepository.load(),
             reviewPacketHistoryRepository.load(),
             dailySessionProgressRepository.load(),
+            morningRoutineProgressRepository.load(),
           ]);
 
         if (!mounted) {
@@ -231,6 +247,7 @@ export function useAppState() {
         setProgramHistory(savedProgramHistory);
         setReviewPackets(savedReviewPackets);
         setDailySessionProgress(savedDailySessionProgress);
+        setMorningRoutineProgress(savedMorningRoutineProgress);
       } catch {
         if (!mounted) {
           return;
@@ -246,6 +263,7 @@ export function useAppState() {
         setProgramHistory([]);
         setReviewPackets([]);
         setDailySessionProgress({});
+        setMorningRoutineProgress({});
       } finally {
         if (mounted) {
           setIsReady(true);
@@ -320,9 +338,11 @@ export function useAppState() {
     return buildMorningRoutine({
       content,
       language,
+      progressEntry: morningRoutineProgress[today.date],
+      progressStore: morningRoutineProgress,
       today,
     });
-  }, [content, language, today]);
+  }, [content, language, morningRoutineProgress, today]);
   const morningExperiments = useMemo(() => {
     return buildMorningExperiments({
       content,
@@ -433,6 +453,10 @@ export function useAppState() {
     setDailySessionProgress(nextProgress);
     await dailySessionProgressRepository.save(nextProgress);
   }, []);
+  const persistMorningRoutineProgress = useCallback(async (nextProgress: MorningRoutineProgressStore) => {
+    setMorningRoutineProgress(nextProgress);
+    await morningRoutineProgressRepository.save(nextProgress);
+  }, []);
   const completeDailySessionStep = useCallback(
     async (stepId: DailySessionStepId) => {
       await persistDailySessionProgress(
@@ -440,6 +464,14 @@ export function useAppState() {
       );
     },
     [dailySessionProgress, persistDailySessionProgress, today.date],
+  );
+  const completeMorningRoutineStep = useCallback(
+    async (stepId: MorningRoutineStepId) => {
+      await persistMorningRoutineProgress(
+        markMorningRoutineStepComplete(morningRoutineProgress, today.date, stepId, new Date().toISOString()),
+      );
+    },
+    [morningRoutineProgress, persistMorningRoutineProgress, today.date],
   );
 
   const saveQuickLog = useCallback(
@@ -461,9 +493,21 @@ export function useAppState() {
       if (dailySession.quizLog?.type === definition.type) {
         await completeDailySessionStep("quiz");
       }
+      if (morningRoutine.logDefinition?.type === definition.type) {
+        await completeMorningRoutineStep("checkin");
+      }
       setSelectedQuickLog(null);
     },
-    [completeDailySessionStep, dailySession.quizLog, logs, persistLogs, persistSyncQueue, syncQueue],
+    [
+      completeDailySessionStep,
+      completeMorningRoutineStep,
+      dailySession.quizLog,
+      logs,
+      morningRoutine.logDefinition,
+      persistLogs,
+      persistSyncQueue,
+      syncQueue,
+    ],
   );
 
   const completeOnboarding = useCallback(
@@ -480,10 +524,12 @@ export function useAppState() {
         persistProgramHistory([]),
         persistReviewPackets([]),
         persistDailySessionProgress({}),
+        persistMorningRoutineProgress({}),
       ]);
     },
     [
       persistDailySessionProgress,
+      persistMorningRoutineProgress,
       persistPrivacyLock,
       persistProgramHistory,
       persistProgramProgress,
@@ -529,6 +575,7 @@ export function useAppState() {
     setProgramHistory([]);
     setReviewPackets([]);
     setDailySessionProgress({});
+    setMorningRoutineProgress({});
     setLearnFocusItemId(null);
     await Promise.all([
       onboardingRepository.clear(),
@@ -540,6 +587,7 @@ export function useAppState() {
       programHistoryRepository.clear(),
       reviewPacketHistoryRepository.clear(),
       dailySessionProgressRepository.clear(),
+      morningRoutineProgressRepository.clear(),
     ]);
   }, []);
 
@@ -737,10 +785,17 @@ export function useAppState() {
   const clearLearnFocus = useCallback(() => {
     setLearnFocusItemId(null);
   }, []);
-  const openLearnItem = useCallback((itemId: string | null) => {
-    setLearnFocusItemId(itemId);
-    setActiveTab("Learn");
-  }, []);
+  const openLearnItem = useCallback(
+    (itemId: string | null) => {
+      if (itemId && itemId === morningRoutine.guideItemId) {
+        void completeMorningRoutineStep("guide");
+      }
+
+      setLearnFocusItemId(itemId);
+      setActiveTab("Learn");
+    },
+    [completeMorningRoutineStep, morningRoutine.guideItemId],
+  );
   const openDailySessionStep = useCallback(
     (stepId: DailySessionStepId) => {
       if (stepId === "lesson") {
@@ -800,6 +855,7 @@ export function useAppState() {
     clearLearnFocus,
     deleteLog,
     lockNow,
+    completeMorningRoutineStep,
     openDailySessionStep,
     openLearnItem,
     openQuickLog: setSelectedQuickLog,

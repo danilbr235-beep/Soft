@@ -62,16 +62,24 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Vault on")).toBeVisible();
   await expect(page.getByText("Morning routine", { exact: true })).toBeVisible();
   await expect(page.getByText("Wake and light anchor")).toBeVisible();
+  await expect(page.getByText("0 of 3", { exact: true })).toBeVisible();
+  await page.getByLabel("Mark done: Wake and light anchor").click();
+  await expect(page.getByText("1 of 3", { exact: true })).toBeVisible();
   await expect(page.getByText("Optional morning experiments", { exact: true })).toBeVisible();
   await expect(page.getByText("Cold finish: caution first")).toBeVisible();
   await page.getByLabel("Open note Cold finish: caution first").click();
   await expect(page.getByText("Cold finish: caution first")).toBeVisible();
   await page.getByLabel("Back to library").click();
   await page.getByLabel("Open Today").click();
-  await page.getByLabel("Open guide").first().click();
+  await page.getByLabel("Open guide: Morning reset guide").click();
   await expect(page.getByText("Morning reset: light, signal, move")).toBeVisible();
   await page.getByLabel("Back to library").click();
   await page.getByLabel("Open Today").click();
+  await expect(page.getByText("2 of 3", { exact: true })).toBeVisible();
+  await page.getByLabel("Quick log: One calm check-in").click();
+  await expect(page.getByLabel("Save Morning Yes")).toBeVisible();
+  await page.getByLabel("Save Morning Yes").click();
+  await expect(page.getByText("3 of 3", { exact: true })).toBeVisible();
   await expect(page.getByText("Build your baseline")).toBeVisible();
   await expect(page.getByText("Start with two calm scores before anything more ambitious.")).toBeVisible();
   await expect(page.getByText("Daily session")).toBeVisible();
@@ -103,7 +111,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
 
   await page.getByLabel("Open Track").click();
   await expect(page.getByText("Baseline snapshot")).toBeVisible();
-  await expect(page.getByText("2 today - 2 last 7 days")).toBeVisible();
+  await expect(page.getByText("3 today - 3 last 7 days")).toBeVisible();
   await expect(page.getByText("Average 7/10 - latest 7/10")).toBeVisible();
   await expect(page.getByText("Weekly snapshot")).toBeVisible();
   await expect(page.getByText("7/10 avg")).toBeVisible();
@@ -120,13 +128,13 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Recovery-first week", { exact: true })).toBeVisible();
   await expect(page.getByText("A symptom check-in still makes this week conservative.")).toBeVisible();
   await expect(page.getByText("Next gentle step")).toBeVisible();
-  await expect(page.getByText("2 logs this week - 1 score - 1 symptom check-in")).toBeVisible();
+  await expect(page.getByText("3 logs this week - 1 score - 1 symptom check-in")).toBeVisible();
   await page.getByLabel("Open Review section: 30 days").click();
   await expect(page.getByText("30-day review")).toBeVisible();
   await expect(page.getByText("Recovery-first month", { exact: true })).toBeVisible();
   await expect(page.getByText("A symptom check-in inside the last 30 days keeps this month conservative.")).toBeVisible();
   await expect(page.getByText("Next conservative step")).toBeVisible();
-  await expect(page.getByText("2 logs in 30 days - 1 score - 1 symptom check-in - 0 completed cycles")).toBeVisible();
+  await expect(page.getByText("3 logs in 30 days - 1 score - 1 symptom check-in - 0 completed cycles")).toBeVisible();
   await page.getByLabel("Open recap format: Packet").click();
   await page.getByLabel("Prepare recap").click();
   await expect(page.getByText("Preview: Packet")).toBeVisible();
@@ -163,7 +171,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Delete Symptoms log").click();
   await expect(page.getByText("No logs for this filter yet.")).toBeVisible();
   await expect(page.getByText("Safety note")).toBeHidden();
-  await expect(page.getByText("2 pending local writes")).toBeVisible();
+  await expect(page.getByText("3 pending local writes")).toBeVisible();
 
   await page.getByLabel("Sync demo writes").click();
   await expect(page.getByText("All local writes are synced.")).toBeVisible();

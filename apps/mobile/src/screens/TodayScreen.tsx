@@ -5,6 +5,7 @@ import type { PrivacyLockState, QuickLogDefinition, TodayPayload } from "@pmhc/t
 import type { DailySession, DailySessionStepId } from "../dailySession";
 import type { MorningExperiments } from "../morningExperiments";
 import type { MorningRoutine } from "../morningRoutine";
+import type { MorningRoutineStepId } from "../morningRoutineProgress";
 import {
   AlertStrip,
   DailySessionBlock,
@@ -27,6 +28,7 @@ type Props = {
   morningRoutine: MorningRoutine;
   privacyLock: PrivacyLockState;
   onAskCoach: () => void;
+  onCompleteMorningRoutineStep: (stepId: MorningRoutineStepId) => void;
   onLog: (definition: QuickLogDefinition) => void;
   onOpenDailySessionStep: (stepId: DailySessionStepId) => void;
   onOpenMorningExperiment: (itemId: string | null) => void;
@@ -40,6 +42,7 @@ export function TodayScreen({
   morningExperiments,
   morningRoutine,
   onAskCoach,
+  onCompleteMorningRoutineStep,
   onLog,
   onOpenDailySessionStep,
   onOpenMorningExperiment,
@@ -61,7 +64,12 @@ export function TodayScreen({
   return (
     <Screen eyebrow={today.todayMode} title={copy.today.title} subtitle={activeProgramTitle}>
       <TodayStatusRow items={statusItems} />
-      <MorningRoutineBlock routine={morningRoutine} onOpenGuide={onOpenMorningGuide} onOpenLog={onOpenMorningLog} />
+      <MorningRoutineBlock
+        routine={morningRoutine}
+        onCompleteStep={onCompleteMorningRoutineStep}
+        onOpenGuide={onOpenMorningGuide}
+        onOpenLog={onOpenMorningLog}
+      />
       <MorningExperimentsBlock experiments={morningExperiments} onOpenExperiment={onOpenMorningExperiment} />
       <PriorityCard copy={copy} priority={today.currentPriority} onAskCoach={onAskCoach} />
       <DailySessionBlock session={dailySession} onOpenStep={onOpenDailySessionStep} />

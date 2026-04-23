@@ -1,5 +1,26 @@
 import { morningRoutineEvidenceSources } from "@pmhc/evidence";
 import type { AppLanguage, ContentItem, QuickLogDefinition, TodayPayload } from "@pmhc/types";
+import {
+  buildMorningRoutineMetrics,
+  morningRoutineStepIds,
+  type MorningRoutineMetric,
+  type MorningRoutineProgressEntry,
+  type MorningRoutineProgressStore,
+  type MorningRoutineStepId,
+} from "./morningRoutineProgress";
+
+export type MorningRoutineStep = {
+  id: MorningRoutineStepId;
+  title: string;
+  body: string;
+  badge: string;
+  statusLabel: string;
+  completed: boolean;
+  cta: string;
+  ctaKind: "guide" | "log" | "complete";
+  actionLabel: string;
+  sourceLabels: string[];
+};
 
 export type MorningRoutine = {
   title: string;
@@ -7,20 +28,15 @@ export type MorningRoutine = {
   note: string;
   guideItemId: string | null;
   logDefinition: QuickLogDefinition | null;
-  steps: {
-    id: "anchor" | "checkin" | "guide";
-    title: string;
-    body: string;
-    badge: string;
-    cta: string | null;
-    ctaKind: "guide" | "log" | null;
-    sourceLabels: string[];
-  }[];
+  metrics: MorningRoutineMetric[];
+  steps: MorningRoutineStep[];
 };
 
 type Input = {
   content: ContentItem[];
   language: AppLanguage;
+  progressEntry?: MorningRoutineProgressEntry | null;
+  progressStore: MorningRoutineProgressStore;
   today: TodayPayload;
 };
 
@@ -40,8 +56,12 @@ const copy = {
     anchorBadge: "Anchor",
     checkinBadge: "Check-in",
     guideBadge: "Guide",
+    ready: "Ready",
+    done: "Done",
     openGuide: "Open guide",
     openLog: "Quick log",
+    markDone: "Mark done",
+    stepActionLabel: (title: string, cta: string) => `${cta}: ${title}`,
   },
   ru: {
     title: "Утренняя рутина",
@@ -56,12 +76,22 @@ const copy = {
     anchorBadge: "Основа",
     checkinBadge: "Чек-ин",
     guideBadge: "Гид",
+    ready: "Готово",
+    done: "Сделано",
     openGuide: "Открыть гид",
     openLog: "Быстрый лог",
+    markDone: "Отметить",
+    stepActionLabel: (title: string, cta: string) => `${cta}: ${title}`,
   },
 } as const;
 
-export function buildMorningRoutine({ content, language, today }: Input): MorningRoutine {
+export function buildMorningRoutine({
+  content,
+  language,
+  progressEntry,
+  progressStore,
+  today,
+}: Input): MorningRoutine {
   const guide = content.find((item) => item.id === guideId) ?? null;
   const preferredLog =
     today.quickLogs.find((log) => log.type === "morning_erection") ??
@@ -70,6 +100,57 @@ export function buildMorningRoutine({ content, language, today }: Input): Mornin
     today.quickLogs[0] ??
     null;
   const languageCopy = copy[language];
+  const completedStepIds = new Set<MorningRoutineStepId>(progressEntry?.completedStepIds ?? []);
+
+  const steps: MorningRoutineStep[] = morningRoutineStepIds.map((stepId) => {
+    const completed = completedStepIds.has(stepId);
+    const statusLabel = completed ? languageCopy.done : languageCopy.ready;
+
+    if (stepId === "anchor") {
+      const cta = completed ? languageCopy.done : languageCopy.markDone;
+
+      return {
+        id: stepId,
+        title: languageCopy.anchorTitle,
+        body: languageCopy.anchorBody,
+        badge: languageCopy.anchorBadge,
+        statusLabel,
+        completed,
+        cta,
+        ctaKind: "complete",
+        actionLabel: languageCopy.stepActionLabel(languageCopy.anchorTitle, cta),
+        sourceLabels: morningRoutineEvidenceSources.slice(0, 2).map((source) => source.organization),
+      };
+    }
+
+    if (stepId === "checkin") {
+      return {
+        id: stepId,
+        title: languageCopy.checkinTitle,
+        body: languageCopy.checkinBody(preferredLog?.label ?? "one signal"),
+        badge: languageCopy.checkinBadge,
+        statusLabel,
+        completed,
+        cta: languageCopy.openLog,
+        ctaKind: "log",
+        actionLabel: languageCopy.stepActionLabel(languageCopy.checkinTitle, languageCopy.openLog),
+        sourceLabels: [morningRoutineEvidenceSources[1]?.organization, morningRoutineEvidenceSources[2]?.organization].filter(Boolean),
+      };
+    }
+
+    return {
+      id: stepId,
+      title: languageCopy.guideTitle,
+      body: languageCopy.guideBody,
+      badge: languageCopy.guideBadge,
+      statusLabel,
+      completed,
+      cta: languageCopy.openGuide,
+      ctaKind: "guide",
+      actionLabel: languageCopy.stepActionLabel(languageCopy.guideTitle, languageCopy.openGuide),
+      sourceLabels: morningRoutineEvidenceSources.map((source) => source.organization),
+    };
+  });
 
   return {
     title: languageCopy.title,
@@ -77,34 +158,7 @@ export function buildMorningRoutine({ content, language, today }: Input): Mornin
     note: languageCopy.note,
     guideItemId: guide?.id ?? null,
     logDefinition: preferredLog,
-    steps: [
-      {
-        id: "anchor",
-        title: languageCopy.anchorTitle,
-        body: languageCopy.anchorBody,
-        badge: languageCopy.anchorBadge,
-        cta: null,
-        ctaKind: null,
-        sourceLabels: morningRoutineEvidenceSources.slice(0, 2).map((source) => source.organization),
-      },
-      {
-        id: "checkin",
-        title: languageCopy.checkinTitle,
-        body: languageCopy.checkinBody(preferredLog?.label ?? "one signal"),
-        badge: languageCopy.checkinBadge,
-        cta: languageCopy.openLog,
-        ctaKind: "log",
-        sourceLabels: [morningRoutineEvidenceSources[1]?.organization, morningRoutineEvidenceSources[2]?.organization].filter(Boolean),
-      },
-      {
-        id: "guide",
-        title: languageCopy.guideTitle,
-        body: languageCopy.guideBody,
-        badge: languageCopy.guideBadge,
-        cta: languageCopy.openGuide,
-        ctaKind: "guide",
-        sourceLabels: morningRoutineEvidenceSources.map((source) => source.organization),
-      },
-    ],
+    metrics: buildMorningRoutineMetrics(progressStore, today.date, language),
+    steps,
   };
 }

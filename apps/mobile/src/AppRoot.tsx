@@ -77,6 +77,7 @@ function AppRootContent() {
             privacyLock={app.privacyLock}
             today={app.today}
             onAskCoach={() => app.setActiveTab("Coach")}
+            onCompleteMorningRoutineStep={app.completeMorningRoutineStep}
             onOpenDailySessionStep={app.openDailySessionStep}
             onOpenMorningExperiment={app.openLearnItem}
             onOpenMorningGuide={() => app.openLearnItem(app.morningRoutine.guideItemId)}

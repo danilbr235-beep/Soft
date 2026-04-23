@@ -5,6 +5,7 @@ import type { Alert, CurrentPriority, DailyStateTile, QuickLogDefinition } from 
 import type { MorningExperiments } from "../morningExperiments";
 import type { DailySession, DailySessionStepId } from "../dailySession";
 import type { MorningRoutine } from "../morningRoutine";
+import type { MorningRoutineStepId } from "../morningRoutineProgress";
 import type { TodayStatusItem } from "../todayStatus";
 import { Surface } from "./Surface";
 
@@ -168,10 +169,12 @@ export function DailySessionBlock({
 
 export function MorningRoutineBlock({
   routine,
+  onCompleteStep,
   onOpenGuide,
   onOpenLog,
 }: {
   routine: MorningRoutine;
+  onCompleteStep: (stepId: MorningRoutineStepId) => void;
   onOpenGuide: () => void;
   onOpenLog: () => void;
 }) {
@@ -184,13 +187,22 @@ export function MorningRoutineBlock({
           <Text style={styles.routineNote}>{routine.note}</Text>
         </View>
       </View>
+      <View style={styles.routineMetricRow}>
+        {routine.metrics.map((metric) => (
+          <View key={metric.id} style={styles.routineMetric}>
+            <Text style={styles.routineMetricLabel}>{metric.label}</Text>
+            <Text style={styles.routineMetricValue}>{metric.value}</Text>
+          </View>
+        ))}
+      </View>
       <View style={styles.sessionList}>
         {routine.steps.map((step, index) => (
-          <View key={step.id} style={styles.sessionStep}>
+          <View key={step.id} style={[styles.sessionStep, step.completed ? styles.sessionStepDone : null]}>
             <View style={styles.rowBetween}>
               <Text style={styles.sessionStepTitle}>{`${index + 1}. ${step.title}`}</Text>
-              <Text style={styles.sessionState}>{step.badge}</Text>
+              <Text style={[styles.sessionState, step.completed ? styles.sessionStateDone : null]}>{step.statusLabel}</Text>
             </View>
+            <Text style={styles.stepBadge}>{step.badge}</Text>
             <Text style={styles.body}>{step.body}</Text>
             <View style={styles.sourceRow}>
               {step.sourceLabels.map((label) => (
@@ -199,16 +211,27 @@ export function MorningRoutineBlock({
                 </Text>
               ))}
             </View>
-            {step.cta ? (
-              <Pressable
-                accessibilityLabel={step.cta}
-                accessibilityRole="button"
-                onPress={step.ctaKind === "guide" ? onOpenGuide : onOpenLog}
-                style={styles.sessionButton}
-              >
-                <Text style={styles.sessionButtonText}>{step.cta}</Text>
-              </Pressable>
-            ) : null}
+            <Pressable
+              accessibilityLabel={step.actionLabel}
+              accessibilityRole="button"
+              disabled={step.ctaKind === "complete" && step.completed}
+              onPress={() => {
+                if (step.ctaKind === "guide") {
+                  onOpenGuide();
+                  return;
+                }
+
+                if (step.ctaKind === "log") {
+                  onOpenLog();
+                  return;
+                }
+
+                onCompleteStep(step.id);
+              }}
+              style={[styles.sessionButton, step.ctaKind === "complete" && step.completed ? styles.disabledButton : null]}
+            >
+              <Text style={styles.sessionButtonText}>{step.cta}</Text>
+            </Pressable>
           </View>
         ))}
       </View>
@@ -495,6 +518,33 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 19,
   },
+  routineMetricRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  routineMetric: {
+    width: "31%",
+    minHeight: 58,
+    borderColor: colors.line,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  routineMetricLabel: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  routineMetricValue: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "800",
+    marginTop: spacing.xs,
+  },
   routineFit: {
     color: colors.text,
     fontSize: 14,
@@ -521,6 +571,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
+  },
+  stepBadge: {
+    color: colors.moss,
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
   },
   disabledButton: {
     opacity: 0.5,
