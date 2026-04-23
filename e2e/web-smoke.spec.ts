@@ -398,9 +398,19 @@ test("programs can switch on a lighter day plan and today can restore it", async
   await expect(page.getByText("Lighter day is on").first()).toBeVisible();
   await expect(page.getByText("Showing 2 priority actions for today.")).toBeVisible();
   await expect(page.getByText("2 more actions are hidden for later.")).toBeVisible();
+  await expect(page.getByText("Keep to two calm scores")).toBeVisible();
+  await expect(page.getByText("Use two calm scores first. Add anything else only if the day stays quiet.")).toBeVisible();
+  await expect(page.getByText("Showing 2 of 4 quick logs today.")).toBeVisible();
+  await expect(page.getByLabel("Quick log Confidence")).toBeVisible();
+  await expect(page.getByLabel("Quick log Libido")).toBeVisible();
+  await expect(page.getByLabel("Quick log Morning")).toHaveCount(0);
+  await expect(page.getByLabel("Quick log Symptoms")).toHaveCount(0);
   await page.getByLabel("Return to full day").click();
   await expect(page.getByLabel("Use lighter day")).toBeVisible();
   await expect(page.getByText("Showing 2 priority actions for today.")).toHaveCount(0);
+  await expect(page.getByLabel("Quick log Morning")).toBeVisible();
+  await expect(page.getByLabel("Quick log Libido")).toBeVisible();
+  await expect(page.getByLabel("Quick log Symptoms")).toBeVisible();
 });
 
 test("coach can suggest when to simplify the whole day", async ({ page }) => {

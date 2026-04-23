@@ -99,8 +99,14 @@ import {
 } from "../reviewPacketHistory";
 import { appStorageKeys } from "../storage/appStorageKeys";
 import { createJsonRepository } from "../storage/localStore";
+import { buildTodayQuickLogSurface } from "../todayQuickLogs";
 
 export type AppTab = "Today" | "Track" | "Review" | "Learn" | "Programs" | "Coach" | "Settings";
+
+type SelectedQuickLogState = {
+  definition: QuickLogDefinition;
+  subtitle: string | null;
+};
 
 const [
   onboardingKey,
@@ -245,7 +251,7 @@ export function useAppState() {
   const [morningRoutineProgress, setMorningRoutineProgress] = useState<MorningRoutineProgressStore>({});
   const [daySimplificationStore, setDaySimplificationStore] = useState<DaySimplificationStore>({});
   const [learnFocusItemId, setLearnFocusItemId] = useState<string | null>(null);
-  const [selectedQuickLog, setSelectedQuickLog] = useState<QuickLogDefinition | null>(null);
+  const [selectedQuickLog, setSelectedQuickLog] = useState<SelectedQuickLogState | null>(null);
   const [isReady, setIsReady] = useState(false);
   const content: ContentItem[] = useMemo(
     () => mergeContentProgress(starterContent, contentProgress),
@@ -473,6 +479,28 @@ export function useAppState() {
       todayMode: daySimplification.effectiveTodayMode,
     };
   }, [daySimplification.active, daySimplification.effectiveTodayMode, today]);
+  const todayQuickLogs = useMemo(() => {
+    return buildTodayQuickLogSurface({
+      daySimplification,
+      guidanceState: adaptiveDayGuidance.state,
+      language,
+      logs: surfacedToday.quickLogs,
+    });
+  }, [adaptiveDayGuidance.state, daySimplification, language, surfacedToday.quickLogs]);
+
+  const openQuickLog = useCallback((definition: QuickLogDefinition, subtitle: string | null = null) => {
+    setSelectedQuickLog({
+      definition,
+      subtitle,
+    });
+  }, []);
+
+  const openTodayQuickLog = useCallback(
+    (definition: QuickLogDefinition) => {
+      openQuickLog(definition, todayQuickLogs.sheetSubtitle);
+    },
+    [openQuickLog, todayQuickLogs.sheetSubtitle],
+  );
 
   const persistLogs = useCallback(async (nextLogs: LogEntry[]) => {
     setLogs(nextLogs);
@@ -1064,7 +1092,7 @@ export function useAppState() {
 
       if (stepId === "quiz") {
         if (dailySession.quizLog) {
-          setSelectedQuickLog(dailySession.quizLog);
+          openTodayQuickLog(dailySession.quizLog);
           return;
         }
 
@@ -1079,7 +1107,7 @@ export function useAppState() {
 
       setActiveTab("Review");
     },
-    [dailySession.lessonItemId, dailySession.quizLog, openLearnItem, today.activeProgram],
+    [dailySession.lessonItemId, dailySession.quizLog, openLearnItem, openTodayQuickLog, today.activeProgram],
   );
 
   return {
@@ -1091,7 +1119,13 @@ export function useAppState() {
     learnFocusItemId,
     logs,
     quickLogSheet: selectedQuickLog ? (
-      <QuickLogSheet definition={selectedQuickLog} language={language} onClose={() => setSelectedQuickLog(null)} onSave={saveQuickLog} />
+      <QuickLogSheet
+        definition={selectedQuickLog.definition}
+        language={language}
+        onClose={() => setSelectedQuickLog(null)}
+        onSave={saveQuickLog}
+        subtitle={selectedQuickLog.subtitle}
+      />
     ) : null,
     language,
     morningRoutineProgress,
@@ -1104,6 +1138,7 @@ export function useAppState() {
     adaptiveDayGuidance,
     daySimplification,
     today: surfacedToday,
+    todayQuickLogs,
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,
     reviewDigest,
@@ -1134,7 +1169,8 @@ export function useAppState() {
     clearDaySimplification,
     openDailySessionStep,
     openLearnItem,
-    openQuickLog: setSelectedQuickLog,
+    openQuickLog,
+    openTodayQuickLog,
     pauseProgram,
     resetOnboarding,
     resumeProgram,

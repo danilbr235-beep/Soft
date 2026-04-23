@@ -9,6 +9,7 @@ type Props = {
   language: AppLanguage;
   onClose: () => void;
   onSave: (definition: QuickLogDefinition, value: unknown) => void;
+  subtitle?: string | null;
 };
 
 const symptomLabelsRu: Record<SymptomCheckinKey, string> = {
@@ -24,7 +25,7 @@ type QuickLogOption = {
   value: unknown;
 };
 
-export function QuickLogSheet({ definition, language, onClose, onSave }: Props) {
+export function QuickLogSheet({ definition, language, onClose, onSave, subtitle }: Props) {
   const copy = getCopy(language);
   const options: QuickLogOption[] =
     definition.input === "score"
@@ -44,7 +45,7 @@ export function QuickLogSheet({ definition, language, onClose, onSave }: Props) 
       <View style={styles.sheet}>
         <View style={styles.handle} />
         <Text style={styles.title}>{definition.label}</Text>
-        <Text style={styles.subtitle}>{copy.quickLog.subtitle}</Text>
+        <Text style={styles.subtitle}>{subtitle ?? copy.quickLog.subtitle}</Text>
         <View style={styles.options}>
           {options.map((option) => (
             <Pressable

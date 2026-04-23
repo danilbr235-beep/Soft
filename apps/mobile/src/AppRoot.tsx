@@ -79,6 +79,7 @@ function AppRootContent() {
             morningNudge={app.morningNudge}
             morningNudgeReview={app.morningNudgeReview}
             morningRoutine={app.morningRoutine}
+            quickLogSurface={app.todayQuickLogs}
             onApplyDaySimplification={() => app.applyDaySimplification("today")}
             privacyLock={app.privacyLock}
             today={app.today}
@@ -90,10 +91,10 @@ function AppRootContent() {
             onOpenMorningGuide={() => app.openLearnItem(app.morningRoutine.guideItemId)}
             onOpenMorningLog={() => {
               if (app.morningRoutine.logDefinition) {
-                app.openQuickLog(app.morningRoutine.logDefinition);
+                app.openTodayQuickLog(app.morningRoutine.logDefinition);
               }
             }}
-            onLog={app.openQuickLog}
+            onLog={app.openTodayQuickLog}
           />
         ) : null}
         {app.activeTab === "Track" ? (

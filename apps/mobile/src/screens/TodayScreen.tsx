@@ -14,6 +14,7 @@ import type { MorningNudgePlan } from "../morningNudge";
 import type { MorningNudgeReview } from "../morningNudgeReview";
 import type { MorningRoutine } from "../morningRoutine";
 import type { MorningRoutineStepId } from "../morningRoutineProgress";
+import type { TodayQuickLogSurface } from "../todayQuickLogs";
 import {
   AdaptiveDayGuidanceBlock,
   AlertStrip,
@@ -42,6 +43,7 @@ type Props = {
   morningNudge: MorningNudgePlan;
   morningNudgeReview: MorningNudgeReview;
   morningRoutine: MorningRoutine;
+  quickLogSurface: TodayQuickLogSurface;
   onApplyDaySimplification: () => void;
   privacyLock: PrivacyLockState;
   onAskCoach: () => void;
@@ -64,6 +66,7 @@ export function TodayScreen({
   morningNudge,
   morningNudgeReview,
   morningRoutine,
+  quickLogSurface,
   onApplyDaySimplification,
   onAskCoach,
   onClearDaySimplification,
@@ -141,7 +144,14 @@ export function TodayScreen({
       </View>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{copy.today.quickLog}</Text>
-        <QuickLogRow accessibilityPrefix={copy.today.quickLog} logs={today.quickLogs} onLog={onLog} />
+        {quickLogSurface.noteTitle ? (
+          <View style={styles.quickLogGuidance}>
+            <Text style={styles.quickLogGuidanceTitle}>{quickLogSurface.noteTitle}</Text>
+            {quickLogSurface.noteBody ? <Text style={styles.actionBody}>{quickLogSurface.noteBody}</Text> : null}
+            {quickLogSurface.noteMeta ? <Text style={styles.quickLogGuidanceMeta}>{quickLogSurface.noteMeta}</Text> : null}
+          </View>
+        ) : null}
+        <QuickLogRow accessibilityPrefix={copy.today.quickLog} logs={quickLogSurface.logs} onLog={onLog} />
       </View>
       <Surface>
         <Text style={styles.sectionTitle}>{copy.today.liveUpdate}</Text>
@@ -163,6 +173,19 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: spacing.md,
+  },
+  quickLogGuidance: {
+    gap: spacing.xs,
+  },
+  quickLogGuidanceTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  quickLogGuidanceMeta: {
+    color: colors.steel,
+    fontSize: 12,
+    fontWeight: "800",
   },
   sectionTitle: {
     color: colors.muted,
