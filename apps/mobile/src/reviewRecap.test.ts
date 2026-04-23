@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getCopy } from "@pmhc/i18n";
 import type { ProgramReviewSummary } from "@pmhc/programs";
 import type { TrackingPeriodReviewSummary, TrackingReviewDigest, TrackingWeeklyReviewSummary } from "@pmhc/tracking";
+import type { MorningRoutineReview } from "./morningRoutineReview";
 import { buildReviewRecap } from "./reviewRecap";
 
 const reviewDigest: TrackingReviewDigest = {
@@ -50,11 +51,30 @@ const programReview: ProgramReviewSummary = {
   trend: "holding_pattern",
 };
 
+const morningRoutineReview: MorningRoutineReview = {
+  title: "Morning routine review",
+  body: "A short 7-day read of whether the morning loop is staying repeatable.",
+  tone: "Building consistency",
+  reason: "At least one full morning is already in place. Repeat the same short loop before adding more.",
+  nextStepTitle: "Morning next step",
+  nextStep: "Repeat the same three-step morning tomorrow before changing the routine.",
+  meta: "Full mornings: 1/7 - Partial mornings: 2 - Streak: 1 day",
+  stepLines: [
+    "Anchor: 3/7 mornings",
+    "Check-in: 1/7 mornings",
+    "Guide: 1/7 mornings",
+  ],
+  fullDays: 1,
+  partialDays: 2,
+  streak: 1,
+};
+
 describe("buildReviewRecap", () => {
   it("builds an overview recap from the digest", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "snapshot",
+      morningRoutineReview,
       monthlyReview,
       programReview,
       reviewDigest,
@@ -74,6 +94,7 @@ describe("buildReviewRecap", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "snapshot",
+      morningRoutineReview,
       monthlyReview,
       programReview: null,
       reviewDigest,
@@ -91,6 +112,7 @@ describe("buildReviewRecap", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "plan",
+      morningRoutineReview,
       monthlyReview,
       programReview,
       reviewDigest,
@@ -109,6 +131,7 @@ describe("buildReviewRecap", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "coach",
+      morningRoutineReview,
       monthlyReview,
       programReview,
       reviewDigest,
@@ -127,6 +150,7 @@ describe("buildReviewRecap", () => {
     const result = buildReviewRecap({
       copy: getCopy("en"),
       format: "packet",
+      morningRoutineReview,
       monthlyReview,
       programReview,
       reviewDigest,
@@ -149,5 +173,27 @@ describe("buildReviewRecap", () => {
     ]);
     expect(result.blocks[0]?.lines.join(" ")).toContain("30-day review");
     expect(result.blocks[3]?.lines.join(" ")).toContain("Latest 30-day cycle context");
+  });
+
+  it("carries morning routine review context into an overview packet", () => {
+    const result = buildReviewRecap({
+      copy: getCopy("en"),
+      format: "packet",
+      morningRoutineReview,
+      monthlyReview,
+      programReview,
+      reviewDigest,
+      section: "overview",
+      weeklyReview,
+    });
+
+    expect(result.kind).toBe("packet");
+
+    if (result.kind !== "packet") {
+      return;
+    }
+
+    expect(result.blocks[2]?.lines.join(" ")).toContain("Full mornings: 1/7");
+    expect(result.blocks[3]?.lines.join(" ")).toContain("Morning routine review: Building consistency");
   });
 });

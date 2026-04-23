@@ -1,6 +1,7 @@
 import type { LanguageCopy } from "@pmhc/i18n";
 import type { ProgramReviewSummary } from "@pmhc/programs";
 import type { TrackingPeriodReviewSummary, TrackingReviewDigest, TrackingWeeklyReviewSummary } from "@pmhc/tracking";
+import type { MorningRoutineReview } from "./morningRoutineReview";
 
 export type ReviewSection = "overview" | "week" | "month" | "cycles";
 export type ReviewRecapFormat = "snapshot" | "plan" | "coach" | "packet";
@@ -26,6 +27,7 @@ export type ReviewRecapResult =
 type ReviewRecapInput = {
   copy: LanguageCopy;
   format: ReviewRecapFormat;
+  morningRoutineReview?: MorningRoutineReview | null;
   monthlyReview: TrackingPeriodReviewSummary;
   programReview: ProgramReviewSummary | null;
   reviewDigest: TrackingReviewDigest;
@@ -45,6 +47,7 @@ type ReviewRecapParts = {
 export function buildReviewRecap({
   copy,
   format,
+  morningRoutineReview,
   monthlyReview,
   programReview,
   reviewDigest,
@@ -53,6 +56,7 @@ export function buildReviewRecap({
 }: ReviewRecapInput): ReviewRecapResult {
   const parts = buildReviewRecapParts({
     copy,
+    morningRoutineReview,
     monthlyReview,
     programReview,
     reviewDigest,
@@ -109,28 +113,40 @@ export function buildReviewRecap({
 
 function buildReviewRecapParts({
   copy,
+  morningRoutineReview,
   monthlyReview,
   programReview,
   reviewDigest,
   section,
   weeklyReview,
 }: Omit<ReviewRecapInput, "format">): ReviewRecapParts {
+  const morningMeta = morningRoutineReview?.meta ?? null;
+  const morningContextLines = morningRoutineReview
+    ? [`${morningRoutineReview.title}: ${morningRoutineReview.tone}`, ...morningRoutineReview.stepLines]
+    : [];
+
   if (section === "week") {
     return {
       title: copy.track.weeklyReviewTitle,
       tone: copy.track.weeklyReviewTones[weeklyReview.tone],
       reason: copy.track.weeklyReviewReasons[weeklyReview.reason],
       nextStep: copy.track.weeklyReviewNextSteps[weeklyReview.nextStep],
-      meta: copy.track.weeklyReviewMeta(
-        weeklyReview.logsInWeek,
-        weeklyReview.scoreLogsInWeek,
-        weeklyReview.symptomLogsInWeek,
-      ),
-      context: weeklyReview.latestProgramId
-        ? [copy.track.weeklyReviewLatestProgram(
-            copy.programs.programTitles[weeklyReview.latestProgramId] ?? weeklyReview.latestProgramId,
-          )].join("\n")
-        : null,
+      meta: compactLines([
+        copy.track.weeklyReviewMeta(
+          weeklyReview.logsInWeek,
+          weeklyReview.scoreLogsInWeek,
+          weeklyReview.symptomLogsInWeek,
+        ),
+        morningMeta,
+      ]).join("\n"),
+      context: compactLines([
+        weeklyReview.latestProgramId
+          ? copy.track.weeklyReviewLatestProgram(
+              copy.programs.programTitles[weeklyReview.latestProgramId] ?? weeklyReview.latestProgramId,
+            )
+          : null,
+        ...morningContextLines,
+      ]).join("\n"),
     };
   }
 
@@ -191,7 +207,10 @@ function buildReviewRecapParts({
     tone: copy.track.reviewDigestTones[reviewDigest.tone],
     reason: copy.track.reviewDigestReasons[reviewDigest.reason],
     nextStep: copy.track.reviewDigestNextSteps[reviewDigest.nextStep],
-    meta: copy.track.reviewDigestConfidenceLabels[reviewDigest.confidence],
+    meta: compactLines([
+      copy.track.reviewDigestConfidenceLabels[reviewDigest.confidence],
+      morningMeta,
+    ]).join("\n"),
     context: [
       copy.track.reviewDigestWindows(
         copy.track.weeklyReviewTones[reviewDigest.weeklyTone],
@@ -202,6 +221,7 @@ function buildReviewRecapParts({
             copy.programs.programTitles[reviewDigest.latestProgramId] ?? reviewDigest.latestProgramId,
           )
         : null,
+      ...morningContextLines,
     ]
       .filter((line): line is string => line != null)
       .join("\n"),

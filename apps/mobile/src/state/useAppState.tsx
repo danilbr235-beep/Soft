@@ -835,6 +835,7 @@ export function useAppState() {
       <QuickLogSheet definition={selectedQuickLog} language={language} onClose={() => setSelectedQuickLog(null)} onSave={saveQuickLog} />
     ) : null,
     language,
+    morningRoutineProgress,
     morningExperiments,
     morningRoutine,
     today,

@@ -7,6 +7,8 @@ import { colors, radii, spacing } from "@pmhc/ui";
 import type { AppLanguage, LogEntry, ProgramHistoryEntry } from "@pmhc/types";
 import { Screen } from "../components/Screen";
 import { Surface } from "../components/Surface";
+import { buildMorningRoutineReview, type MorningRoutineReview } from "../morningRoutineReview";
+import type { MorningRoutineProgressStore } from "../morningRoutineProgress";
 import type { ReviewPacketHistoryEntry } from "../reviewPacketHistory";
 import { buildReviewRecap, type ReviewRecapFormat, type ReviewRecapResult, type ReviewSection } from "../reviewRecap";
 import {
@@ -20,12 +22,23 @@ type Props = {
   copy: LanguageCopy;
   language: AppLanguage;
   logs: LogEntry[];
+  morningRoutineProgress: MorningRoutineProgressStore;
   onSavePacket: (section: ReviewSection, packet: Extract<ReviewRecapResult, { kind: "packet" }>) => Promise<void> | void;
   programHistory: ProgramHistoryEntry[];
   reviewPackets: ReviewPacketHistoryEntry[];
+  todayDate: string;
 };
 
-export function ReviewScreen({ copy, language, logs, onSavePacket, programHistory, reviewPackets }: Props) {
+export function ReviewScreen({
+  copy,
+  language,
+  logs,
+  morningRoutineProgress,
+  onSavePacket,
+  programHistory,
+  reviewPackets,
+  todayDate,
+}: Props) {
   const [activeSection, setActiveSection] = useState<ReviewSection>("overview");
   const [activeFormat, setActiveFormat] = useState<ReviewRecapFormat>("snapshot");
   const [archiveFilter, setArchiveFilter] = useState<ReviewPacketArchiveFilter>("all");
@@ -35,6 +48,15 @@ export function ReviewScreen({ copy, language, logs, onSavePacket, programHistor
   const weeklyReview = useMemo(() => buildTrackingWeeklyReview(logs, programHistory), [logs, programHistory]);
   const monthlyReview = useMemo(() => buildTrackingPeriodReview(logs, programHistory, 30), [logs, programHistory]);
   const programReview = useMemo(() => buildProgramReview(programHistory), [programHistory]);
+  const morningRoutineReview = useMemo(
+    () =>
+      buildMorningRoutineReview({
+        date: todayDate,
+        language,
+        progressStore: morningRoutineProgress,
+      }),
+    [language, morningRoutineProgress, todayDate],
+  );
   const sectionOrder: ReviewSection[] = ["overview", "week", "month", "cycles"];
   const formatOrder: ReviewRecapFormat[] = ["snapshot", "plan", "coach", "packet"];
   const archiveFilterOrder: ReviewPacketArchiveFilter[] = ["all", ...sectionOrder];
@@ -52,6 +74,7 @@ export function ReviewScreen({ copy, language, logs, onSavePacket, programHistor
     const nextPreview = buildReviewRecap({
       copy,
       format: activeFormat,
+      morningRoutineReview,
       monthlyReview,
       programReview,
       reviewDigest,
@@ -109,49 +132,55 @@ export function ReviewScreen({ copy, language, logs, onSavePacket, programHistor
         </View>
       </Surface>
       {activeSection === "overview" ? (
-        <Surface>
-          <Text style={styles.title}>{copy.track.reviewDigestTitle}</Text>
-          <Text style={styles.body}>{copy.track.reviewDigestBody}</Text>
-          <Text style={styles.hintTitle}>{copy.track.reviewDigestTones[reviewDigest.tone]}</Text>
-          <Text style={styles.body}>{copy.track.reviewDigestReasons[reviewDigest.reason]}</Text>
-          <Text style={styles.signalDetail}>{copy.track.reviewDigestConfidenceTitle}</Text>
-          <Text style={styles.body}>{copy.track.reviewDigestConfidenceLabels[reviewDigest.confidence]}</Text>
-          <Text style={styles.signalDetail}>{copy.track.reviewDigestNextStepTitle}</Text>
-          <Text style={styles.body}>{copy.track.reviewDigestNextSteps[reviewDigest.nextStep]}</Text>
-          <Text style={styles.hintMeta}>
-            {copy.track.reviewDigestWindows(
-              copy.track.weeklyReviewTones[reviewDigest.weeklyTone],
-              copy.track.monthlyReviewTones[reviewDigest.monthlyTone],
-            )}
-          </Text>
-          {reviewDigest.latestProgramId ? (
+        <>
+          <Surface>
+            <Text style={styles.title}>{copy.track.reviewDigestTitle}</Text>
+            <Text style={styles.body}>{copy.track.reviewDigestBody}</Text>
+            <Text style={styles.hintTitle}>{copy.track.reviewDigestTones[reviewDigest.tone]}</Text>
+            <Text style={styles.body}>{copy.track.reviewDigestReasons[reviewDigest.reason]}</Text>
+            <Text style={styles.signalDetail}>{copy.track.reviewDigestConfidenceTitle}</Text>
+            <Text style={styles.body}>{copy.track.reviewDigestConfidenceLabels[reviewDigest.confidence]}</Text>
+            <Text style={styles.signalDetail}>{copy.track.reviewDigestNextStepTitle}</Text>
+            <Text style={styles.body}>{copy.track.reviewDigestNextSteps[reviewDigest.nextStep]}</Text>
             <Text style={styles.hintMeta}>
-              {copy.track.reviewDigestLatestProgram(
-                copy.programs.programTitles[reviewDigest.latestProgramId] ?? reviewDigest.latestProgramId,
+              {copy.track.reviewDigestWindows(
+                copy.track.weeklyReviewTones[reviewDigest.weeklyTone],
+                copy.track.monthlyReviewTones[reviewDigest.monthlyTone],
               )}
             </Text>
-          ) : null}
-        </Surface>
+            {reviewDigest.latestProgramId ? (
+              <Text style={styles.hintMeta}>
+                {copy.track.reviewDigestLatestProgram(
+                  copy.programs.programTitles[reviewDigest.latestProgramId] ?? reviewDigest.latestProgramId,
+                )}
+              </Text>
+            ) : null}
+          </Surface>
+          <MorningRoutineReviewCard review={morningRoutineReview} />
+        </>
       ) : null}
       {activeSection === "week" ? (
-        <PeriodReviewCard
-          body={copy.track.weeklyReviewBody}
-          latestProgram={weeklyReview.latestProgramId
-            ? copy.track.weeklyReviewLatestProgram(
-                copy.programs.programTitles[weeklyReview.latestProgramId] ?? weeklyReview.latestProgramId,
-              )
-            : null}
-          meta={copy.track.weeklyReviewMeta(
-            weeklyReview.logsInWeek,
-            weeklyReview.scoreLogsInWeek,
-            weeklyReview.symptomLogsInWeek,
-          )}
-          nextStep={copy.track.weeklyReviewNextSteps[weeklyReview.nextStep]}
-          nextStepTitle={copy.track.weeklyReviewNextStepTitle}
-          reason={copy.track.weeklyReviewReasons[weeklyReview.reason]}
-          title={copy.track.weeklyReviewTitle}
-          tone={copy.track.weeklyReviewTones[weeklyReview.tone]}
-        />
+        <>
+          <PeriodReviewCard
+            body={copy.track.weeklyReviewBody}
+            latestProgram={weeklyReview.latestProgramId
+              ? copy.track.weeklyReviewLatestProgram(
+                  copy.programs.programTitles[weeklyReview.latestProgramId] ?? weeklyReview.latestProgramId,
+                )
+              : null}
+            meta={copy.track.weeklyReviewMeta(
+              weeklyReview.logsInWeek,
+              weeklyReview.scoreLogsInWeek,
+              weeklyReview.symptomLogsInWeek,
+            )}
+            nextStep={copy.track.weeklyReviewNextSteps[weeklyReview.nextStep]}
+            nextStepTitle={copy.track.weeklyReviewNextStepTitle}
+            reason={copy.track.weeklyReviewReasons[weeklyReview.reason]}
+            title={copy.track.weeklyReviewTitle}
+            tone={copy.track.weeklyReviewTones[weeklyReview.tone]}
+          />
+          <MorningRoutineReviewCard review={morningRoutineReview} />
+        </>
       ) : null}
       {activeSection === "month" ? (
         <PeriodReviewCard
@@ -302,6 +331,25 @@ export function ReviewScreen({ copy, language, logs, onSavePacket, programHistor
         )}
       </Surface>
     </Screen>
+  );
+}
+
+function MorningRoutineReviewCard({ review }: { review: MorningRoutineReview }) {
+  return (
+    <Surface>
+      <Text style={styles.title}>{review.title}</Text>
+      <Text style={styles.body}>{review.body}</Text>
+      <Text style={styles.hintTitle}>{review.tone}</Text>
+      <Text style={styles.body}>{review.reason}</Text>
+      <Text style={styles.signalDetail}>{review.nextStepTitle}</Text>
+      <Text style={styles.body}>{review.nextStep}</Text>
+      <Text style={styles.hintMeta}>{review.meta}</Text>
+      {review.stepLines.map((line) => (
+        <Text key={line} style={styles.hintMeta}>
+          {line}
+        </Text>
+      ))}
+    </Surface>
   );
 }
 
