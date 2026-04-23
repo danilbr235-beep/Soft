@@ -28,4 +28,10 @@ describe("buildCoachMorningAnswer", () => {
     expect(answer.body).toContain("Tighten the loop");
     expect(answer.nextStep).toContain("Pair the quick morning log");
   });
+
+  it("returns readable Russian copy", () => {
+    const answer = buildCoachMorningAnswer(review, "ru");
+
+    expect(answer.title).toBe("Что с утренней рутиной?");
+  });
 });

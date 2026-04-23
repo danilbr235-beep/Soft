@@ -345,6 +345,28 @@ test("settings can apply a review preset from current usage guidance", async ({ 
   await expect(page.getByText("7 days packet")).toHaveCount(2);
 });
 
+test("coach can suggest when to simplify the whole day", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByText("Start privately").click();
+  await page.getByLabel("Confidence").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Mixed signals").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Simple mode").click();
+  await page.getByLabel("Generate Today").click();
+
+  await page.getByLabel("Open Coach").click();
+  await expect(page.getByText("Should I simplify today?")).toBeVisible();
+  await page.getByLabel("Open coach question: Should I simplify today?").click();
+  await expect(
+    page.getByText("Keep today narrow. The signal is still thin enough that extra effort will add noise faster than clarity."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Land the morning anchor, log two calm scores, and stop there unless the day stays quiet."),
+  ).toBeVisible();
+});
+
 test("completed program shows a conservative wrap-up", async ({ page }) => {
   await page.goto("/");
 

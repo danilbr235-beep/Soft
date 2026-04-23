@@ -157,6 +157,7 @@ function AppRootContent() {
           <CoachScreen
             copy={copy}
             language={app.language}
+            morningNudgeReview={app.morningNudgeReview}
             morningRoutineReview={app.morningRoutineReview}
             reviewDigest={app.reviewDigest}
             today={app.today}
