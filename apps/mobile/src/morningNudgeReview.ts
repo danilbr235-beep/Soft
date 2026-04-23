@@ -2,7 +2,7 @@ import type { AppLanguage } from "@pmhc/types";
 import type { MorningNudgeHistoryEntry, MorningNudgePlan } from "./morningNudge";
 import type { MorningRoutineReview } from "./morningRoutineReview";
 
-type MorningNudgeGuidanceState = "optional" | "simplify" | "pair" | "same_cue" | "repeat" | "hold" | "steady";
+export type MorningNudgeGuidanceState = "optional" | "simplify" | "pair" | "same_cue" | "repeat" | "hold" | "steady";
 
 export type MorningNudgeReview = {
   title: string;
@@ -19,6 +19,7 @@ export type MorningNudgeReview = {
   previewBody: string;
   historyTitle: string;
   historyLabel: string;
+  guidanceState: MorningNudgeGuidanceState;
   guidanceTitle: string;
   guidanceTone: string;
   guidanceBody: string;
@@ -36,15 +37,7 @@ type LocalizedCopy = {
   recentChanges: (count: number) => string;
   guidanceTitle: string;
   guidanceTones: Record<MorningNudgeGuidanceState, string>;
-  guidanceBodies: {
-    optional: string;
-    simplify: string;
-    pair: string;
-    same_cue: string;
-    repeat: string;
-    hold: string;
-    steady: string;
-  };
+  guidanceBodies: Record<MorningNudgeGuidanceState, string>;
 };
 
 const copy: Record<AppLanguage, LocalizedCopy> = {
@@ -60,7 +53,7 @@ const copy: Record<AppLanguage, LocalizedCopy> = {
     guidanceTitle: "Today nudge check",
     guidanceTones: {
       optional: "Optional support",
-      simplify: "Keep it simple",
+      simplify: "Keep one calm cue",
       pair: "Use one rail",
       same_cue: "One cue is enough",
       repeat: "Repeat first",
@@ -96,7 +89,7 @@ const copy: Record<AppLanguage, LocalizedCopy> = {
     guidanceTitle: "Подсказка на сегодня",
     guidanceTones: {
       optional: "Поддержка по желанию",
-      simplify: "Чем проще, тем лучше",
+      simplify: "Оставь один спокойный сигнал",
       pair: "Один рельс для утра",
       same_cue: "Одного сигнала достаточно",
       repeat: "Сначала повторить",
@@ -162,6 +155,7 @@ export function buildMorningNudgeReview({
     previewBody: plan.previewBody,
     historyTitle: languageCopy.historyTitle,
     historyLabel,
+    guidanceState,
     guidanceTitle: languageCopy.guidanceTitle,
     guidanceTone: languageCopy.guidanceTones[guidanceState],
     guidanceBody: languageCopy.guidanceBodies[guidanceState],

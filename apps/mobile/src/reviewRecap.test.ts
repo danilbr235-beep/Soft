@@ -88,6 +88,7 @@ const morningNudgeReview: MorningNudgeReview = {
   previewBody: "Repeat the same three-step morning once more before changing it.",
   historyTitle: "Recent changes",
   historyLabel: "Last changed Apr 23, 09:00 - 2 adjustments in the last 30 days",
+  guidanceState: "hold",
   guidanceTitle: "Today nudge check",
   guidanceTone: "Hold steady",
   guidanceBody: "The reminder changed recently. Leave timing and tone alone for a few mornings so the loop can settle.",

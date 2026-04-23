@@ -66,7 +66,7 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Weekdays - 08:00")).toBeVisible();
   await expect(page.getByText("Keep morning simple. Light first.")).toBeVisible();
   await expect(page.getByText("Today nudge check")).toBeVisible();
-  await expect(page.getByText("Keep one calm cue")).toBeVisible();
+  await expect(page.getByText("Keep one calm cue", { exact: true })).toBeVisible();
   await expect(page.getByText("0 of 3", { exact: true })).toBeVisible();
   await expect(page.getByText("Land the wake-and-light anchor first. Add the other two steps only after that starts to stick.")).toBeVisible();
   await page.getByLabel("Mark done: Wake and light anchor").click();
@@ -289,6 +289,34 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Timing: Daily - 09:00").first()).toBeVisible();
   await page.getByLabel("Filter packet archive: 7 days").click();
   await expect(page.getByText("Morning routine", { exact: true })).toHaveCount(0);
+});
+
+test("settings can apply a calmer morning nudge setup from current guidance", async ({ page }) => {
+  await page.goto("/");
+
+  await page.getByText("Start privately").click();
+  await page.getByLabel("Confidence").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Mixed signals").click();
+  await page.getByLabel("Next").click();
+  await page.getByLabel("Simple mode").click();
+  await page.getByLabel("Generate Today").click();
+
+  await page.getByLabel("Open Settings").click();
+  await expect(page.getByText("Morning nudges")).toBeVisible();
+  await page.getByLabel("Set morning nudge style: Supportive").click();
+  await page.getByLabel("Set morning nudge timing: 09:00").click();
+  await page.getByLabel("Set morning nudge cadence: Daily").click();
+  await expect(page.getByText("Recommended setup")).toBeVisible();
+  await expect(page.getByText("Keep one calm cue", { exact: true })).toBeVisible();
+  await expect(page.getByText("Style: Supportive -> Discreet")).toBeVisible();
+  await expect(page.getByText("Timing: 09:00 -> 08:00")).toBeVisible();
+  await expect(page.getByText("Cadence: Daily -> Weekdays")).toBeVisible();
+  await page.getByLabel("Apply calmer setup").click();
+  await expect(page.getByText("Current settings already fit this morning read.")).toBeVisible();
+  await page.getByLabel("Open Today").click();
+  await expect(page.getByText("Morning nudge")).toBeVisible();
+  await expect(page.getByText("Weekdays - 08:00")).toBeVisible();
 });
 
 test("completed program shows a conservative wrap-up", async ({ page }) => {

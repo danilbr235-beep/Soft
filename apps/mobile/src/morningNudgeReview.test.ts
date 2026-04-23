@@ -77,6 +77,7 @@ describe("morningNudgeReview", () => {
     expect(review.title).toBe("Morning nudge review");
     expect(review.historyLabel).toContain("Last changed");
     expect(review.historyLabel).toContain("2 adjustments in the last 30 days");
+    expect(review.guidanceState).toBe("hold");
     expect(review.guidanceTone).toBe("Hold steady");
     expect(review.guidanceBody).toContain("The reminder changed recently.");
 
@@ -92,7 +93,8 @@ describe("morningNudgeReview", () => {
     });
 
     expect(review.historyLabel).toBe("No recent morning nudge changes yet.");
-    expect(review.guidanceTone).toBe("Keep it simple");
+    expect(review.guidanceState).toBe("simplify");
+    expect(review.guidanceTone).toBe("Keep one calm cue");
     expect(review.guidanceMeta).toBe("No reminder changes in the last 30 days.");
   });
 });

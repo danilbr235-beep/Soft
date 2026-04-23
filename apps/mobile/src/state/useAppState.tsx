@@ -730,6 +730,12 @@ export function useAppState() {
     },
     [morningNudgePreferences, saveMorningNudgePreferences],
   );
+  const applyMorningNudgePreferences = useCallback(
+    async (nextPreferences: MorningNudgePreferences) => {
+      await saveMorningNudgePreferences(nextPreferences);
+    },
+    [saveMorningNudgePreferences],
+  );
 
   const resetOnboarding = useCallback(async () => {
     setOnboarding(null);
@@ -1032,6 +1038,7 @@ export function useAppState() {
     changeMorningNudgeTimePreset,
     changeMorningNudgeTone,
     changeMorningNudgeWeekdaysOnly,
+    applyMorningNudgePreferences,
     changeReviewDefaultFormat,
     changeReviewDefaultSection,
     completeProgramToday,

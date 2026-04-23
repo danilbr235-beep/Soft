@@ -169,6 +169,8 @@ function AppRootContent() {
             language={app.language}
             morningNudgePlan={app.morningNudge}
             morningNudgePreferences={app.morningNudgePreferences}
+            morningNudgeReview={app.morningNudgeReview}
+            onApplyMorningNudgePreferences={app.applyMorningNudgePreferences}
             onClearPrivacyPin={app.clearPrivacyPin}
             privacyLock={app.privacyLock}
             onChangeLanguage={app.changeLanguage}

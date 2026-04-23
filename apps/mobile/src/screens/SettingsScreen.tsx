@@ -9,6 +9,8 @@ import type {
   MorningNudgeTimePreset,
   MorningNudgeTone,
 } from "../morningNudge";
+import type { MorningNudgeReview } from "../morningNudgeReview";
+import { buildMorningNudgeSettingsGuidance } from "../morningNudgeSettingsGuidance";
 import type { ReviewPreferences } from "../reviewPreferences";
 import type { ReviewRecapFormat, ReviewSection } from "../reviewRecap";
 import { Screen } from "../components/Screen";
@@ -21,6 +23,8 @@ type Props = {
   language: AppLanguage;
   morningNudgePlan: MorningNudgePlan;
   morningNudgePreferences: MorningNudgePreferences;
+  morningNudgeReview: MorningNudgeReview;
+  onApplyMorningNudgePreferences: (preferences: MorningNudgePreferences) => void;
   onChangeLanguage: (language: AppLanguage) => void;
   onChangeMorningNudgeTimePreset: (timePreset: MorningNudgeTimePreset) => void;
   onChangeMorningNudgeTone: (tone: MorningNudgeTone) => void;
@@ -43,6 +47,8 @@ export function SettingsScreen({
   language,
   morningNudgePlan,
   morningNudgePreferences,
+  morningNudgeReview,
+  onApplyMorningNudgePreferences,
   onChangeLanguage,
   onChangeMorningNudgeTimePreset,
   onChangeMorningNudgeTone,
@@ -66,6 +72,11 @@ export function SettingsScreen({
   const morningNudgeTimings: MorningNudgeTimePreset[] = ["early", "standard", "late"];
   const reviewSections: ReviewSection[] = ["overview", "week", "month", "cycles"];
   const reviewFormats: ReviewRecapFormat[] = ["snapshot", "plan", "coach", "packet"];
+  const morningNudgeSettingsGuidance = buildMorningNudgeSettingsGuidance({
+    language,
+    preferences: morningNudgePreferences,
+    review: morningNudgeReview,
+  });
 
   function savePin() {
     if (!canSavePin) {
@@ -197,6 +208,29 @@ export function SettingsScreen({
           <Text style={styles.hintText}>{`${morningNudgePlan.timingTitle}: ${morningNudgePlan.timingLabel}`}</Text>
           <Text style={styles.hintText}>{`${morningNudgePlan.styleTitle}: ${morningNudgePlan.styleLabel}`}</Text>
           <Text style={styles.hintText}>{`${morningNudgePlan.focusTitle}: ${morningNudgePlan.focusLabel}`}</Text>
+        </View>
+        <View style={styles.infoBlock}>
+          <Text style={styles.infoTitle}>{morningNudgeSettingsGuidance.title}</Text>
+          <Text style={styles.statusText}>{morningNudgeSettingsGuidance.tone}</Text>
+          <Text style={styles.body}>{morningNudgeSettingsGuidance.body}</Text>
+          {morningNudgeSettingsGuidance.changeLines.map((line) => (
+            <Text key={line} style={styles.hintText}>
+              {line}
+            </Text>
+          ))}
+          <Text style={styles.hintText}>{morningNudgeSettingsGuidance.meta}</Text>
+          {morningNudgeSettingsGuidance.recommendedPreferences && morningNudgeSettingsGuidance.ctaLabel ? (
+            <Pressable
+              accessibilityLabel={morningNudgeSettingsGuidance.ctaLabel}
+              accessibilityRole="button"
+              onPress={() => onApplyMorningNudgePreferences(morningNudgeSettingsGuidance.recommendedPreferences!)}
+              style={[styles.button, styles.activeButton]}
+            >
+              <Text style={styles.buttonText}>{morningNudgeSettingsGuidance.ctaLabel}</Text>
+            </Pressable>
+          ) : (
+            <Text style={styles.body}>{morningNudgeSettingsGuidance.statusLabel}</Text>
+          )}
         </View>
         <Text style={styles.body}>{copy.settings.morningNudgeHint}</Text>
       </Surface>
