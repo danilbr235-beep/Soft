@@ -6,6 +6,7 @@ import type { AppLanguage, PrivacyLockState } from "@pmhc/types";
 import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
 import { buildDaySimplificationGuidance } from "../daySimplificationGuidance";
 import type { DaySimplificationState } from "../daySimplification";
+import type { DaySimplificationReview } from "../daySimplificationReview";
 import type {
   MorningNudgePlan,
   MorningNudgePreferences,
@@ -29,6 +30,7 @@ type Props = {
   adaptiveDayGuidance: CoachAdaptiveNudge;
   copy: LanguageCopy;
   daySimplification: DaySimplificationState;
+  daySimplificationReview: DaySimplificationReview;
   language: AppLanguage;
   morningNudgePlan: MorningNudgePlan;
   morningNudgePreferences: MorningNudgePreferences;
@@ -61,6 +63,7 @@ export function SettingsScreen({
   adaptiveDayGuidance,
   copy,
   daySimplification,
+  daySimplificationReview,
   hasPrivacyPin,
   language,
   morningNudgePlan,
@@ -111,6 +114,7 @@ export function SettingsScreen({
     actionCardCount,
     adaptiveDayGuidance,
     daySimplification,
+    daySimplificationReview,
     language,
     programTaskCount,
   });
@@ -251,7 +255,7 @@ export function SettingsScreen({
           <Text style={styles.statusText}>{daySimplificationGuidance.tone}</Text>
           <Text style={styles.body}>{daySimplificationGuidance.body}</Text>
           <Text style={styles.hintText}>{daySimplificationGuidance.statusLabel}</Text>
-          <Text style={styles.hintText}>{adaptiveDayGuidance.nextStep}</Text>
+          <Text style={styles.hintText}>{daySimplificationGuidance.nextStep}</Text>
           {daySimplificationGuidance.lines.map((line) => (
             <Text key={line} style={styles.hintText}>
               {line}

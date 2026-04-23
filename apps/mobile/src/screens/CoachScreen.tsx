@@ -8,6 +8,7 @@ import type { CoachQuestionId, CoachReviewDigest } from "@pmhc/rules";
 import type { CoachAdaptiveNudge } from "../coachAdaptiveNudge";
 import { buildDaySimplificationGuidance } from "../daySimplificationGuidance";
 import type { DaySimplificationState } from "../daySimplification";
+import type { DaySimplificationReview } from "../daySimplificationReview";
 import { buildCoachMorningAnswer, type CoachMorningAnswer } from "../coachMorningAnswer";
 import type { MorningRoutineReview } from "../morningRoutineReview";
 import { Screen } from "../components/Screen";
@@ -21,6 +22,7 @@ export function CoachScreen({
   adaptiveDayGuidance,
   copy,
   daySimplification,
+  daySimplificationReview,
   language,
   morningRoutineReview,
   onApplyDaySimplification,
@@ -33,6 +35,7 @@ export function CoachScreen({
   adaptiveDayGuidance: CoachAdaptiveNudge;
   copy: LanguageCopy;
   daySimplification: DaySimplificationState;
+  daySimplificationReview: DaySimplificationReview;
   language: AppLanguage;
   morningRoutineReview: MorningRoutineReview;
   onApplyDaySimplification: () => void;
@@ -54,10 +57,14 @@ export function CoachScreen({
     actionCardCount,
     adaptiveDayGuidance,
     daySimplification,
+    daySimplificationReview,
     language,
     programTaskCount,
   });
   const showSimplificationAction = selectedAnswer.id === adaptiveDayGuidance.id && simplificationGuidance.ctaLabel;
+  const answerBody = selectedAnswer.id === adaptiveDayGuidance.id ? simplificationGuidance.body : selectedAnswer.body;
+  const answerNextStep =
+    selectedAnswer.id === adaptiveDayGuidance.id ? simplificationGuidance.nextStep : selectedAnswer.nextStep;
 
   return (
     <Screen title={copy.coach.title} subtitle={copy.coach.subtitle}>
@@ -84,11 +91,11 @@ export function CoachScreen({
       <Surface>
         <Text style={styles.answerEyebrow}>{copy.coach.title}</Text>
         <Text style={styles.answerTitle}>{selectedAnswer.title}</Text>
-        <Text style={styles.answerBody}>{selectedAnswer.body}</Text>
-        {selectedAnswer.nextStep ? (
+        <Text style={styles.answerBody}>{answerBody}</Text>
+        {answerNextStep ? (
           <View style={styles.nextStepBlock}>
             <Text style={styles.nextStepLabel}>{copy.coach.nextStep}</Text>
-            <Text style={styles.nextStepText}>{selectedAnswer.nextStep}</Text>
+            <Text style={styles.nextStepText}>{answerNextStep}</Text>
             {selectedAnswer.id === adaptiveDayGuidance.id ? (
               <>
                 <Text style={styles.hintText}>{simplificationGuidance.statusLabel}</Text>

@@ -371,7 +371,12 @@ test("settings can apply a lighter day preset from current guidance", async ({ p
   await expect(page.getByText("Today: up to 2 of 4 priority actions stay visible.")).toBeVisible();
   await expect(page.getByText("Programs: up to 2 of 3 tasks stay visible.")).toBeVisible();
   await page.getByLabel("Use lighter day").click();
-  await expect(page.getByText("Current day already runs in the lighter preset.")).toBeVisible();
+  await expect(page.getByText("Current lighter day looks optional now.")).toBeVisible();
+  await expect(
+    page.getByText("This looks like a one-day support reset. If today's signal feels quiet again, you can return to the full day."),
+  ).toBeVisible();
+  await expect(page.getByText("Use it when the day tightens, then return to the full plan once the signal is quiet again.")).toBeVisible();
+  await expect(page.getByLabel("Return to full day")).toBeVisible();
   await page.getByLabel("Open Today").click();
   await expect(page.getByText("Lighter day is on").first()).toBeVisible();
 });
@@ -441,6 +446,10 @@ test("coach can suggest when to simplify the whole day", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByText("A lighter preset is ready if you want the app to trim today's scope for you.")).toBeVisible();
   await page.getByLabel("Use lighter day").click();
+  await expect(
+    page.getByText("This looks like a one-day support reset. If today's signal feels quiet again, you can return to the full day."),
+  ).toBeVisible();
+  await expect(page.getByText("Current lighter day looks optional now.")).toBeVisible();
   await expect(page.getByLabel("Return to full day")).toBeVisible();
 });
 

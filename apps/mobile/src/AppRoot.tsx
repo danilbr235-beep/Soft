@@ -171,6 +171,7 @@ function AppRootContent() {
             adaptiveDayGuidance={app.adaptiveDayGuidance}
             copy={copy}
             daySimplification={app.daySimplification}
+            daySimplificationReview={app.daySimplificationReview}
             language={app.language}
             morningRoutineReview={app.morningRoutineReview}
             onApplyDaySimplification={() => app.applyDaySimplification("today")}
@@ -186,6 +187,7 @@ function AppRootContent() {
             adaptiveDayGuidance={app.adaptiveDayGuidance}
             copy={copy}
             daySimplification={app.daySimplification}
+            daySimplificationReview={app.daySimplificationReview}
             hasPrivacyPin={app.hasPrivacyPin}
             language={app.language}
             morningNudgePlan={app.morningNudge}
