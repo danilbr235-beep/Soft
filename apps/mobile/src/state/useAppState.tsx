@@ -60,6 +60,7 @@ import {
   type DailySessionProgressStore,
   type DailySessionStepId,
 } from "../dailySession";
+import { buildMorningRoutine } from "../morningRoutine";
 import { type ReviewSection } from "../reviewRecap";
 import {
   appendReviewPacketHistory,
@@ -314,6 +315,13 @@ export function useAppState() {
     reviewPackets,
     today,
   ]);
+  const morningRoutine = useMemo(() => {
+    return buildMorningRoutine({
+      content,
+      language,
+      today,
+    });
+  }, [content, language, today]);
 
   const persistLogs = useCallback(async (nextLogs: LogEntry[]) => {
     setLogs(nextLogs);
@@ -722,11 +730,14 @@ export function useAppState() {
   const clearLearnFocus = useCallback(() => {
     setLearnFocusItemId(null);
   }, []);
+  const openLearnItem = useCallback((itemId: string | null) => {
+    setLearnFocusItemId(itemId);
+    setActiveTab("Learn");
+  }, []);
   const openDailySessionStep = useCallback(
     (stepId: DailySessionStepId) => {
       if (stepId === "lesson") {
-        setLearnFocusItemId(dailySession.lessonItemId);
-        setActiveTab("Learn");
+        openLearnItem(dailySession.lessonItemId);
         return;
       }
 
@@ -747,7 +758,7 @@ export function useAppState() {
 
       setActiveTab("Review");
     },
-    [dailySession.lessonItemId, dailySession.quizLog, today.activeProgram],
+    [dailySession.lessonItemId, dailySession.quizLog, openLearnItem, today.activeProgram],
   );
 
   return {
@@ -762,6 +773,7 @@ export function useAppState() {
       <QuickLogSheet definition={selectedQuickLog} language={language} onClose={() => setSelectedQuickLog(null)} onSave={saveQuickLog} />
     ) : null,
     language,
+    morningRoutine,
     today,
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,
@@ -781,6 +793,7 @@ export function useAppState() {
     deleteLog,
     lockNow,
     openDailySessionStep,
+    openLearnItem,
     openQuickLog: setSelectedQuickLog,
     pauseProgram,
     resetOnboarding,

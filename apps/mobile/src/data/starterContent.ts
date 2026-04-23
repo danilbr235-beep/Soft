@@ -2,6 +2,21 @@ import type { ContentItem } from "@pmhc/types";
 
 export const starterContent: ContentItem[] = [
   {
+    id: "morning-routine-reset",
+    type: "guide",
+    title: "Morning reset: light, signal, move",
+    translatedTitleRu: "Мягкое утро: свет, сигнал, движение",
+    summary: "A short guide for a calm morning routine built around stable wake time, one useful signal, and light movement.",
+    durationMinutes: 5,
+    trustLevel: "reviewed_source",
+    tags: ["sleep", "tracking", "confidence", "baseline"],
+    sourceName: "Morning routine brief",
+    language: "en",
+    translatedSummaryRu: "Короткий гид по спокойному началу дня: стабильный подъем, один полезный сигнал и легкое движение.",
+    saved: false,
+    completed: false,
+  },
+  {
     id: "baseline-without-overchecking",
     type: "guide",
     title: "Build a baseline without overchecking",

@@ -3,6 +3,7 @@ import type { LanguageCopy } from "@pmhc/i18n";
 import { colors, radii, spacing } from "@pmhc/ui";
 import type { Alert, CurrentPriority, DailyStateTile, QuickLogDefinition } from "@pmhc/types";
 import type { DailySession, DailySessionStepId } from "../dailySession";
+import type { MorningRoutine } from "../morningRoutine";
 import type { TodayStatusItem } from "../todayStatus";
 import { Surface } from "./Surface";
 
@@ -157,6 +158,56 @@ export function DailySessionBlock({
             >
               <Text style={styles.sessionButtonText}>{step.cta}</Text>
             </Pressable>
+          </View>
+        ))}
+      </View>
+    </Surface>
+  );
+}
+
+export function MorningRoutineBlock({
+  routine,
+  onOpenGuide,
+  onOpenLog,
+}: {
+  routine: MorningRoutine;
+  onOpenGuide: () => void;
+  onOpenLog: () => void;
+}) {
+  return (
+    <Surface>
+      <View style={styles.sessionHeader}>
+        <View style={styles.sessionHeaderText}>
+          <Text style={styles.kicker}>{routine.title}</Text>
+          <Text style={styles.body}>{routine.body}</Text>
+          <Text style={styles.routineNote}>{routine.note}</Text>
+        </View>
+      </View>
+      <View style={styles.sessionList}>
+        {routine.steps.map((step, index) => (
+          <View key={step.id} style={styles.sessionStep}>
+            <View style={styles.rowBetween}>
+              <Text style={styles.sessionStepTitle}>{`${index + 1}. ${step.title}`}</Text>
+              <Text style={styles.sessionState}>{step.badge}</Text>
+            </View>
+            <Text style={styles.body}>{step.body}</Text>
+            <View style={styles.sourceRow}>
+              {step.sourceLabels.map((label) => (
+                <Text key={`${step.id}-${label}`} style={styles.sourcePill}>
+                  {label}
+                </Text>
+              ))}
+            </View>
+            {step.cta ? (
+              <Pressable
+                accessibilityLabel={step.cta}
+                accessibilityRole="button"
+                onPress={step.ctaKind === "guide" ? onOpenGuide : onOpenLog}
+                style={styles.sessionButton}
+              >
+                <Text style={styles.sessionButtonText}>{step.cta}</Text>
+              </Pressable>
+            ) : null}
           </View>
         ))}
       </View>
@@ -388,5 +439,26 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 13,
     fontWeight: "800",
+  },
+  routineNote: {
+    color: colors.steel,
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  sourcePill: {
+    backgroundColor: colors.panelSoft,
+    borderColor: colors.line,
+    borderRadius: radii.sm,
+    borderWidth: 1,
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700",
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  sourceRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
   },
 });
