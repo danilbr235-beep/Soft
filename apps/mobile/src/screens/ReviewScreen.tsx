@@ -12,6 +12,7 @@ import type { MorningNudgeReview } from "../morningNudgeReview";
 import type { MorningRoutineReview } from "../morningRoutineReview";
 import type { ReviewPreferences } from "../reviewPreferences";
 import { buildReviewPacketCompare } from "../reviewPacketCompare";
+import { buildReviewSignalChange, type ReviewSignalChange } from "../reviewSignalChange";
 import type { ReviewPacketHistoryEntry } from "../reviewPacketHistory";
 import { buildReviewRecap, type ReviewRecapFormat, type ReviewRecapResult, type ReviewSection } from "../reviewRecap";
 import {
@@ -55,6 +56,10 @@ export function ReviewScreen({
   const weeklyReview = useMemo(() => buildTrackingWeeklyReview(logs, programHistory), [logs, programHistory]);
   const monthlyReview = useMemo(() => buildTrackingPeriodReview(logs, programHistory, 30), [logs, programHistory]);
   const programReview = useMemo(() => buildProgramReview(programHistory), [programHistory]);
+  const weeklyChange = useMemo(
+    () => buildReviewSignalChange({ language, logs, programHistory }),
+    [language, logs, programHistory],
+  );
   const sectionOrder: ReviewSection[] = ["overview", "week", "month", "cycles"];
   const formatOrder: ReviewRecapFormat[] = ["snapshot", "plan", "coach", "packet"];
   const archiveFilterOrder: ReviewPacketArchiveFilter[] = ["all", ...sectionOrder];
@@ -177,6 +182,7 @@ export function ReviewScreen({
               </Text>
             ) : null}
           </Surface>
+          <ReviewSignalChangeCard review={weeklyChange} />
           <MorningRoutineReviewCard review={morningRoutineReview} />
           <MorningNudgeReviewCard review={morningNudgeReview} />
           <DaySimplificationReviewCard review={daySimplificationReview} />
@@ -457,6 +463,26 @@ function DaySimplificationReviewCard({ review }: { review: DaySimplificationRevi
       <Text style={styles.hintMeta}>{review.meta}</Text>
       <Text style={styles.hintMeta}>{review.todayLine}</Text>
       {review.sourceLine ? <Text style={styles.hintMeta}>{review.sourceLine}</Text> : null}
+    </Surface>
+  );
+}
+
+function ReviewSignalChangeCard({ review }: { review: ReviewSignalChange }) {
+  return (
+    <Surface>
+      <Text style={styles.title}>{review.title}</Text>
+      <Text style={styles.body}>{review.body}</Text>
+      <Text style={styles.hintTitle}>{review.tone}</Text>
+      <Text style={styles.hintMeta}>{review.pattern}</Text>
+      <Text style={styles.body}>{review.reason}</Text>
+      <Text style={styles.signalDetail}>{review.nextStepTitle}</Text>
+      <Text style={styles.body}>{review.nextStep}</Text>
+      <Text style={styles.hintMeta}>{review.meta}</Text>
+      {review.changeLines.map((line) => (
+        <Text key={line} style={styles.hintMeta}>
+          {line}
+        </Text>
+      ))}
     </Surface>
   );
 }

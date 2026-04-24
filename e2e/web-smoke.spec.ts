@@ -137,6 +137,9 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Digest confidence")).toBeVisible();
   await expect(page.getByText("High confidence")).toBeVisible();
   await expect(page.getByText("Recent reads lean cautious enough that the next block should stay recovery-first.")).toBeVisible();
+  await expect(page.getByText("What changed this week")).toBeVisible();
+  await expect(page.getByText("Pattern: this week tightened the recovery picture")).toBeVisible();
+  await expect(page.getByText("Symptoms: 1 check-in this week vs 0 check-ins last week")).toBeVisible();
   await expect(page.getByText("Morning routine review")).toBeVisible();
   await expect(page.getByText("Morning nudge review")).toBeVisible();
   await expect(page.getByText("Full mornings: 1/7 - Partial mornings: 0 - Streak: 1 day")).toBeVisible();
