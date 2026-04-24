@@ -76,6 +76,8 @@ describe("Track pattern hint copy", () => {
     expect(getCopy("en").review.archiveFilterLabels.all).toBe("All");
     expect(getCopy("en").review.openArchiveFilter("30 days")).toContain("Filter packet archive");
     expect(getCopy("en").review.archiveSavedAt("30 days", "Apr 22, 10:00")).toContain("saved");
+    expect(getCopy("en").review.compareTitle).toBe("Latest packet contrast");
+    expect(getCopy("en").review.compareMissing).toBe("No block in this packet.");
     expect(getCopy("en").review.exportPacketAction).toBe("Export packet");
     expect(getCopy("en").review.exportStatuses.copied).toBe("Packet copied.");
     expect(getCopy("en").review.packetBlockTitles.history).toBe("History snapshot");
@@ -86,6 +88,8 @@ describe("Track pattern hint copy", () => {
     expect(getCopy("ru").review.formatLabels.snapshot).toBe("Кратко");
     expect(getCopy("ru").review.formatLabels.packet).toBe("Пакет");
     expect(getCopy("ru").review.archiveTitle.length).toBeGreaterThan(0);
+    expect(getCopy("ru").review.compareTitle.length).toBeGreaterThan(0);
+    expect(getCopy("ru").review.compareMissing.length).toBeGreaterThan(0);
     expect(getCopy("ru").review.recapPreview("Кратко")).toContain("Предпросмотр");
   });
 

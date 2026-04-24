@@ -228,6 +228,12 @@ export type LanguageCopy = {
     archiveEmpty: string;
     archiveEmptyFiltered: (label: string) => string;
     archiveSavedAt: (section: string, savedAt: string) => string;
+    compareTitle: string;
+    compareBody: string;
+    compareEmpty: string;
+    compareMissing: string;
+    compareChangedCount: (changed: number, total: number) => string;
+    compareLabels: Record<"earlier" | "latest" | "same" | "changed", string>;
     exportPacketAction: string;
     exportPacket: (title: string) => string;
     exportStatuses: Record<"copied" | "shared" | "unavailable", string>;
@@ -856,6 +862,17 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       archiveEmpty: "No saved packets yet. Prepare one from any review section first.",
       archiveEmptyFiltered: (label) => `No saved packets for ${label} yet.`,
       archiveSavedAt: (section, savedAt) => `${section} - saved ${savedAt}`,
+      compareTitle: "Latest packet contrast",
+      compareBody: "A quick comparison across the two most recent packets in this archive filter.",
+      compareEmpty: "Need two saved packets in this archive view before the comparison becomes useful.",
+      compareMissing: "No block in this packet.",
+      compareChangedCount: (changed, total) => `Changed blocks: ${changed} of ${total}`,
+      compareLabels: {
+        earlier: "Earlier",
+        latest: "Latest",
+        same: "Stable",
+        changed: "Changed",
+      },
       exportPacketAction: "Export packet",
       exportPacket: (title) => `Export packet ${title}`,
       exportStatuses: {
@@ -1484,6 +1501,17 @@ const copies: Record<AppLanguage, LanguageCopy> = {
       archiveEmpty: "Сохраненных пакетов пока нет. Сначала подготовьте пакет в одном из разделов обзора.",
       archiveEmptyFiltered: (label) => `Для раздела ${label} сохраненных пакетов пока нет.`,
       archiveSavedAt: (section, savedAt) => `${section} - сохранено ${savedAt}`,
+      compareTitle: "Сравнение последних пакетов",
+      compareBody: "Быстрое сравнение двух последних пакетов в текущем фильтре архива.",
+      compareEmpty: "Для сравнения нужны два сохраненных пакета в текущем фильтре архива.",
+      compareMissing: "В этом пакете блока нет.",
+      compareChangedCount: (changed, total) => `Изменилось блоков: ${changed} из ${total}`,
+      compareLabels: {
+        earlier: "Раньше",
+        latest: "Сейчас",
+        same: "Без изменений",
+        changed: "Изменилось",
+      },
       exportPacketAction: "Экспорт пакета",
       exportPacket: (title) => `Экспортировать пакет: ${title}`,
       exportStatuses: {

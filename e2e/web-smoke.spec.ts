@@ -302,10 +302,14 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Weekly review")).toBeVisible();
   await page.getByLabel("Prepare recap").click();
   await expect(page.getByText("Preview: Packet").first()).toBeVisible();
-  await expect(page.getByText("7 days packet")).toHaveCount(2);
+  await expect(page.getByText("7 days packet").first()).toBeVisible();
   await expect(page.getByText("Morning nudge", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Pattern: recent changes are still settling").first()).toBeVisible();
   await expect(page.getByText("Timing: Daily - 09:00").first()).toBeVisible();
+  await expect(page.getByText("Latest packet contrast")).toBeVisible();
+  await expect(page.getByText(/^Changed blocks:/)).toBeVisible();
+  await expect(page.getByText("Earlier").first()).toBeVisible();
+  await expect(page.getByText("Latest").first()).toBeVisible();
   await page.getByLabel("Filter packet archive: 7 days").click();
   await expect(page.getByText("Morning routine", { exact: true })).toHaveCount(0);
 });

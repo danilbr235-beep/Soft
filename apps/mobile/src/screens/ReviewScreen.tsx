@@ -11,6 +11,7 @@ import type { DaySimplificationReview } from "../daySimplificationReview";
 import type { MorningNudgeReview } from "../morningNudgeReview";
 import type { MorningRoutineReview } from "../morningRoutineReview";
 import type { ReviewPreferences } from "../reviewPreferences";
+import { buildReviewPacketCompare } from "../reviewPacketCompare";
 import type { ReviewPacketHistoryEntry } from "../reviewPacketHistory";
 import { buildReviewRecap, type ReviewRecapFormat, type ReviewRecapResult, type ReviewSection } from "../reviewRecap";
 import {
@@ -60,6 +61,10 @@ export function ReviewScreen({
   const visibleReviewPackets = useMemo(
     () => filterReviewPacketHistory(reviewPackets, archiveFilter),
     [archiveFilter, reviewPackets],
+  );
+  const packetComparison = useMemo(
+    () => buildReviewPacketCompare(visibleReviewPackets),
+    [visibleReviewPackets],
   );
 
   function selectSection(section: ReviewSection) {
@@ -314,6 +319,80 @@ export function ReviewScreen({
             );
           })}
         </View>
+        {packetComparison ? (
+          <View style={styles.comparePanel}>
+            <Text style={styles.hintTitle}>{copy.review.compareTitle}</Text>
+            <Text style={styles.body}>{copy.review.compareBody}</Text>
+            <Text style={styles.hintMeta}>
+              {copy.review.compareChangedCount(packetComparison.changedBlocks, packetComparison.totalBlocks)}
+            </Text>
+            <View style={styles.compareSides}>
+              <View style={styles.compareSide}>
+                <Text style={styles.signalDetail}>{copy.review.compareLabels.earlier}</Text>
+                <Text style={styles.body}>{packetComparison.left.title}</Text>
+                <Text style={styles.hintMeta}>
+                  {copy.review.archiveSavedAt(
+                    copy.review.filterLabels[packetComparison.left.section],
+                    formatReviewPacketSavedAt(packetComparison.left.createdAt, language),
+                  )}
+                </Text>
+              </View>
+              <View style={styles.compareSide}>
+                <Text style={styles.signalDetail}>{copy.review.compareLabels.latest}</Text>
+                <Text style={styles.body}>{packetComparison.right.title}</Text>
+                <Text style={styles.hintMeta}>
+                  {copy.review.archiveSavedAt(
+                    copy.review.filterLabels[packetComparison.right.section],
+                    formatReviewPacketSavedAt(packetComparison.right.createdAt, language),
+                  )}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.packetList}>
+              {(packetComparison.changedBlocks > 0
+                ? packetComparison.blocks.filter((block) => block.status === "changed")
+                : packetComparison.blocks
+              ).map((block, index) => (
+                <View key={block.id} style={[styles.compareBlock, index > 0 ? styles.packetBlockDivider : null]}>
+                  <Text style={styles.packetBlockTitle}>{block.title}</Text>
+                  <Text style={styles.hintMeta}>
+                    {block.status === "changed"
+                      ? copy.review.compareLabels.changed
+                      : copy.review.compareLabels.same}
+                  </Text>
+                  <View style={styles.compareSides}>
+                    <View style={styles.compareSide}>
+                      <Text style={styles.signalDetail}>{copy.review.compareLabels.earlier}</Text>
+                      {block.leftLines.length > 0 ? (
+                        block.leftLines.map((line, lineIndex) => (
+                          <Text key={`${block.id}-left-${lineIndex}`} style={styles.recapText}>
+                            {line}
+                          </Text>
+                        ))
+                      ) : (
+                        <Text style={styles.hintMeta}>{copy.review.compareMissing}</Text>
+                      )}
+                    </View>
+                    <View style={styles.compareSide}>
+                      <Text style={styles.signalDetail}>{copy.review.compareLabels.latest}</Text>
+                      {block.rightLines.length > 0 ? (
+                        block.rightLines.map((line, lineIndex) => (
+                          <Text key={`${block.id}-right-${lineIndex}`} style={styles.recapText}>
+                            {line}
+                          </Text>
+                        ))
+                      ) : (
+                        <Text style={styles.hintMeta}>{copy.review.compareMissing}</Text>
+                      )}
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : (
+          <Text style={styles.body}>{copy.review.compareEmpty}</Text>
+        )}
         {exportStatus ? <Text style={styles.hintMeta}>{copy.review.exportStatuses[exportStatus]}</Text> : null}
         {reviewPackets.length > 0 ? (
           <View style={styles.packetList}>
@@ -618,6 +697,26 @@ const styles = StyleSheet.create({
   },
   archiveEntry: {
     gap: spacing.sm,
+  },
+  comparePanel: {
+    gap: spacing.sm,
+    marginTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+    paddingTop: spacing.md,
+  },
+  compareSides: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  compareSide: {
+    flexGrow: 1,
+    flexBasis: 220,
+    gap: spacing.xs,
+  },
+  compareBlock: {
+    gap: spacing.xs,
   },
   archiveActions: {
     flexDirection: "row",
