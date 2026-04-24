@@ -413,8 +413,14 @@ test("programs can switch on a lighter day plan and today can restore it", async
   await page.getByLabel("Open Review").click();
   await expect(page.getByText("Lighter day review")).toBeVisible();
   await expect(page.getByText("Used as support")).toBeVisible();
+  await expect(page.getByText("Pattern: one-off support day")).toBeVisible();
   await expect(page.getByText("Lighter days: 1/7 - Current streak: 1 day")).toBeVisible();
   await expect(page.getByText("Today: 0 - Programs: 1")).toBeVisible();
+  await page.getByLabel("Open recap format: Packet").click();
+  await page.getByLabel("Prepare recap").click();
+  await expect(page.getByText("Preview: Packet")).toBeVisible();
+  await expect(page.getByText("Lighter day review", { exact: true }).nth(1)).toBeVisible();
+  await expect(page.getByText("Pattern: one-off support day").nth(1)).toBeVisible();
   await page.getByLabel("Open Today").click();
   await page.getByLabel("Return to full day").click();
   await expect(page.getByLabel("Use lighter day")).toBeVisible();

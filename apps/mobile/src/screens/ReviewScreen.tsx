@@ -345,6 +345,7 @@ function DaySimplificationReviewCard({ review }: { review: DaySimplificationRevi
       <Text style={styles.title}>{review.title}</Text>
       <Text style={styles.body}>{review.body}</Text>
       <Text style={styles.hintTitle}>{review.tone}</Text>
+      <Text style={styles.hintMeta}>{review.pattern}</Text>
       <Text style={styles.body}>{review.reason}</Text>
       <Text style={styles.signalDetail}>{review.nextStepTitle}</Text>
       <Text style={styles.body}>{review.nextStep}</Text>

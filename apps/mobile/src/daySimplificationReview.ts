@@ -21,6 +21,7 @@ export type DaySimplificationReview = {
   reasonId: DaySimplificationReviewReason;
   nextStepId: DaySimplificationReviewNextStep;
   tone: string;
+  pattern: string;
   reason: string;
   nextStepTitle: string;
   nextStep: string;
@@ -38,6 +39,7 @@ type LocalizedCopy = {
   body: string;
   nextStepTitle: string;
   tones: Record<DaySimplificationReviewTone, string>;
+  patterns: Record<DaySimplificationReviewReason, string>;
   reasons: Record<DaySimplificationReviewReason, string>;
   nextSteps: Record<DaySimplificationReviewNextStep, string>;
   meta: (activeDays: number, streak: number) => string;
@@ -56,6 +58,13 @@ const copy: Record<AppLanguage, LocalizedCopy> = {
       full: "Mostly full days",
       targeted: "Used as support",
       protective: "Week stayed compressed",
+    },
+    patterns: {
+      none_recent: "Pattern: no lighter days this week",
+      single_day: "Pattern: one-off support day",
+      mixed_sources: "Pattern: multi-source compression",
+      repeated_days: "Pattern: repeated lighter days",
+      active_streak: "Pattern: current lighter-day streak",
     },
     reasons: {
       none_recent:
@@ -90,44 +99,51 @@ const copy: Record<AppLanguage, LocalizedCopy> = {
     },
   },
   ru: {
-    title: "РћР±Р·РѕСЂ С‰Р°РґСЏС‰РµРіРѕ РґРЅСЏ",
-    body: "РљРѕСЂРѕС‚РєРёР№ РІР·РіР»СЏРґ РЅР° РїРѕСЃР»РµРґРЅРёРµ 7 РґРЅРµР№: РєР°Рє С‡Р°СЃС‚Рѕ РїСЂРёР»РѕР¶РµРЅРёРµ РѕСЃС‚Р°РІР»СЏР»Рѕ РґРµРЅСЊ РІ С‰Р°РґСЏС‰РµРј СЂРµР¶РёРјРµ.",
-    nextStepTitle: "РЎР»РµРґСѓСЋС‰РёР№ С€Р°Рі РґР»СЏ С‰Р°РґСЏС‰РµРіРѕ РґРЅСЏ",
+    title: "Обзор щадящего дня",
+    body: "Короткий обзор за 7 дней: как часто приложение оставляло день в щадящем режиме.",
+    nextStepTitle: "Следующий шаг для щадящего дня",
     tones: {
-      full: "РџРѕРєР° РїСЂРµРѕР±Р»Р°РґР°СЋС‚ РѕР±С‹С‡РЅС‹Рµ РґРЅРё",
-      targeted: "РЎСЂР°Р±Р°С‚С‹РІР°Р» РєР°Рє РїРѕРґРґРµСЂР¶РєР°",
-      protective: "РќРµРґРµР»СЏ РёС€Р»Р° РІ СЃР¶Р°С‚РѕРј СЂРµР¶РёРјРµ",
+      full: "Пока преобладают обычные дни",
+      targeted: "Используется как поддержка",
+      protective: "Неделя все еще идет в сжатом режиме",
+    },
+    patterns: {
+      none_recent: "Паттерн: на этой неделе щадящих дней не было",
+      single_day: "Паттерн: разовый поддерживающий день",
+      mixed_sources: "Паттерн: сжатие пришло с нескольких сторон",
+      repeated_days: "Паттерн: щадящие дни повторяются",
+      active_streak: "Паттерн: идет текущая серия щадящих дней",
     },
     reasons: {
       none_recent:
-        "Р—Р° РїРѕСЃР»РµРґРЅРёРµ 7 РґРЅРµР№ С‰Р°РґСЏС‰РёС… РґРЅРµР№ РЅРµ Р±С‹Р»Рѕ, Р·РЅР°С‡РёС‚ РїР»Р°РЅ РЅРµ РїСЂРёС…РѕРґРёР»РѕСЃСЊ СЃРѕРєСЂР°С‰Р°С‚СЊ.",
+        "За последние 7 дней щадящих дней не было, значит плану пока не приходилось сужаться.",
       single_day:
-        "РћРґРёРЅ С‰Р°РґСЏС‰РёР№ РґРµРЅСЊ РїРѕС…РѕР¶ РЅР° С‚РѕС‡РµС‡РЅРѕРµ СЃРЅРёР¶РµРЅРёРµ С‚РµРјРїР°, Р° РЅРµ РЅР° РІСЃСЋ РЅРµРґРµР»СЋ.",
+        "Один щадящий день больше похож на точечную поддержку, а не на общий ритм всей недели.",
       mixed_sources:
-        "Р©Р°РґСЏС‰РёР№ СЂРµР¶РёРј РІРєР»СЋС‡Р°Р»СЃСЏ Рё РёР· Today, Рё РёР· Programs. РћР±С‹С‡РЅРѕ СЌС‚Рѕ Р·РЅР°С‡РёС‚, С‡С‚Рѕ РґРµРЅСЊ РїСЂРёС…РѕРґРёР»РѕСЃСЊ СЃСѓР¶Р°С‚СЊ СЃ СЂР°Р·РЅС‹С… СЃС‚РѕСЂРѕРЅ.",
+        "Щадящий режим включался и из Today, и из Programs. Обычно это значит, что день пришлось сужать с нескольких сторон.",
       repeated_days:
-        "РќРµСЃРєРѕР»СЊРєРѕ РЅРµРґР°РІРЅРёС… РґРЅРµР№ РѕСЃС‚Р°РІР°Р»РёСЃСЊ РІ С‰Р°РґСЏС‰РµРј СЂРµР¶РёРјРµ, Р·РЅР°С‡РёС‚ РЅРµРґРµР»СЏ РёРґРµС‚ СЃ РјРµРЅСЊС€РёРј СЂР°Р·РјР°С…РѕРј.",
+        "Несколько недавних дней остались в щадящем режиме, значит неделя идет с уменьшенной нагрузкой.",
       active_streak:
-        "Р©Р°РґСЏС‰РёР№ СЂРµР¶РёРј РґРµСЂР¶РёС‚СЃСЏ РЅРµСЃРєРѕР»СЊРєРѕ РґРЅРµР№ РїРѕРґСЂСЏРґ, Рё СЌС‚Рѕ СѓР¶Рµ СЃРёР»СЊРЅРµРµ, С‡РµРј РѕРґРёРЅ СЂР°Р·РѕРІС‹Р№ downshift.",
+        "Щадящий режим держится несколько дней подряд, и это уже сильнее, чем разовый спокойный день.",
     },
     nextSteps: {
       keep_optional:
-        "РџСѓСЃС‚СЊ С‰Р°РґСЏС‰РёР№ РґРµРЅСЊ РѕСЃС‚Р°РµС‚СЃСЏ РёРЅСЃС‚СЂСѓРјРµРЅС‚РѕРј РґР»СЏ СѓР·РєРёС… РґРЅРµР№, Р° РЅРµ СЂРµР¶РёРјРѕРј РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ.",
+        "Пусть щадящий день остается вариантом для узких дней, а не формой недели по умолчанию.",
       return_when_quiet:
-        "Р’РєР»СЋС‡Р°Р№ РµРіРѕ, РєРѕРіРґР° РґРµРЅСЊ СЃСѓР¶Р°РµС‚СЃСЏ, Рё РІРѕР·РІСЂР°С‰Р°Р№СЃСЏ Рє РѕР±С‹С‡РЅРѕРјСѓ РїР»Р°РЅСѓ, РєРѕРіРґР° СЃРёРіРЅР°Р» СЃРЅРѕРІР° СЃРїРѕРєРѕРµРЅ.",
+        "Включай его, когда день сужается, и спокойно возвращай полный план, когда сигнал снова тихий.",
       watch_repeat:
-        "РџРѕСЃРјРѕС‚СЂРё, РїРѕРІС‚РѕСЂРёС‚СЃСЏ Р»Рё С‚Р°РєРѕРµ СЃР¶Р°С‚РёРµ РµС‰Рµ СЂР°Р·, РїСЂРµР¶РґРµ С‡РµРј РґРѕР±Р°РІР»СЏС‚СЊ РЅРѕРІСѓСЋ Р°РјР±РёС†РёСЋ.",
+        "Посмотри, повторится ли такое сжатие еще раз, прежде чем добавлять амбицию.",
       keep_small:
-        "РћСЃС‚Р°РІСЊ Р±Р»РёР¶Р°Р№С€РёР№ РґРµРЅСЊ РёР»Рё РґРІР° РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РЅРµР±РѕР»СЊС€РёРјРё, С‡С‚РѕР±С‹ РїСЂРёР»РѕР¶РµРЅРёСЋ РЅРµ РїСЂРёС…РѕРґРёР»РѕСЃСЊ СЃРЅРѕРІР° СЃРїР°СЃР°С‚СЊ РїР»Р°РЅ.",
+        "Оставь следующий день или два достаточно небольшими, чтобы приложению не пришлось снова спасать план.",
     },
     meta: (activeDays, streak) =>
-      `Р©Р°РґСЏС‰РёС… РґРЅРµР№: ${activeDays}/7 - РўРµРєСѓС‰Р°СЏ СЃРµСЂРёСЏ: ${formatRussianDayCount(streak)}`,
-    activeToday: (sourceLabel) => `РЎРµРіРѕРґРЅСЏ С‰Р°РґСЏС‰РёР№ СЂРµР¶РёРј РІРєР»СЋС‡РµРЅ РёР· ${sourceLabel}.`,
-    inactiveToday: "РЎРµРіРѕРґРЅСЏ С‰Р°РґСЏС‰РёР№ СЂРµР¶РёРј РЅРµ Р°РєС‚РёРІРµРЅ.",
-    sourceLine: (todayCount, programsCount) => `РЎРµРіРѕРґРЅСЏ: ${todayCount} - РџСЂРѕРіСЂР°РјРјС‹: ${programsCount}`,
+      `Щадящих дней: ${activeDays}/7 - Текущая серия: ${formatRussianDayCount(streak)}`,
+    activeToday: (sourceLabel) => `Сегодня щадящий режим активен из ${sourceLabel}.`,
+    inactiveToday: "Сегодня щадящий режим не активен.",
+    sourceLine: (todayCount, programsCount) => `Today: ${todayCount} - Programs: ${programsCount}`,
     sourceLabels: {
-      today: "РЎРµРіРѕРґРЅСЏ",
-      programs: "РџСЂРѕРіСЂР°РјРјС‹",
+      today: "Today",
+      programs: "Programs",
     },
   },
 };
@@ -171,6 +187,7 @@ export function buildDaySimplificationReview({
     reasonId: summary.reason,
     nextStepId: summary.nextStep,
     tone: languageCopy.tones[summary.tone],
+    pattern: languageCopy.patterns[summary.reason],
     reason: languageCopy.reasons[summary.reason],
     nextStepTitle: languageCopy.nextStepTitle,
     nextStep: languageCopy.nextSteps[summary.nextStep],
@@ -271,12 +288,12 @@ function formatRussianDayCount(count: number) {
   const mod100 = count % 100;
 
   if (mod10 === 1 && mod100 !== 11) {
-    return `${count} РґРµРЅСЊ`;
+    return `${count} день`;
   }
 
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
-    return `${count} РґРЅСЏ`;
+    return `${count} дня`;
   }
 
-  return `${count} РґРЅРµР№`;
+  return `${count} дней`;
 }

@@ -64,7 +64,7 @@ type MorningNudgeTimingCopy = Record<"early" | "standard" | "late", string>;
 type MorningNudgeCadenceCopy = Record<"weekdays" | "daily", string>;
 type ReviewSectionCopy = Record<"overview" | "week" | "month" | "cycles", string>;
 type ReviewRecapFormatCopy = Record<"snapshot" | "plan" | "coach" | "packet", string>;
-type ReviewPacketBlockCopy = Record<"summary" | "next" | "signals" | "morning" | "nudge" | "history", string>;
+type ReviewPacketBlockCopy = Record<"summary" | "next" | "signals" | "morning" | "lighter" | "nudge" | "history", string>;
 
 function russianCycleWord(count: number) {
   const lastTwo = count % 100;
@@ -869,6 +869,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         next: "Next step",
         signals: "Signals",
         morning: "Morning routine",
+        lighter: "Lighter day review",
         nudge: "Morning nudge",
         history: "History snapshot",
       },
@@ -1496,6 +1497,7 @@ const copies: Record<AppLanguage, LanguageCopy> = {
         next: "Следующий шаг",
         signals: "Сигналы",
         morning: "Утренняя рутина",
+        lighter: "Щадящий день",
         nudge: "Утренний сигнал",
         history: "Снимок истории",
       },

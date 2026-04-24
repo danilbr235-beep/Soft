@@ -103,6 +103,7 @@ const daySimplificationReview: DaySimplificationReview = {
   reasonId: "mixed_sources",
   nextStepId: "watch_repeat",
   tone: "Used as support",
+  pattern: "Pattern: multi-source compression",
   reason: "The lighter preset came from both Today and Programs, which usually means the scope needed trimming from more than one angle.",
   nextStepTitle: "Lighter-day next step",
   nextStep: "Watch whether the same compression shows up again before adding more ambition.",
@@ -235,6 +236,7 @@ describe("buildReviewRecap", () => {
     ]);
     expect(result.blocks[0]?.lines.join(" ")).toContain("30-day review");
     expect(result.blocks[3]?.lines.join(" ")).toContain("Morning routine review");
+    expect(result.blocks[4]?.lines.join(" ")).toContain("Pattern: multi-source compression");
     expect(result.blocks[4]?.lines.join(" ")).toContain("Today: 1 - Programs: 1");
     expect(result.blocks[5]?.lines.join(" ")).toContain("Daily - 09:00");
     expect(result.blocks[6]?.lines.join(" ")).toContain("Latest 30-day cycle context");
@@ -262,6 +264,7 @@ describe("buildReviewRecap", () => {
 
     expect(result.blocks[2]?.lines.join(" ")).not.toContain("Full mornings: 1/7");
     expect(result.blocks[3]?.lines.join(" ")).toContain("Full mornings: 1/7");
+    expect(result.blocks[4]?.lines.join(" ")).toContain("Pattern: multi-source compression");
     expect(result.blocks[4]?.lines.join(" ")).toContain("Used as support");
     expect(result.blocks[5]?.lines.join(" ")).toContain("Morning nudge review");
     expect(result.blocks[6]?.lines.join(" ")).not.toContain("Morning routine review: Building consistency");

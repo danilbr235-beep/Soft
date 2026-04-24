@@ -153,6 +153,7 @@ function buildReviewRecapParts({
     includeMorningInSharedFields && daySimplificationReview
       ? compactLines([
           `${daySimplificationReview.title}: ${daySimplificationReview.tone}`,
+          daySimplificationReview.pattern,
           daySimplificationReview.todayLine,
           daySimplificationReview.sourceLine,
         ])
@@ -320,9 +321,10 @@ function buildReviewPacketBlocks(
       ? [
           {
             id: "lighter",
-            title: daySimplificationReview.title,
+            title: copy.review.packetBlockTitles.lighter,
             lines: compactLines([
               daySimplificationReview.tone,
+              daySimplificationReview.pattern,
               daySimplificationReview.reason,
               daySimplificationReview.nextStep,
               daySimplificationReview.meta,

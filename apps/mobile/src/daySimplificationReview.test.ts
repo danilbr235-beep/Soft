@@ -12,6 +12,7 @@ describe("buildDaySimplificationReview", () => {
     expect(review.toneId).toBe("full");
     expect(review.reasonId).toBe("none_recent");
     expect(review.nextStepId).toBe("keep_optional");
+    expect(review.pattern).toBe("Pattern: no lighter days this week");
     expect(review.meta).toBe("Lighter days: 0/7 - Current streak: 0 days");
     expect(review.todayLine).toBe("Not active today.");
     expect(review.sourceLine).toBeNull();
@@ -32,6 +33,7 @@ describe("buildDaySimplificationReview", () => {
     expect(review.toneId).toBe("targeted");
     expect(review.reasonId).toBe("single_day");
     expect(review.nextStepId).toBe("return_when_quiet");
+    expect(review.pattern).toBe("Pattern: one-off support day");
     expect(review.todayLine).toBe("Active today from Programs.");
     expect(review.sourceLine).toBe("Today: 0 - Programs: 1");
   });
@@ -62,11 +64,30 @@ describe("buildDaySimplificationReview", () => {
 
     expect(review.toneId).toBe("protective");
     expect(review.reasonId).toBe("active_streak");
+    expect(review.pattern).toBe("Pattern: current lighter-day streak");
     expect(review.streak).toBe(4);
     expect(review.sourceCounts).toEqual({
       today: 2,
       programs: 2,
     });
     expect(review.nextStep).toContain("Keep the next day or two small");
+  });
+
+  it("returns clean russian copy for packet-facing lighter day fields", () => {
+    const review = buildDaySimplificationReview({
+      date: "2026-04-23",
+      language: "ru",
+      store: {
+        "2026-04-23": {
+          appliedAt: "2026-04-23T09:00:00.000Z",
+          source: "today",
+        },
+      },
+    });
+
+    expect(review.title).toBe("Обзор щадящего дня");
+    expect(review.pattern).toBe("Паттерн: разовый поддерживающий день");
+    expect(review.todayLine).toBe("Сегодня щадящий режим активен из Today.");
+    expect(review.meta).toBe("Щадящих дней: 1/7 - Текущая серия: 1 день");
   });
 });
