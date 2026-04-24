@@ -25,6 +25,7 @@ const repeatReview: MorningRoutineReview = {
   title: "Morning routine review",
   body: "A short 7-day read of whether the morning loop is staying repeatable.",
   tone: "Building consistency",
+  pattern: "Pattern: first full morning landed",
   reason: "At least one full morning is already in place.",
   nextStepTitle: "Morning next step",
   nextStep: "Repeat the same three-step morning tomorrow before changing the routine.",
@@ -39,6 +40,7 @@ const anchorReview: MorningRoutineReview = {
   ...repeatReview,
   reasonId: "no_signal",
   nextStepId: "protect_anchor",
+  pattern: "Pattern: morning loop has barely started",
   reason: "There is still very little morning routine signal.",
   nextStep: "Land the wake-and-light anchor first.",
 };
@@ -75,6 +77,7 @@ describe("morningNudgeReview", () => {
     });
 
     expect(review.title).toBe("Morning nudge review");
+    expect(review.pattern).toBe("Pattern: recent changes are still settling");
     expect(review.historyLabel).toContain("Last changed");
     expect(review.historyLabel).toContain("2 adjustments in the last 30 days");
     expect(review.guidanceState).toBe("hold");
@@ -94,6 +97,7 @@ describe("morningNudgeReview", () => {
 
     expect(review.historyLabel).toBe("No recent morning nudge changes yet.");
     expect(review.guidanceState).toBe("simplify");
+    expect(review.pattern).toBe("Pattern: one calmer cue fits best");
     expect(review.guidanceTone).toBe("Keep one calm cue");
     expect(review.guidanceMeta).toBe("No reminder changes in the last 30 days.");
   });

@@ -111,6 +111,20 @@ export function ReviewScreen({
     setExportStatus(result);
   }
 
+  function openSavedPacket(packet: ReviewPacketHistoryEntry) {
+    setActiveSection(packet.section);
+    setActiveFormat("packet");
+    setExportStatus(null);
+    setRecapPreview({
+      kind: "packet",
+      title: packet.title,
+      blocks: packet.blocks.map((block) => ({
+        ...block,
+        lines: [...block.lines],
+      })),
+    });
+  }
+
   return (
     <Screen title={copy.review.title} subtitle={copy.review.subtitle}>
       <Surface>
@@ -312,16 +326,28 @@ export function ReviewScreen({
                   )}
                 </Text>
                 <PacketBlocksView blocks={packet.blocks} title={packet.title} />
-                <Pressable
-                  accessibilityLabel={copy.review.exportPacket(packet.title)}
-                  accessibilityRole="button"
-                  onPress={() => {
-                    void exportPacket(packet);
-                  }}
-                  style={styles.secondaryButton}
-                >
-                  <Text style={styles.secondaryButtonText}>{copy.review.exportPacketAction}</Text>
-                </Pressable>
+                <View style={styles.archiveActions}>
+                  <Pressable
+                    accessibilityLabel={copy.review.recapPreview(packet.title)}
+                    accessibilityRole="button"
+                    onPress={() => openSavedPacket(packet)}
+                    style={styles.secondaryButton}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      {copy.review.recapPreview(copy.review.formatLabels.packet)}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityLabel={copy.review.exportPacket(packet.title)}
+                    accessibilityRole="button"
+                    onPress={() => {
+                      void exportPacket(packet);
+                    }}
+                    style={styles.secondaryButton}
+                  >
+                    <Text style={styles.secondaryButtonText}>{copy.review.exportPacketAction}</Text>
+                  </Pressable>
+                </View>
               </View>
             )) : (
               <Text style={styles.body}>
@@ -361,6 +387,7 @@ function MorningNudgeReviewCard({ review }: { review: MorningNudgeReview }) {
     <Surface>
       <Text style={styles.title}>{review.title}</Text>
       <Text style={styles.body}>{review.body}</Text>
+      <Text style={styles.hintMeta}>{review.pattern}</Text>
       <Text style={styles.signalDetail}>{review.stateTitle}</Text>
       <Text style={styles.body}>{review.stateLabel}</Text>
       <Text style={styles.signalDetail}>{review.timingTitle}</Text>
@@ -369,6 +396,10 @@ function MorningNudgeReviewCard({ review }: { review: MorningNudgeReview }) {
       <Text style={styles.body}>{review.styleLabel}</Text>
       <Text style={styles.signalDetail}>{review.focusTitle}</Text>
       <Text style={styles.body}>{review.focusLabel}</Text>
+      <Text style={styles.signalDetail}>{review.guidanceTitle}</Text>
+      <Text style={styles.hintTitle}>{review.guidanceTone}</Text>
+      <Text style={styles.body}>{review.guidanceBody}</Text>
+      <Text style={styles.hintMeta}>{review.guidanceMeta}</Text>
       <Text style={styles.signalDetail}>{review.previewTitle}</Text>
       <Text style={styles.body}>{review.previewBody}</Text>
       <Text style={styles.hintMeta}>{review.historyTitle}</Text>
@@ -383,6 +414,7 @@ function MorningRoutineReviewCard({ review }: { review: MorningRoutineReview }) 
       <Text style={styles.title}>{review.title}</Text>
       <Text style={styles.body}>{review.body}</Text>
       <Text style={styles.hintTitle}>{review.tone}</Text>
+      <Text style={styles.hintMeta}>{review.pattern}</Text>
       <Text style={styles.body}>{review.reason}</Text>
       <Text style={styles.signalDetail}>{review.nextStepTitle}</Text>
       <Text style={styles.body}>{review.nextStep}</Text>
@@ -585,6 +617,11 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   archiveEntry: {
+    gap: spacing.sm,
+  },
+  archiveActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.sm,
   },
   archiveEntryDivider: {

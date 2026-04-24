@@ -6,6 +6,7 @@ import type { MorningNudgePreferences } from "./morningNudge";
 const simplifyReview: MorningNudgeReview = {
   title: "Morning nudge review",
   body: "A short read of the current local reminder setup for the morning loop.",
+  pattern: "Pattern: one calmer cue fits best",
   stateTitle: "State",
   stateLabel: "On",
   timingTitle: "Timing",

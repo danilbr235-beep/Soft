@@ -32,6 +32,7 @@ const morningRoutineReview: MorningRoutineReview = {
   title: "Morning routine review",
   body: "A short 7-day read of whether the morning loop is staying repeatable.",
   tone: "Tighten the loop",
+  pattern: "Pattern: anchor appears before check-in",
   reason: "The wake-and-light anchor shows up more often than the morning check-in, so the loop still breaks early.",
   nextStepTitle: "Morning next step",
   nextStep: "Pair the quick morning log right after the anchor instead of adding a new step.",
@@ -48,6 +49,7 @@ const steadyMorningRoutineReview: MorningRoutineReview = {
   reasonId: "routine_holding",
   nextStepId: "keep_same_loop",
   tone: "Routine is holding",
+  pattern: "Pattern: repeatable full mornings",
   reason: "The short morning loop is landing often enough to keep it steady instead of making it more ambitious.",
   nextStep: "Keep the same three-step morning loop for a few more days and let consistency build.",
 };
@@ -55,6 +57,7 @@ const steadyMorningRoutineReview: MorningRoutineReview = {
 const morningNudgeReview: MorningNudgeReview = {
   title: "Morning nudge review",
   body: "A short read of the current local reminder setup for the morning loop.",
+  pattern: "Pattern: repeat before retuning",
   stateTitle: "State",
   stateLabel: "Enabled",
   timingTitle: "Timing",

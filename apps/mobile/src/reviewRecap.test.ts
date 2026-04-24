@@ -60,6 +60,7 @@ const morningRoutineReview: MorningRoutineReview = {
   title: "Morning routine review",
   body: "A short 7-day read of whether the morning loop is staying repeatable.",
   tone: "Building consistency",
+  pattern: "Pattern: first full morning landed",
   reason: "At least one full morning is already in place. Repeat the same short loop before adding more.",
   nextStepTitle: "Morning next step",
   nextStep: "Repeat the same three-step morning tomorrow before changing the routine.",
@@ -77,6 +78,7 @@ const morningRoutineReview: MorningRoutineReview = {
 const morningNudgeReview: MorningNudgeReview = {
   title: "Morning nudge review",
   body: "A short read of the current local reminder setup for the morning loop.",
+  pattern: "Pattern: recent changes are still settling",
   stateTitle: "State",
   stateLabel: "On",
   timingTitle: "Timing",
@@ -235,9 +237,12 @@ describe("buildReviewRecap", () => {
       "History snapshot",
     ]);
     expect(result.blocks[0]?.lines.join(" ")).toContain("30-day review");
-    expect(result.blocks[3]?.lines.join(" ")).toContain("Morning routine review");
+    expect(result.blocks[3]?.lines.join(" ")).toContain("Pattern: first full morning landed");
+    expect(result.blocks[3]?.lines.join(" ")).toContain("Morning next step:");
     expect(result.blocks[4]?.lines.join(" ")).toContain("Pattern: multi-source compression");
     expect(result.blocks[4]?.lines.join(" ")).toContain("Today: 1 - Programs: 1");
+    expect(result.blocks[5]?.lines.join(" ")).toContain("Pattern: recent changes are still settling");
+    expect(result.blocks[5]?.lines.join(" ")).toContain("Today nudge check: Hold steady");
     expect(result.blocks[5]?.lines.join(" ")).toContain("Daily - 09:00");
     expect(result.blocks[6]?.lines.join(" ")).toContain("Latest 30-day cycle context");
   });
@@ -264,9 +269,11 @@ describe("buildReviewRecap", () => {
 
     expect(result.blocks[2]?.lines.join(" ")).not.toContain("Full mornings: 1/7");
     expect(result.blocks[3]?.lines.join(" ")).toContain("Full mornings: 1/7");
+    expect(result.blocks[3]?.lines.join(" ")).toContain("Pattern: first full morning landed");
     expect(result.blocks[4]?.lines.join(" ")).toContain("Pattern: multi-source compression");
     expect(result.blocks[4]?.lines.join(" ")).toContain("Used as support");
-    expect(result.blocks[5]?.lines.join(" ")).toContain("Morning nudge review");
+    expect(result.blocks[5]?.lines.join(" ")).toContain("Pattern: recent changes are still settling");
+    expect(result.blocks[5]?.lines.join(" ")).toContain("Today nudge check: Hold steady");
     expect(result.blocks[6]?.lines.join(" ")).not.toContain("Morning routine review: Building consistency");
   });
 

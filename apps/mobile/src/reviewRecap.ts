@@ -147,7 +147,11 @@ function buildReviewRecapParts({
   const lighterMeta = includeMorningInSharedFields ? daySimplificationReview?.meta ?? null : null;
   const morningContextLines =
     includeMorningInSharedFields && morningRoutineReview
-      ? [`${morningRoutineReview.title}: ${morningRoutineReview.tone}`, ...morningRoutineReview.stepLines]
+      ? compactLines([
+          `${morningRoutineReview.title}: ${morningRoutineReview.tone}`,
+          morningRoutineReview.pattern,
+          ...morningRoutineReview.stepLines,
+        ])
       : [];
   const lighterContextLines =
     includeMorningInSharedFields && daySimplificationReview
@@ -160,12 +164,14 @@ function buildReviewRecapParts({
       : [];
   const morningNudgeContextLines =
     includeMorningInSharedFields && morningNudgeReview
-      ? [
+      ? compactLines([
           `${morningNudgeReview.title}: ${morningNudgeReview.stateLabel}`,
+          morningNudgeReview.pattern,
           `${morningNudgeReview.timingTitle}: ${morningNudgeReview.timingLabel}`,
           `${morningNudgeReview.styleTitle}: ${morningNudgeReview.styleLabel}`,
+          `${morningNudgeReview.guidanceTitle}: ${morningNudgeReview.guidanceTone}`,
           `${morningNudgeReview.historyTitle}: ${morningNudgeReview.historyLabel}`,
-        ]
+        ])
       : [];
 
   if (section === "week") {
@@ -307,10 +313,10 @@ function buildReviewPacketBlocks(
             id: "morning",
             title: copy.review.packetBlockTitles.morning,
             lines: compactLines([
-              morningRoutineReview.title,
               morningRoutineReview.tone,
+              morningRoutineReview.pattern,
               morningRoutineReview.reason,
-              morningRoutineReview.nextStep,
+              `${morningRoutineReview.nextStepTitle}: ${morningRoutineReview.nextStep}`,
               morningRoutineReview.meta,
               ...morningRoutineReview.stepLines,
             ]),
@@ -340,11 +346,14 @@ function buildReviewPacketBlocks(
             id: "nudge",
             title: copy.review.packetBlockTitles.nudge,
             lines: compactLines([
-              morningNudgeReview.title,
               `${morningNudgeReview.stateTitle}: ${morningNudgeReview.stateLabel}`,
+              morningNudgeReview.pattern,
               `${morningNudgeReview.timingTitle}: ${morningNudgeReview.timingLabel}`,
               `${morningNudgeReview.styleTitle}: ${morningNudgeReview.styleLabel}`,
               `${morningNudgeReview.focusTitle}: ${morningNudgeReview.focusLabel}`,
+              `${morningNudgeReview.guidanceTitle}: ${morningNudgeReview.guidanceTone}`,
+              morningNudgeReview.guidanceBody,
+              morningNudgeReview.guidanceMeta,
               `${morningNudgeReview.previewTitle}: ${morningNudgeReview.previewBody}`,
               `${morningNudgeReview.historyTitle}: ${morningNudgeReview.historyLabel}`,
             ]),

@@ -29,6 +29,7 @@ describe("buildMorningRoutineReview", () => {
     expect(review.toneId).toBe("steady");
     expect(review.nextStepId).toBe("keep_same_loop");
     expect(review.tone).toBe("Routine is holding");
+    expect(review.pattern).toBe("Pattern: repeatable full mornings");
     expect(review.reason).toContain("landing often enough");
     expect(review.meta).toContain("Full mornings: 4/7");
     expect(review.stepLines).toEqual([
@@ -57,6 +58,7 @@ describe("buildMorningRoutineReview", () => {
     expect(review.reasonId).toBe("checkin_gap");
     expect(review.nextStepId).toBe("pair_checkin");
     expect(review.tone).toBe("Tighten the loop");
+    expect(review.pattern).toBe("Pattern: anchor appears before check-in");
     expect(review.reason).toContain("wake-and-light anchor");
     expect(review.nextStep).toContain("Pair the quick morning log");
     expect(review.stepLines[0]).toBe("Anchor: 2/7 mornings");

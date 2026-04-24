@@ -15,6 +15,7 @@ const review: MorningRoutineReview = {
   title: "Morning routine review",
   body: "A short 7-day read of whether the morning loop is staying repeatable.",
   tone: "Building consistency",
+  pattern: "Pattern: anchor appears before check-in",
   reason: "The loop still breaks early.",
   nextStepTitle: "Morning next step",
   nextStep: "Pair the quick morning log right after the anchor instead of adding a new step.",

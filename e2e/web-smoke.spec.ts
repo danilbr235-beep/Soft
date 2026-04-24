@@ -155,11 +155,13 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("3 logs in 30 days - 1 score - 1 symptom check-in - 0 completed cycles")).toBeVisible();
   await page.getByLabel("Open recap format: Packet").click();
   await page.getByLabel("Prepare recap").click();
-  await expect(page.getByText("Preview: Packet")).toBeVisible();
+  await expect(page.getByText("Preview: Packet").first()).toBeVisible();
   await expect(page.getByText("30 days packet")).toHaveCount(2);
   await expect(page.getByText("Signals", { exact: true })).toHaveCount(2);
   await expect(page.getByText("Morning routine", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Pattern: first full morning landed").first()).toBeVisible();
   await expect(page.getByText("Morning nudge", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Pattern: repeat before retuning").first()).toBeVisible();
   await expect(page.getByText("History snapshot", { exact: true })).toHaveCount(2);
   await expect(page.getByText("Recent packets")).toBeVisible();
   await expect(page.getByText("Prepared packet recaps stay local on this device until you clear app data.")).toBeVisible();
@@ -170,7 +172,9 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Packet copied.")).toBeVisible();
   await expect(page.evaluate(() => localStorage.getItem("pmhc:test-clipboard"))).resolves.toContain("30 days packet");
   await expect(page.evaluate(() => localStorage.getItem("pmhc:test-clipboard"))).resolves.toContain("Morning routine");
+  await expect(page.evaluate(() => localStorage.getItem("pmhc:test-clipboard"))).resolves.toContain("Pattern: first full morning landed");
   await expect(page.evaluate(() => localStorage.getItem("pmhc:test-clipboard"))).resolves.toContain("Morning nudge");
+  await expect(page.evaluate(() => localStorage.getItem("pmhc:test-clipboard"))).resolves.toContain("Pattern: repeat before retuning");
   await page.reload();
   if ((await page.getByLabel("Unlock demo vault").count()) > 0) {
     await page.getByLabel("Unlock demo vault").click();
@@ -178,6 +182,11 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Open Review").click();
   await expect(page.getByText("Recent packets")).toBeVisible();
   await expect(page.getByText("30 days packet")).toHaveCount(1);
+  await page.getByLabel("Preview: 30 days packet").click();
+  await expect(page.getByText("Preview: Packet").first()).toBeVisible();
+  await expect(page.getByText("30 days packet")).toHaveCount(2);
+  await expect(page.getByText("Pattern: first full morning landed").first()).toBeVisible();
+  await expect(page.getByText("Pattern: repeat before retuning").first()).toBeVisible();
   await page.getByLabel("Open Track").click();
   await expect(page.getByText("Pattern hints")).toBeVisible();
   await expect(page.getByText("More paired logs needed")).toBeVisible();
@@ -292,9 +301,10 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await page.getByLabel("Open Review").click();
   await expect(page.getByText("Weekly review")).toBeVisible();
   await page.getByLabel("Prepare recap").click();
-  await expect(page.getByText("Preview: Packet")).toBeVisible();
+  await expect(page.getByText("Preview: Packet").first()).toBeVisible();
   await expect(page.getByText("7 days packet")).toHaveCount(2);
   await expect(page.getByText("Morning nudge", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Pattern: recent changes are still settling").first()).toBeVisible();
   await expect(page.getByText("Timing: Daily - 09:00").first()).toBeVisible();
   await page.getByLabel("Filter packet archive: 7 days").click();
   await expect(page.getByText("Morning routine", { exact: true })).toHaveCount(0);
@@ -350,7 +360,7 @@ test("settings can apply a review preset from current usage guidance", async ({ 
   await page.getByLabel("Open Review").click();
   await expect(page.getByText("Weekly review")).toBeVisible();
   await page.getByLabel("Prepare recap").click();
-  await expect(page.getByText("Preview: Packet")).toBeVisible();
+  await expect(page.getByText("Preview: Packet").first()).toBeVisible();
   await expect(page.getByText("7 days packet")).toHaveCount(2);
 });
 
@@ -418,7 +428,7 @@ test("programs can switch on a lighter day plan and today can restore it", async
   await expect(page.getByText("Today: 0 - Programs: 1")).toBeVisible();
   await page.getByLabel("Open recap format: Packet").click();
   await page.getByLabel("Prepare recap").click();
-  await expect(page.getByText("Preview: Packet")).toBeVisible();
+  await expect(page.getByText("Preview: Packet").first()).toBeVisible();
   await expect(page.getByText("Lighter day review", { exact: true }).nth(1)).toBeVisible();
   await expect(page.getByText("Pattern: one-off support day").nth(1)).toBeVisible();
   await page.getByLabel("Open Today").click();
@@ -536,7 +546,7 @@ test("completed program shows a conservative wrap-up", async ({ page }) => {
   await expect(page.getByText("Latest completed cycle: 14-day confidence reset")).toBeVisible();
   await page.getByLabel("Open recap format: Packet").click();
   await page.getByLabel("Prepare recap").click();
-  await expect(page.getByText("Preview: Packet")).toBeVisible();
+  await expect(page.getByText("Preview: Packet").first()).toBeVisible();
   await expect(page.getByText("Cycles packet")).toHaveCount(2);
   await expect(page.getByText("History snapshot", { exact: true })).toHaveCount(2);
   await expect(page.getByText("Latest completed cycle: 14-day confidence reset")).toHaveCount(3);

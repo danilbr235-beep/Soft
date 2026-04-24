@@ -23,6 +23,7 @@ export type MorningRoutineReview = {
   title: string;
   body: string;
   tone: string;
+  pattern: string;
   reason: string;
   nextStepTitle: string;
   nextStep: string;
@@ -38,6 +39,7 @@ type LocalizedCopy = {
   body: string;
   nextStepTitle: string;
   tones: Record<MorningRoutineReviewTone, string>;
+  patterns: Record<MorningRoutineReviewReason, string>;
   reasons: Record<MorningRoutineReviewReason, string>;
   nextSteps: Record<MorningRoutineReviewNextStep, string>;
   stepLabels: Record<MorningRoutineStepId, string>;
@@ -54,6 +56,14 @@ const copy: Record<AppLanguage, LocalizedCopy> = {
       building: "Building consistency",
       steady: "Routine is holding",
       reset: "Tighten the loop",
+    },
+    patterns: {
+      no_signal: "Pattern: morning loop has barely started",
+      first_full_day: "Pattern: first full morning landed",
+      checkin_gap: "Pattern: anchor appears before check-in",
+      guide_gap: "Pattern: guide is the step that drops off",
+      partial_only: "Pattern: partial mornings without a full loop",
+      routine_holding: "Pattern: repeatable full mornings",
     },
     reasons: {
       no_signal: "There is still very little morning routine signal, so the first step should stay minimal.",
@@ -81,12 +91,20 @@ const copy: Record<AppLanguage, LocalizedCopy> = {
   },
   ru: {
     title: "Обзор утренней рутины",
-    body: "Короткий взгляд на последние 7 дней: получается ли держать утренний цикл повторяемым.",
+    body: "Короткий обзор за 7 дней: получается ли удерживать утренний цикл повторяемым.",
     nextStepTitle: "Следующий шаг утром",
     tones: {
       building: "Собираем регулярность",
       steady: "Рутина держится",
-      reset: "Нужно чуть плотнее собрать цикл",
+      reset: "Цикл лучше чуть подтянуть",
+    },
+    patterns: {
+      no_signal: "Паттерн: утренний цикл почти не стартовал",
+      first_full_day: "Паттерн: появилось первое полное утро",
+      checkin_gap: "Паттерн: якорь появляется раньше чек-ина",
+      guide_gap: "Паттерн: чаще всего выпадает гид",
+      partial_only: "Паттерн: есть частичные утра, но нет целого цикла",
+      routine_holding: "Паттерн: полные утра уже повторяются",
     },
     reasons: {
       no_signal: "По утренней рутине сигнала пока мало, поэтому первый шаг лучше оставить совсем простым.",
@@ -94,17 +112,24 @@ const copy: Record<AppLanguage, LocalizedCopy> = {
         "Хотя бы одно полное утро уже получилось. Лучше повторить тот же короткий цикл еще раз, а не добавлять новое.",
       checkin_gap:
         "Подъем и свет появляются чаще, чем спокойный чек-ин, поэтому цикл пока обрывается слишком рано.",
-      guide_gap: "Якорь и чек-ин уже появляются, но короткий гид выпадает чаще остальных шагов.",
-      partial_only: "Части рутины уже появляются, но пока не складываются в один повторяемый трехшаговый блок.",
+      guide_gap:
+        "Якорь и чек-ин уже появляются, но короткий гид выпадает чаще остальных шагов.",
+      partial_only:
+        "Части рутины уже появляются, но пока не складываются в один повторяемый трехшаговый блок.",
       routine_holding:
         "Короткий утренний цикл уже держится достаточно регулярно. Сейчас полезнее закрепить его, а не усложнять.",
     },
     nextSteps: {
-      protect_anchor: "Сначала просто держи подъем и дневной свет. Остальные два шага добавляй только после этого.",
-      repeat_full_loop: "Завтра повтори тот же трехшаговый цикл целиком, не меняя рутину.",
-      pair_checkin: "Привяжи быстрый чек-ин сразу к утреннему якорю, вместо того чтобы добавлять новый шаг.",
-      open_guide_same_morning: "Открывай короткий гид в то же утро, когда делаешь чек-ин.",
-      keep_same_loop: "Оставь тот же трехшаговый цикл еще на несколько дней и дай регулярности закрепиться.",
+      protect_anchor:
+        "Сначала просто держи подъем и дневной свет. Остальные два шага добавляй только после этого.",
+      repeat_full_loop:
+        "Завтра повтори тот же трехшаговый цикл целиком, не меняя рутину.",
+      pair_checkin:
+        "Привяжи быстрый чек-ин сразу к утреннему якорю, вместо того чтобы добавлять новый шаг.",
+      open_guide_same_morning:
+        "Открывай короткий гид в то же утро, когда делаешь чек-ин.",
+      keep_same_loop:
+        "Оставь тот же трехшаговый цикл еще на несколько дней и дай регулярности закрепиться.",
     },
     stepLabels: {
       anchor: "Якорь",
@@ -156,6 +181,7 @@ export function buildMorningRoutineReview({
     title: languageCopy.title,
     body: languageCopy.body,
     tone: languageCopy.tones[summary.tone],
+    pattern: languageCopy.patterns[summary.reason],
     reason: languageCopy.reasons[summary.reason],
     nextStepTitle: languageCopy.nextStepTitle,
     nextStep: languageCopy.nextSteps[summary.nextStep],

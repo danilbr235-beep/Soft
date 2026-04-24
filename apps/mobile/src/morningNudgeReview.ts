@@ -7,6 +7,7 @@ export type MorningNudgeGuidanceState = "optional" | "simplify" | "pair" | "same
 export type MorningNudgeReview = {
   title: string;
   body: string;
+  pattern: string;
   stateTitle: string;
   stateLabel: string;
   timingTitle: string;
@@ -29,6 +30,7 @@ export type MorningNudgeReview = {
 type LocalizedCopy = {
   title: string;
   body: string;
+  patterns: Record<MorningNudgeGuidanceState, string>;
   stateTitle: string;
   historyTitle: string;
   noChanges: string;
@@ -44,6 +46,15 @@ const copy: Record<AppLanguage, LocalizedCopy> = {
   en: {
     title: "Morning nudge review",
     body: "A short read of the current local reminder setup for the morning loop.",
+    patterns: {
+      optional: "Pattern: reminder support is optional",
+      simplify: "Pattern: one calmer cue fits best",
+      pair: "Pattern: keep the cue and add the check-in",
+      same_cue: "Pattern: one cue should carry the guide too",
+      repeat: "Pattern: repeat before retuning",
+      hold: "Pattern: recent changes are still settling",
+      steady: "Pattern: current cue already fits",
+    },
     stateTitle: "State",
     historyTitle: "Recent changes",
     noChanges: "No recent morning nudge changes yet.",
@@ -80,6 +91,15 @@ const copy: Record<AppLanguage, LocalizedCopy> = {
   ru: {
     title: "Обзор утреннего сигнала",
     body: "Короткий вывод по тому, как сейчас настроено локальное напоминание для утреннего цикла.",
+    patterns: {
+      optional: "Паттерн: сигнал пока только опциональная поддержка",
+      simplify: "Паттерн: лучше оставить один спокойный сигнал",
+      pair: "Паттерн: тот же сигнал стоит связать с чек-ином",
+      same_cue: "Паттерн: одного сигнала достаточно и для гида",
+      repeat: "Паттерн: сначала повторение, потом настройка",
+      hold: "Паттерн: последние изменения еще укладываются",
+      steady: "Паттерн: текущий сигнал уже подходит",
+    },
     stateTitle: "Состояние",
     historyTitle: "Недавние изменения",
     noChanges: "Недавних изменений утреннего сигнала пока не было.",
@@ -102,7 +122,7 @@ const copy: Record<AppLanguage, LocalizedCopy> = {
       simplify:
         "Сейчас важнее сначала закрепить сам якорь утра. Оставь один спокойный сигнал и не перенастраивай его каждый день.",
       pair:
-        "Оставь тот же сигнал и привяжи к нему короткий чек-ин. Следующий выигрыш здесь — регулярность, а не новая настройка.",
+        "Оставь тот же сигнал и привяжи к нему короткий чек-ин. Следующий выигрыш здесь - регулярность, а не новая настройка.",
       same_cue:
         "Не добавляй второе напоминание. Пусть тот же утренний сигнал ведет и в чек-ин, и в короткий гид.",
       repeat:
@@ -143,6 +163,7 @@ export function buildMorningNudgeReview({
   return {
     title: languageCopy.title,
     body: languageCopy.body,
+    pattern: languageCopy.patterns[guidanceState],
     stateTitle: languageCopy.stateTitle,
     stateLabel: plan.stateLabel,
     timingTitle: plan.timingTitle,
