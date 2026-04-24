@@ -91,6 +91,7 @@ import {
 } from "../morningRoutineProgress";
 import { buildMorningRoutineReview } from "../morningRoutineReview";
 import { defaultReviewPreferences, isReviewPreferences, type ReviewPreferences } from "../reviewPreferences";
+import { buildReviewSignalChange } from "../reviewSignalChange";
 import { type ReviewSection } from "../reviewRecap";
 import {
   appendReviewPacketHistory,
@@ -259,6 +260,10 @@ export function useAppState() {
     [contentProgress],
   );
   const reviewDigest = useMemo(() => buildTrackingReviewDigest(logs, programHistory), [logs, programHistory]);
+  const reviewSignalChange = useMemo(
+    () => buildReviewSignalChange({ language, logs, programHistory }),
+    [language, logs, programHistory],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -457,10 +462,11 @@ export function useAppState() {
       language,
       morningNudgeReview,
       morningRoutineReview,
+      reviewSignalChange,
       reviewDigest,
       today,
     });
-  }, [language, morningNudgeReview, morningRoutineReview, reviewDigest, today]);
+  }, [language, morningNudgeReview, morningRoutineReview, reviewDigest, reviewSignalChange, today]);
   const daySimplification = useMemo(() => {
     return buildDaySimplificationState({
       baseTodayMode: today.todayMode,
@@ -1151,6 +1157,7 @@ export function useAppState() {
     pendingSyncCount: nextPendingJobs(syncQueue).length,
     privacyLock,
     reviewDigest,
+    reviewSignalChange,
     reviewPreferences,
     hasPrivacyPin: hasPrivacyPin(privacyLock),
     programDayPlan,

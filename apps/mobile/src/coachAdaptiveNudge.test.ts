@@ -4,6 +4,7 @@ import type { TodayPayload } from "@pmhc/types";
 import { buildCoachAdaptiveNudge } from "./coachAdaptiveNudge";
 import type { MorningNudgeReview } from "./morningNudgeReview";
 import type { MorningRoutineReview } from "./morningRoutineReview";
+import type { ReviewSignalChange } from "./reviewSignalChange";
 
 const today: TodayPayload = {
   date: "2026-04-23",
@@ -75,6 +76,45 @@ const morningNudgeReview: MorningNudgeReview = {
   guidanceTone: "Repeat first",
   guidanceBody: "Repeat the same reminder tomorrow before changing timing or style.",
   guidanceMeta: "No reminder changes in the last 30 days.",
+};
+
+const weeklyRecoveryChange: ReviewSignalChange = {
+  title: "What changed this week",
+  body: "A compact week-over-week read of whether the signal got clearer, quieter, or more cautious.",
+  toneId: "recovery",
+  reasonId: "recovery_shift",
+  nextStepId: "protect_recovery",
+  tone: "Recovery tightened",
+  pattern: "Pattern: this week tightened the recovery picture",
+  reason: "A symptom check-in this week makes the week more conservative than the previous one.",
+  nextStepTitle: "Weekly next step",
+  nextStep: "Keep the next week recovery-first before adding challenge.",
+  meta: "This week: 3 logs - Previous week: 1 log",
+  changeLines: ["Symptoms: 1 check-in this week vs 0 check-ins last week"],
+};
+
+const weeklyMixedChange: ReviewSignalChange = {
+  ...weeklyRecoveryChange,
+  toneId: "mixed",
+  reasonId: "score_shift",
+  nextStepId: "watch_mix",
+  tone: "Mixed signal",
+  pattern: "Pattern: the week moved in more than one direction",
+  reason: "Score signals moved apart enough that the next few logs should stay easy to compare.",
+  nextStep: "Keep the next few logs comparable before changing the plan.",
+  changeLines: ["Confidence: 6/10 this week vs 7/10 last week"],
+};
+
+const weeklyBuildingChange: ReviewSignalChange = {
+  ...weeklyRecoveryChange,
+  toneId: "building",
+  reasonId: "more_signal",
+  nextStepId: "keep_logging",
+  tone: "More usable signal",
+  pattern: "Pattern: this week added more usable signal",
+  reason: "The current week carries more usable tracking signal than the week before.",
+  nextStep: "Keep the same calm logging loop for a few more days before changing the plan.",
+  changeLines: ["Logs: 3 this week vs 1 last week"],
 };
 
 describe("buildCoachAdaptiveNudge", () => {
@@ -153,5 +193,88 @@ describe("buildCoachAdaptiveNudge", () => {
     expect(answer.body).toContain("День лучше держать узким");
     expect(answer.body).toContain("лучше не трогать его время и тон");
     expect(answer.nextStep).toContain("две спокойные оценки");
+  });
+
+  it("lets a weekly recovery shift tighten an otherwise steady day", () => {
+    const reviewDigest: CoachReviewDigest = {
+      tone: "steady",
+      confidence: "medium",
+      nextStep: "keep_consistency",
+    };
+
+    const answer = buildCoachAdaptiveNudge({
+      language: "en",
+      morningNudgeReview,
+      morningRoutineReview: steadyMorningRoutineReview,
+      reviewSignalChange: weeklyRecoveryChange,
+      reviewDigest,
+      today: {
+        ...today,
+        currentPriority: {
+          ...today.currentPriority,
+          confidence: "medium",
+        },
+      },
+    });
+
+    expect(answer.state).toBe("recovery");
+    expect(answer.tone).toBe("Recovery-first day");
+    expect(answer.body).toContain("Weekly change: Pattern: this week tightened the recovery picture");
+    expect(answer.nextStep).toContain("protect recovery before adding any new challenge");
+  });
+
+  it("keeps mixed weekly change narrow when the day has no stronger caution", () => {
+    const reviewDigest: CoachReviewDigest = {
+      tone: "steady",
+      confidence: "medium",
+      nextStep: "keep_consistency",
+    };
+
+    const answer = buildCoachAdaptiveNudge({
+      language: "en",
+      morningNudgeReview,
+      morningRoutineReview: steadyMorningRoutineReview,
+      reviewSignalChange: weeklyMixedChange,
+      reviewDigest,
+      today: {
+        ...today,
+        currentPriority: {
+          ...today.currentPriority,
+          confidence: "medium",
+        },
+      },
+    });
+
+    expect(answer.state).toBe("narrow");
+    expect(answer.body).toContain("Pattern: the week moved in more than one direction");
+    expect(answer.nextStep).toContain("keep the plan narrow");
+  });
+
+  it("makes today's caution override a building weekly note", () => {
+    const reviewDigest: CoachReviewDigest = {
+      tone: "steady",
+      confidence: "medium",
+      nextStep: "keep_consistency",
+    };
+
+    const answer = buildCoachAdaptiveNudge({
+      language: "en",
+      morningNudgeReview,
+      morningRoutineReview: steadyMorningRoutineReview,
+      reviewSignalChange: weeklyBuildingChange,
+      reviewDigest,
+      today: {
+        ...today,
+        currentPriority: {
+          ...today.currentPriority,
+          domain: "safety",
+          confidence: "medium",
+        },
+      },
+    });
+
+    expect(answer.state).toBe("recovery");
+    expect(answer.body).toContain("Today's caution still wins");
+    expect(answer.body).toContain("Pattern: this week added more usable signal");
   });
 });

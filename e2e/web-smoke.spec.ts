@@ -122,6 +122,8 @@ test("mobile web MVP opens, completes onboarding, and records a quick log", asyn
   await expect(page.getByText("Keep today conservative")).toBeVisible();
   await expect(page.getByText("Log symptoms and keep the rest of today to one recovery-first action.")).toBeVisible();
   await expect(page.getByText("One recovery-first step")).toBeVisible();
+  await expect(page.getByText(/Weekly change: Pattern:/)).toBeVisible();
+  await expect(page.getByText(/today's caution still wins/i)).toBeVisible();
 
   await page.getByLabel("Open Track").click();
   await expect(page.getByText("Baseline snapshot")).toBeVisible();
